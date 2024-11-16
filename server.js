@@ -3,8 +3,19 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const fs = require("fs");
+const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 
-let intervel = 20; // enter the time in seconds
+let interval = 5 * 60; // in seconds
+
+// Ask for the input and wait synchronously
+const time = prompt('Enter the duration (in minutes) for recording attendance:');
+
+if (time.trim() === "") {
+    console.log("Default duration -> 5 min");
+} else {
+    interval = parseInt(time) * 60; // Convert minutes to seconds
+    console.log(`Server will be active for ${time} minutes`);
+}
 
 function getLocalIP() {
     const interfaces = os.networkInterfaces();
@@ -21,13 +32,13 @@ function getLocalIP() {
         }
         if (localIP !== '0.0.0.0') break; // If a valid IP is found, exit the loop
     }
-    
+
     return localIP;
 }
 
 const app = express();
 const localIP = getLocalIP();
-const PORT = 3210;
+const PORT = 80;
 let totalCount = 0;
 
 // Middleware
@@ -37,7 +48,7 @@ app.use(cors());
 // Cooldown data
 const attendedList = new Set();
 const proxyList = new Set();
-let WINDOWINTERVAL = intervel * 1000;
+let WINDOWINTERVAL = interval * 1000;
 
 setInterval(() => {
     WINDOWINTERVAL -= 1000
@@ -80,17 +91,18 @@ app.post('/submit', (req, res) => {
 
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running at http://${localIP}:${PORT}`);
-    console.log(`You can also access it using http://localhost:${PORT}`);
+    console.log(`Attendance link -> ${localIP}`);
+    console.log(`Personal link -> localhost`);
 });
 
 
 setTimeout(() => {
     const proxyCount = proxyList.size;
-    console.log(`Shutting down the server after ${intervel} seconds...`);
+    console.log(`Shutting down the server after ${interval} seconds...`);
     console.log('Total connections established', totalCount);
     console.log('Those who tried to give proxy', proxyCount);
     server.close(() => {
         console.log('Server stopped gracefully.');
+        process.exit(0);
     });
 }, WINDOWINTERVAL);
