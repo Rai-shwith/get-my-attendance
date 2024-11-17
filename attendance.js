@@ -1,13 +1,14 @@
 const os = require('os');
-const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
+const generatePDF = require('./pdfGenerator');
 
 let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
+const outputFilePath = 'a.pdf';
 
 // Ask for the input and wait synchronously
 const time = prompt('Enter the duration (in minutes) for recording attendance:');
@@ -51,13 +52,8 @@ const studentDetails = JSON.parse(fs.readFileSync('attendance/info.json', 'utf8'
 app.use(express.json());
 app.use(cors());
 
-// Cooldown data
+// Server uptime in milliseconds
 let WINDOWINTERVAL = interval * 1000;
-
-setInterval(() => {
-    WINDOWINTERVAL -= 1000
-}, 1000);
-
 
 const getHTML = (condition, name, usn) => {
     let color, message;
@@ -151,47 +147,64 @@ app.get('/', (req, res) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
     console.log(`Attendance link -> http://${localIP}:${PORT}`);
-    console.log(`Personal link -> http://localhost:${PORT}`);
 });
 
 
-const killServer = () => {
+const killServer = async () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
-    console.log("\n\n----------RESULT----------\n");
-    const absentList = new Object();
+
+    const absentList = {};
     for (const ip in studentDetails) {
         if (!presentList[ip]) {
             absentList[ip] = studentDetails[ip];
         }
     }
-    console.log("\n----------PRESENT----------\n");
-    for (const ip of Object.keys(presentList)) {
-        let name = presentList[ip].name;
-        let usn = presentList[ip].usn;
-        console.log(usn + " : " + name);
+
+    console.log("\n----------RESULT----------");
+    console.log("\n----------PRESENT----------");
+    Object.values(presentList).forEach(({ usn, name }) => console.log(`${usn} : ${name}`));
+    console.log("\n----------ABSENT----------");
+    Object.values(absentList).forEach(({ usn, name }) => console.log(`${usn} : ${name}`));
+
+    try {
+        console.log("Generating PDF...");
+        await generatePDF(outputFilePath, presentList, absentList); // Wait for PDF generation
+        console.log("PDF successfully generated!");
+    } catch (err) {
+        console.error("Error during PDF generation:", err);
     }
-    console.log("\n--------------------------\n\n");
-    console.log("\n----------ABSENT----------\n");
-    for (const ip of Object.keys(absentList)) {
-        let name = absentList[ip].name;
-        let usn = absentList[ip].usn;
-        console.log(usn + " : " + name);
-    }
-    console.log("\n--------------------------\n");
-    console.log("--------------------------\n\n");
+
     server.close(() => {
         console.log('Server stopped gracefully.');
         process.exit(0);
     });
-}
+};
 
+
+
+
+
+let isShuttingDown = false;
+
+const shutdownHandler = async () => {
+    if (isShuttingDown) {
+        console.log("Server is already shutting down. Please wait...");
+        return;
+    }
+    isShuttingDown = true;
+    console.log("Initiating server shutdown...");
+    await killServer();
+};
+
+// Set a timeout to call the shutdown handler
 setTimeout(() => {
-    killServer()
+    shutdownHandler();
 }, WINDOWINTERVAL);
 
-process.on('SIGINT', () => {
-    console.log('Performing cleanup...');
-    killServer()
+// Handle SIGINT for graceful shutdown
+process.on("SIGINT", async () => {
+    console.log("Performing cleanup due to SIGINT...");
+    await shutdownHandler();
 });

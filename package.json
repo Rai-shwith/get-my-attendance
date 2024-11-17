@@ -13,6 +13,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1",
+    "pdfkit": "^0.15.1",
     "prompt-sync": "^4.2.0"
   }
 }
