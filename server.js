@@ -42,6 +42,7 @@ const app = express();
 const localIP = getLocalIP();
 const PORT = 1111;
 let totalCount = 0;
+const nums = new Set() // This is to keep track of Numbers
 
 // Middleware
 app.use(express.json());
@@ -80,12 +81,13 @@ app.post('/submit', (req, res) => {
 
     if (attendedList.has(ip)) {
         proxyList.add(ip)
-        return res.status(429).json({ message: "Attendance already taken!.<br>THIS INCIDENT WILL BE REPORTED!!!" });
+        return res.status(429).json({ message: `Attendance already taken!.<br style="color: red;">THIS INCIDENT WILL BE REPORTED!!!`});
     }
 
     attendedList.add(ip);
     totalCount += 1
     const number = req.body.number;
+    nums.add(number);
     console.log(`Received number: ${number} from ${ip}`);
     res.status(200).send("success");
 });
@@ -103,8 +105,11 @@ const killServer = () => {
     const serverDuration = Math.floor((endTime-startTime)/1000); 
     const proxyCount = proxyList.size;
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
+    console.log("\n\n----------RESULT----------\n");
     console.log('Total connections established', totalCount);
     console.log('Those who tried to give proxy', proxyCount);
+    console.log('Total Numbers Received: ',Array.from(nums))
+    console.log("\n--------------------------\n\n");
     server.close(() => {
         console.log('Server stopped gracefully.');
         process.exit(0);
