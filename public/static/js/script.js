@@ -1,9 +1,20 @@
 
-const form = document.getElementById('numberForm');
+const numberForm = document.getElementById('numberForm');
+const registerForm = document.getElementById('registerForm');
 const message = document.getElementById('message');
 const submitBtn = document.getElementById('submitBtn');
-const totalTime = document.getElementById('timer').innerText;
-const submitUrl = document.getElementById('submitUrl').innerText;
+const getInnerText = (id) => {
+    let element = document.getElementById(id);
+    if (element) {
+        return element.innerText;
+    }
+    return null
+}
+const totalTime = getInnerText('timer');
+const submitUrl = getInnerText('submitUrl');
+const registerUrl = getInnerText('registerUrl');
+
+
 console.log("total time", totalTime)
 startTimer(totalTime);
 
@@ -37,8 +48,9 @@ function startTimer(timeString) {
     updateTimer();
 }
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();  // Prevent page refresh when the form is submitted
+if (numberForm){
+numberForm.addEventListener('submit', async (e) => {
+    e.preventDefault();  // Prevent page refresh when the numberForm is submitted
 
     // Get the roll number input value
     const number = document.getElementById('rollno').value;
@@ -95,4 +107,52 @@ form.addEventListener('submit', async (e) => {
         message.classList.remove('hidden');
     }
 });
+}
+
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();  // Prevent page refresh when the numberForm is submitted
+
+        // Get the roll number input value
+        const usn = document.getElementById('usn').value.toUpperCase().trim();
+        const name = document.getElementById('studentName').value.trim();
+        console.log(`${name} : ${usn}`);
+        const info = { "name": name, "usn": usn }
+
+
+        try {
+
+            // Make the POST request to the server
+            const response = await fetch(registerUrl, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({"info":info}),
+            });
+
+            // Handle the response based on its status
+            if (response.ok) {
+                console.log("ok")
+                // Successfully submitted
+                const data = await response.json()
+                message.innerHTML = data.message || "Submitted";
+                message.classList.remove('hidden');
+                submitBtn.hidden = true;
+            } else {
+                console.log("not ok");
+                // Attendance already taken or other error
+                const errorResponse = await response.json();
+                message.innerHTML = `<span style="color: #ff9595;">${errorResponse.message || "Already Registered!"}</span>`;
+                message.classList.remove('hidden');
+                submitBtn.hidden = true;
+            }
+        } catch (error) {
+            // Log the error and display a user-friendly message
+            console.error("Error during fetch:", error);
+            message.innerHTML = "Times UP!!!!";
+            message.classList.remove('hidden');
+        }
+    });
+}
 

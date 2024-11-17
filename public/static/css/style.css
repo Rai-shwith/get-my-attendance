@@ -73,6 +73,9 @@ button {
 button:hover {
     background-color: #45a049;
 }
+button:active{
+    transform: scale(1.2);
+}
 
 #message {
     margin-top: 15px;
