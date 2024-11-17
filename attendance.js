@@ -43,6 +43,11 @@ const app = express();
 const localIP = getLocalIP();
 const PORT = 1111;
 
+// To display how much time left
+setInterval(() => {
+    WINDOWINTERVAL -= 1000
+}, 1000);
+
 // To keep track of students who gave attendance
 const presentList = new Object();
 // Load the student details from the file
@@ -90,7 +95,9 @@ const getHTML = (condition, name, usn) => {
         }
 
         h1 {
-            color: ${color};
+            color: ${color}
+
+            ;
             font-size: 2.5rem;
             margin-bottom: 20px;
         }
@@ -104,19 +111,64 @@ const getHTML = (condition, name, usn) => {
             border-radius: 12px;
             box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
         }
+
+        header {
+            text-align: center;
+            margin-top: 10px;
+            width: 90vw;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 
 <body class="column">
+    <header >Time remaining : <span id="timer" style="color: red;">${WINDOWINTERVAL}</span></header>
     <div class="container">
         <h1>${message}</h1>
     </div>
     <br>
-    <div class="container" ${hideInfo?'hidden':''} >
+    <div class="container" ${hideInfo?'hidden':''}>
         <section>
             <h2>${name} : ${usn}</h2>
         </section>
     </div>
+    <script>
+        const totalTime = document.getElementById('timer').innerText;
+        function startTimer(timeString) {
+            // Parse the input time string to milliseconds
+            let totalMilliseconds = Number(timeString);
+
+            // Create a reference to the DOM element where you want to display the timer
+            const timerDisplay = document.getElementById("timer");
+
+            // Function to update the time and display it
+            function updateTimer() {
+                console.log("Timer Started")
+                if (totalMilliseconds <= 0) {
+                    clearInterval(timerInterval); // Stop the timer when it reaches 0
+                    timerDisplay.innerHTML = "Time's up!";
+                } else {
+                    totalMilliseconds -= 1000; // Decrease the time by 1 second (1000ms)
+
+                    let minutesLeft = Math.floor(totalMilliseconds / 60000); // Get minutes
+                    let secondsLeft = Math.floor((totalMilliseconds % 60000) / 1000); // Get seconds
+
+                    // Format the time in "mm:ss"
+                    timerDisplay.innerHTML = \`${"${String(minutesLeft).padStart(2, '0')}"}:${"${String(secondsLeft).padStart(2, '0')}"}\`;
+                }
+            }
+
+            // Start the interval to update the timer every second (1000ms)
+            const timerInterval = setInterval(updateTimer, 1000);
+
+            // Initial call to display the starting time
+            updateTimer();
+        }
+        startTimer(totalTime);   
+    </script>
 </body>
 
 </html>`
