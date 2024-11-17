@@ -16,13 +16,16 @@ const generatePDF = (outputFilePath, present, absent) => {
             return a.status === 'Absent' ? -1 : 1; // Absent first
         });
 
+        const date = new Date();
+        const filePath = `${outputFilePath.split('.pdf')[0]}${date.getHours()}-${date.getMinutes()}.pdf`
+
         // Create PDF and set up stream
         const doc = new PDFDocument();
-        const stream = fs.createWriteStream(outputFilePath);
+        const stream = fs.createWriteStream(filePath);
 
         // Handle stream completion
         stream.on('finish', () => {
-            console.log(`PDF successfully written to ${outputFilePath}`);
+            console.log(`PDF successfully written to ${filePath}`);
             resolve(); // Resolve the promise
         });
 
@@ -35,7 +38,6 @@ const generatePDF = (outputFilePath, present, absent) => {
         doc.pipe(stream);
         
         // Formatting Date
-        const date = new Date();
         const options = {
             year: 'numeric',
             month: 'long',
