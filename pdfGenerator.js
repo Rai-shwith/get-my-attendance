@@ -33,10 +33,22 @@ const generatePDF = (outputFilePath, present, absent) => {
 
         // Pipe document to stream
         doc.pipe(stream);
+        
+        // Formatting Date
+        const date = new Date();
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+        };
 
+        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
         // Add Title
-        doc.fontSize(18).text('Attendance Report', { align: 'center' }).moveDown(1);
-
+        doc.fontSize(18).text(`Attendance Report  ${formattedDate}`, { align: 'center' }).moveDown(0.5);
+        
         // Add Table Header
         const startX = 50;
         let y = 100;
