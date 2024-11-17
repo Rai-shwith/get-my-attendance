@@ -10,6 +10,18 @@ body {
     height: 100vh;
 }
 
+body.column{
+    display: flex;
+    flex-direction: column;
+}
+
+body.column > .container{
+    margin: 0;
+}
+
+.AttendanceSuccess{
+    color: #45a049;
+}
 
 #timer{
 color: red;
