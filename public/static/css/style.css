@@ -47,7 +47,7 @@ form {
     align-items: center;
 }
 
-input[type="number"] {
+input[type="number"],[type="text"] {
     padding: 10px;
     width: 80%;
     margin-bottom: 20px;
@@ -57,6 +57,7 @@ input[type="number"] {
     outline: none;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 
 button {
     padding: 10px 20px;
