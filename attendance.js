@@ -41,10 +41,9 @@ function getLocalIP() {
 const app = express();
 const localIP = getLocalIP();
 const PORT = 1111;
-let totalCount = 0;
 
 // To keep track of students who gave attendance
-const presentList = new Object(); 
+const presentList = new Object();
 // Load the student details from the file
 const studentDetails = JSON.parse(fs.readFileSync('attendance/info.json', 'utf8'));
 
@@ -59,49 +58,94 @@ setInterval(() => {
     WINDOWINTERVAL -= 1000
 }, 1000);
 
-// Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, 'public/static')));
+
+const getHTML = (condition, name, usn) => {
+    let color, message;
+    let hideInfo = false;
+    if (condition === "alreadyGiven") {
+        color = "#f44336";
+        message = "Attendance already taken!";
+    } else if (condition === "notRegistered") {
+        hideInfo = true;
+        color = "#ff9800";
+        message = "You are not registered for this class!";
+    } else {
+        color = "#4caf50";
+        message = "Attendance taken successfully!";
+    }
+    htmlString = `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: ${color};
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            margin-top: 3em;
+            width: 75vw;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body class="column">
+    <div class="container">
+        <h1>${message}</h1>
+    </div>
+    <br>
+    <div class="container" ${hideInfo?'hidden':''} >
+        <section>
+            <h2>${name} : ${usn}</h2>
+        </section>
+    </div>
+</body>
+
+</html>`
+    return htmlString;
+}
 
 // Route to serve the main HTML file
 app.get('/', (req, res) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (presentList[ip]) {
-        return res.status(429).send("Attendance already taken!");
+        console.log(presentList[ip].name + " already gave attendance!");
+        const html = getHTML("alreadyGiven", presentList[ip].name, presentList[ip].usn);
+        return res.status(429).send(html);
     }
-    if (!studentDetails[ip]){
-        return res.status(403).send("You are not registered for this class!");
+    if (!studentDetails[ip]) {
+        console.log(ip + " is not registered for this class!");
+        const html = getHTML("notRegistered");
+        return res.status(403).send(html);
     }
-    presentList[ip]=studentDetails[ip];
-    return res.statusCode(200).send("Attendance taken successfully!");
-    const filePath = path.join(__dirname, 'public', 'attendance.html');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).send('Error reading the file.');
-        }
-        const submitUrl = `http://${localIP}:${PORT}/submit`;
-        let modifiedHtml = data.replace('%submitUrl%', submitUrl);
-        modifiedHtml = modifiedHtml.replace('%timer%', String(WINDOWINTERVAL));
-        res.send(modifiedHtml);
-    });
+    const html = getHTML("normal", studentDetails[ip].name, studentDetails[ip].usn);
+    presentList[ip] = studentDetails[ip];
+    console.log(`Attendance given to ${presentList[ip].name} [${presentList[ip].usn}]`);
+    return res.status(200).send(html);
 });
 
-// Handle form submission with cooldown logic
-app.post('/submit', (req, res) => {
-    console.log("Entering submit")
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-    if (attendedList.has(ip)) {
-        proxyList.add(ip)
-        return res.status(429).json({ message: `Attendance already taken!.<br style="color: red;">THIS INCIDENT WILL BE REPORTED!!!`});
-    }
-
-    attendedList.add(ip);
-    totalCount += 1
-    const number = req.body.number;
-    nums.add(number);
-    console.log(`Received number: ${number} from ${ip}`);
-    res.status(200).send("success");
-});
 
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
@@ -113,7 +157,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 
 const killServer = () => {
     endTime = new Date();
-    const serverDuration = Math.floor((endTime-startTime)/1000); 
+    const serverDuration = Math.floor((endTime - startTime) / 1000);
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
     console.log("\n\n----------RESULT----------\n");
     const absentList = new Object();
@@ -123,20 +167,20 @@ const killServer = () => {
         }
     }
     console.log("\n----------PRESENT----------\n");
-    for (const ip of presentList) {
+    for (const ip of Object.keys(presentList)) {
         let name = presentList[ip].name;
         let usn = presentList[ip].usn;
         console.log(usn + " : " + name);
     }
     console.log("\n--------------------------\n\n");
-    console.log("\n----------PRESENT----------\n");
-    for (const ip of absentList) {
+    console.log("\n----------ABSENT----------\n");
+    for (const ip of Object.keys(absentList)) {
         let name = absentList[ip].name;
         let usn = absentList[ip].usn;
         console.log(usn + " : " + name);
     }
-    console.log("\n--------------------------\n\n");
-    console.log("\n--------------------------\n\n");
+    console.log("\n--------------------------\n");
+    console.log("--------------------------\n\n");
     server.close(() => {
         console.log('Server stopped gracefully.');
         process.exit(0);
