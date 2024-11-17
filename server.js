@@ -6,6 +6,8 @@ const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 
 let interval = 5 * 60; // in seconds
+let startTime;
+let endTime;
 
 // Ask for the input and wait synchronously
 const time = prompt('Enter the duration (in minutes) for recording attendance:');
@@ -38,7 +40,7 @@ function getLocalIP() {
 
 const app = express();
 const localIP = getLocalIP();
-const PORT = 80;
+const PORT = 1111;
 let totalCount = 0;
 
 // Middleware
@@ -74,8 +76,7 @@ app.get('/', (req, res) => {
 // Handle form submission with cooldown logic
 app.post('/submit', (req, res) => {
     console.log("Entering submit")
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const now = Date.now();
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     if (attendedList.has(ip)) {
         proxyList.add(ip)
@@ -91,18 +92,30 @@ app.post('/submit', (req, res) => {
 
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Attendance link -> ${localIP}`);
-    console.log(`Personal link -> localhost`);
+    startTime = new Date();
+    console.log(`Attendance link -> http://${localIP}:${PORT}`);
+    console.log(`Personal link -> http://localhost:${PORT}`);
 });
 
 
-setTimeout(() => {
+const killServer = () => {
+    endTime = new Date();
+    const serverDuration = Math.floor((endTime-startTime)/1000); 
     const proxyCount = proxyList.size;
-    console.log(`Shutting down the server after ${interval} seconds...`);
+    console.log(`Shutting down the server after ${serverDuration} seconds...`);
     console.log('Total connections established', totalCount);
     console.log('Those who tried to give proxy', proxyCount);
     server.close(() => {
         console.log('Server stopped gracefully.');
         process.exit(0);
     });
+}
+
+setTimeout(() => {
+    killServer()
 }, WINDOWINTERVAL);
+
+process.on('SIGINT', () => {
+    console.log('Performing cleanup...');
+    killServer()
+});
