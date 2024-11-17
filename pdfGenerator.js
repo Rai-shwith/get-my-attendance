@@ -17,7 +17,20 @@ const generatePDF = (outputFilePath, present, absent) => {
         });
 
         const date = new Date();
-        const filePath = `${outputFilePath.split('.pdf')[0]}${date.getHours()}-${date.getMinutes()}.pdf`
+
+        // Formatting Date
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+        };
+
+        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+
+        const filePath = `${outputFilePath.split('.pdf')[0]}${String(formattedDate).replace(':','-')}.pdf`
 
         // Create PDF and set up stream
         const doc = new PDFDocument();
@@ -37,17 +50,6 @@ const generatePDF = (outputFilePath, present, absent) => {
         // Pipe document to stream
         doc.pipe(stream);
         
-        // Formatting Date
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true
-        };
-
-        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
         // Add Title
         doc.fontSize(18).text(`Attendance Report  ${formattedDate}`, { align: 'center' }).moveDown(0.5);
         
