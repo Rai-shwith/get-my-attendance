@@ -70,6 +70,7 @@ function getLocalIP() {
 
 // Function to fetch MAC address based on IP
 const getMacAddress = (ip) => {
+    console.log("first line of getMacAddress")
     return new Promise((resolve, reject) => {
         arp.getMAC(ip, (err, mac) => {
             if (err || !mac) {
@@ -128,13 +129,18 @@ app.get('/', (req, res) => {
 app.post('/register', async (req, res) => {
     console.log("Received request");
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log("IP Address",ip)
     const info = req.body.info;
     let macAddress;
     try {
+        console.log("Trying to get MAC address");
         macAddress = await getMacAddress(ip);
+        console.log("MAC address fetched");
         console.log(`Client IP: ${clientIP}, MAC Address: ${macAddress}`);
         handleRegistration(macAddress, info)
+        console.log("Registration Sucessfull");
     } catch (error) {
+        console.log("Caught debug : ",error.message);
         if (error.code === 409) {
             console.log("Caught : ",error.message);
             return res.status(error.code).json({ message:error.message});
