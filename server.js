@@ -4,10 +4,12 @@ const express = require('express');
 const cors = require('cors');
 const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
+require('dotenv').config();
 
 let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
+const PORT = process.env.PORT || 1111;
 
 // Ask for the input and wait synchronously
 const time = prompt('Enter the duration (in minutes) for recording attendance:');
@@ -40,7 +42,6 @@ function getLocalIP() {
 
 const app = express();
 const localIP = getLocalIP();
-const PORT = 1111;
 let totalCount = 0;
 const nums = new Set() // This is to keep track of Numbers
 

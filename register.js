@@ -9,12 +9,12 @@ require('dotenv').config()
 let startTime;
 let endTime;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+const PORT = process.env.PORT || 1111;
 if (!studentDetailsPath) {
     console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
     process.exit(0);
 }
 const app = express()
-const PORT = 80;
 // Get the local IP address of the server
 const localIP = getLocalIP();
 // load the student details from the JSON file

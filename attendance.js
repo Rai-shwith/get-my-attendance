@@ -11,6 +11,9 @@ let startTime;
 let endTime;
 const outputFilePath = process.env.OUTPUT_FILE_PATH;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+const PORT = process.env.PORT || 1111;
+
+
 if (!outputFilePath) {
     console.log("Please create .env file in the project root and set OUTPUT_FILE_PATH")
     process.exit(0);
@@ -50,7 +53,6 @@ function getLocalIP() {
 
 const app = express();
 const localIP = getLocalIP();
-const PORT = 1111;
 
 // To display how much time left
 setInterval(() => {
