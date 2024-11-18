@@ -83,43 +83,64 @@ const generateID = () => {
 
 // Returns the student object if he already registerd
 const getAlreadyRegistered = (usn) => {
+    console.log(usn);
     const StudentValues = Object.values(studentDetails);
-    return StudentValues.find(student => student?.usn === info.usn);
-
+    const alreadyRegistered = StudentValues.find(student => student?.usn === usn);
+    console.log(alreadyRegistered)
+    return alreadyRegistered
 }
 
 const handleRegistration = (id, info, res) => {
+    // If the id (Cookie) is empty then he either cleared his browser info(Already Registered) or New Registration
     if (id === undefined) {
         // Checking wheather the student is already registed or not based on USN
         const alreadyRegistered = getAlreadyRegistered(info.usn);
-        if (alreadyRegistered) {
+        // If the user is not registerd before a unique id is set to users Cookie and the registration completes
+        if (!alreadyRegistered) { 
+            // Setting unique ID as Cookie 
+            const uniqueId = generateID()
+            res.cookie('id', uniqueId, { signed: true, maxAge: 4 * 365 * 24 * 60 * 60 * 1000, httpOnly: true }); //expiry time for 4 years
+            studentDetails[uniqueId] = info;
+            currentRegistration[uniqueId] = info;
+            console.log(green, "Registering " + info.name);
+        } // If the user is already registered he have to contact the admin to log him
+        else if ((alreadyRegistered.name !== info.name)){
             errrorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if there is any issues.`
             console.error(`${info.name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
+        }else{
+            errrorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if you want to login.`
+            console.error(`${info.name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
+            const error = new Error(errrorMessage);
+            error.code = 409;
+            throw error;
         }
-        // Setting unique ID as Cookie 
-        const uniqueId = generateID()
-        res.cookie('id', uniqueId, { signed: true, maxAge: 4 * 365 * 24 * 60 * 60 * 1000, httpOnly: true }); //expiry time for 4 years
-        studentDetails[uniqueId] = info;
-        currentRegistration[uniqueId] = info;
-        console.log(green, "Registering " + info.name);
+// If the user has id (Cookie) then,
+    // CASE 1: He may be trying to register again
+    // CASE 2 : He may be trying to register again with another USN
+    // CASE 3: Register Others
     } else {
         let errrorMessage;
         console.error(studentDetails[id].name, " tried to register twice");
+        // CASE 1:
         if (studentDetails[id].name === info.name && (studentDetails[id].usn === info.usn)) {
             errrorMessage = `${studentDetails[id].name} is already registered`
             console.error(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        } else if (studentDetails[id].name === info.name && (studentDetails[id].usn !== info.usn)) {
+        }
+        // CASE 2:
+         else if (studentDetails[id].name === info.name && (studentDetails[id].usn !== info.usn)) {
             errrorMessage = `Your USN is ${studentDetails[id].usn} right?<br>Please contact the admin if there is any issues.`
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        } else{
+         } 
+         // CASE 3:
+        else {
             errrorMessage = `${studentDetails[id].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
             console.error(`${studentDetails[id].name} is trying to register ${info.name}`)
             const error = new Error(errrorMessage);
