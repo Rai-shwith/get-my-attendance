@@ -11,15 +11,16 @@ const cookieParser = require('cookie-parser');
 let startTime;
 let endTime;
 const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
+const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
 const SECRET_KEY = process.env.SECRET_KEY;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
 const PORT = process.env.PORT || 1111;
 if (!studentDetailsPath) {
-    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    console.error("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
     process.exit(0);
 }
 if (!SECRET_KEY) {
-    console.log("Please create .env file in the project root and set SECRET_KEY'")
+    console.error("Please create .env file in the project root and set SECRET_KEY'")
     process.exit(0);
 }
 const app = express()
@@ -124,7 +125,7 @@ const handleRegistration = (id, info, res) => {
         // CASE 1:
         if (studentDetails[id].name === info.name && (studentDetails[id].usn === info.usn)) {
             errrorMessage = `${studentDetails[id].name} is already registered`
-            console.error(errrorMessage)
+            console.log(yellow,errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
@@ -181,7 +182,7 @@ app.post('/register', (req, res) => {
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
-    console.log(`Server is running at http://${localIP}:${PORT}`);
+    console.log(green,`link -> http://${localIP}:${PORT}`);
 });
 
 
@@ -189,17 +190,17 @@ const killServer = () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
-    console.log("\n\n----------RESULT----------\n");
-    console.log("Registerd Students in this session");
+    console.log(yellow,"\n\n----------RESULT----------\n");
+    console.log(green,"Registerd Students in this session");
     // List the students who registered in this session
     for (const info of Object.values(currentRegistration)) {
-        console.log(info.name);
+        console.log(green,info.name);
     }
     fs.writeFileSync(studentDetailsPath, JSON.stringify(studentDetails));
-    console.log("\n--------------------------\n\n");
-    console.log("Student details updated Succesfully!")
+    console.log(yellow,"\n--------------------------\n\n");
+    console.log(green,"Student details updated Succesfully!")
     server.close(() => {
-        console.log('Server stopped gracefully.');
+        console.log(green,'Server stopped gracefully.');
         process.exit(0);
     });
 }
@@ -209,6 +210,6 @@ setTimeout(() => {
 }, WINDOWINTERVAL);
 
 process.on('SIGINT', () => {
-    console.log('Performing cleanup...');
+    console.log(yellow,'Performing cleanup...');
     killServer()
 });
