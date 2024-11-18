@@ -4,10 +4,15 @@ const os = require('os');
 const fs = require('fs');
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const path = require('path')
+require('dotenv').config()
 
 let startTime;
 let endTime;
-
+const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+if (!studentDetailsPath) {
+    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    process.exit(0);
+}
 const app = express()
 const PORT = 80;
 // Get the local IP address of the server

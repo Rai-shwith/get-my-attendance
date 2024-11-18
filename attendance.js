@@ -4,12 +4,21 @@ const cors = require('cors');
 const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
+require('dotenv').config();
 
 let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
-const outputFilePath = 'a.pdf';
-
+const outputFilePath = process.env.OUTPUT_FILE_PATH;
+const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+if (!outputFilePath) {
+    console.log("Please create .env file in the project root and set OUTPUT_FILE_PATH")
+    process.exit(0);
+}
+if (!studentDetailsPath) {
+    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    process.exit(0);
+}
 // Ask for the input and wait synchronously
 const time = prompt('Enter the duration (in minutes) for recording attendance:');
 
@@ -51,7 +60,7 @@ setInterval(() => {
 // To keep track of students who gave attendance
 const presentList = new Object();
 // Load the student details from the file
-const studentDetails = JSON.parse(fs.readFileSync('attendance/info.json', 'utf8'));
+const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
 
 // Middleware
 app.use(express.json());
