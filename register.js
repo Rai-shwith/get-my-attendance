@@ -18,7 +18,7 @@ const app = express()
 // Get the local IP address of the server
 const localIP = getLocalIP();
 // load the student details from the JSON file
-const studentDetails = JSON.parse(fs.readFileSync('attendance/info.json', 'utf8'));
+const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
 
 
 let interval = 5 * 60; // in seconds
