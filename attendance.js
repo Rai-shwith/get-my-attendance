@@ -220,14 +220,14 @@ app.get('/', (req, res) => {
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
-    console.log(`Attendance link -> http://${localIP}:${PORT}`);
+    console.log(green,`Attendance link -> http://${localIP}:${PORT}`);
 });
 
 
 const killServer = async () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
-    console.log(`Shutting down the server after ${serverDuration} seconds...`);
+    console.log(yellow,`Shutting down the server after ${serverDuration} seconds...`);
 
     const absentList = {};
     for (const id in studentDetails) {
@@ -236,12 +236,14 @@ const killServer = async () => {
         }
     }
 
-    console.log(yellow,"\n----------RESULT----------");
+    console.log(yellow,"\n--------------------------");
+    console.log(yellow,"----------RESULT----------");
     console.log(green,"\n----------PRESENT----------");
     Object.values(presentList).forEach(({ usn, name }) => console.log(green,`${usn} : ${name}`));
     console.error("\n----------ABSENT----------");
     Object.values(absentList).forEach(({ usn, name }) => console.error(`${usn} : ${name}`));
-
+    console.log(yellow,"\n--------------------------");
+    console.log(yellow,"--------------------------");
     try {
         console.log(yellow,"Generating PDF...");
         await generatePDF(outputFilePath, presentList, absentList); // Wait for PDF generation
@@ -251,7 +253,7 @@ const killServer = async () => {
     }
 
     server.close(() => {
-        console.log(green,'Server stopped gracefully.');
+        console.log(yellow,'Server stopped gracefully.');
         process.exit(0);
     });
 };
@@ -264,11 +266,11 @@ let isShuttingDown = false;
 
 const shutdownHandler = async () => {
     if (isShuttingDown) {
-        console.log("Server is already shutting down. Please wait...");
+        console.log(yellow,"Server is already shutting down. Please wait...");
         return;
     }
     isShuttingDown = true;
-    console.log("Initiating server shutdown...");
+    console.log(yellow,"Initiating server shutdown...");
     await killServer();
 };
 
@@ -279,6 +281,6 @@ setTimeout(() => {
 
 // Handle SIGINT for graceful shutdown
 process.on("SIGINT", async () => {
-    console.log("Performing cleanup due to SIGINT...");
+    console.log(yellow,"Performing cleanup due to SIGINT...");
     await shutdownHandler();
 });

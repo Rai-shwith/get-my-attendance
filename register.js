@@ -190,14 +190,16 @@ const killServer = () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
-    console.log(yellow,"\n\n----------RESULT----------\n");
+    console.log(yellow,"\n--------------------------");
+    console.log(yellow,"----------RESULT----------\n");
     console.log(green,"Registerd Students in this session");
     // List the students who registered in this session
     for (const info of Object.values(currentRegistration)) {
         console.log(green,info.name);
     }
     fs.writeFileSync(studentDetailsPath, JSON.stringify(studentDetails));
-    console.log(yellow,"\n--------------------------\n\n");
+    console.log(yellow,"\n--------------------------");
+    console.log(yellow,"--------------------------");
     console.log(green,"Student details updated Succesfully!")
     server.close(() => {
         console.log(green,'Server stopped gracefully.');
