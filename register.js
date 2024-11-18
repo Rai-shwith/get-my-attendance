@@ -30,7 +30,6 @@ const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
 
 
 let interval = 5 * 60; // in seconds
-const totalRegistrationCount = studentDetails.length;
 let currentRegistration = {};
 
 // Ask for the input and wait synchronously
