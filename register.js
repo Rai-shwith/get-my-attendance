@@ -121,7 +121,6 @@ const handleRegistration = (id, info, res) => {
     // CASE 3: Register Others
     } else {
         let errrorMessage;
-        console.error(studentDetails[id].name, " tried to register twice");
         // CASE 1:
         if (studentDetails[id].name === info.name && (studentDetails[id].usn === info.usn)) {
             errrorMessage = `${studentDetails[id].name} is already registered`
