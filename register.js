@@ -83,10 +83,8 @@ const generateID = () => {
 
 // Returns the student object if he already registerd
 const getAlreadyRegistered = (usn) => {
-    console.log(usn);
     const StudentValues = Object.values(studentDetails);
     const alreadyRegistered = StudentValues.find(student => student?.usn === usn);
-    console.log(alreadyRegistered)
     return alreadyRegistered
 }
 
@@ -167,7 +165,6 @@ app.get('/', (req, res) => {
 app.post('/register', (req, res) => {
     // const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const id = req.signedCookies.id;
-    console.log(id);
     const info = req.body.info;
 
     try {
