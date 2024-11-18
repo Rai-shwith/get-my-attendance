@@ -5,6 +5,7 @@ const fs = require('fs');
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const path = require('path')
 require('dotenv').config()
+const arp = require('node-arp');
 
 let startTime;
 let endTime;
@@ -14,6 +15,7 @@ if (!studentDetailsPath) {
     console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
     process.exit(0);
 }
+
 const app = express()
 // Get the local IP address of the server
 const localIP = getLocalIP();
@@ -66,29 +68,42 @@ function getLocalIP() {
     return localIP;
 }
 
-const handleRegistration = (ip, info) => {
-    const details = studentDetails[ip];
+// Function to fetch MAC address based on IP
+const getMacAddress = (ip) => {
+    return new Promise((resolve, reject) => {
+        arp.getMAC(ip, (err, mac) => {
+            if (err || !mac) {
+                reject(`Could not fetch MAC address for IP: ${ip}`);
+            } else {
+                resolve(mac);
+            }
+        });
+    });
+};
+
+const handleRegistration = (macAddress, info) => {
+    const details = studentDetails[macAddress];
     if (details == undefined) {
         console.log("Registering ", info.name);
-        studentDetails[ip] = info;
-        currentRegistration[ip] = info;
+        studentDetails[macAddress] = info;
+        currentRegistration[macAddress] = info;
     } else {
         console.log(info.name, " tried to register twice");
         let errrorMessage;
-        if (studentDetails[ip].name === info.name && (studentDetails[ip].usn === info.usn)) {
-            errrorMessage = `${studentDetails[ip].name} is already registered`
+        if (studentDetails[macAddress].name === info.name && (studentDetails[macAddress].usn === info.usn)) {
+            errrorMessage = `${studentDetails[macAddress].name} is already registered`
             console.log(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        }else  if (studentDetails[ip].name === info.name &&(studentDetails[ip].usn !== info.usn)){
-            errrorMessage = `Your USN is ${studentDetails[ip].usn} right?<br>Please contact the admin if there is any issues.`
+        }else  if (studentDetails[macAddress].name === info.name &&(studentDetails[macAddress].usn !== info.usn)){
+            errrorMessage = `Your USN is ${studentDetails[macAddress].usn} right?<br>Please contact the admin if there is any issues.`
             console.log(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
         }else {
-            errrorMessage = `${studentDetails[ip].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
+            errrorMessage = `${studentDetails[macAddress].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
             console.log(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
@@ -110,19 +125,32 @@ app.get('/', (req, res) => {
 });
 
 // Handle form submission with cooldown logic
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     console.log("Received request");
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const info = req.body.info;
-
+    let macAddress;
     try {
-        handleRegistration(ip, info)
+        macAddress = await getMacAddress(ip);
+        console.log(`Client IP: ${clientIP}, MAC Address: ${macAddress}`);
+        handleRegistration(macAddress, info)
     } catch (error) {
         if (error.code === 409) {
             console.log("Caught : ",error.message);
             return res.status(error.code).json({ message:error.message});
         }
+        console.error(error);
+        return res.status(500).send(error);
     }
+
+    // try {
+    //     handleRegistration(ip, info)
+    // } catch (error) {
+    //     if (error.code === 409) {
+    //         console.log("Caught : ",error.message);
+    //         return res.status(error.code).json({ message:error.message});
+    //     }
+    // }
     res.status(200).json({ message: "Registration Sucessfull" });
 });
 

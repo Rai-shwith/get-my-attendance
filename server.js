@@ -21,7 +21,7 @@ if (time.trim() === "") {
     console.log(`Server will be active for ${time} minutes`);
 }
 
-function getLocalIP() {
+const getLocalIP = () => {
     const interfaces = os.networkInterfaces();
     let localIP = '0.0.0.0'; // Default fallback IP in case no valid address is found
 
@@ -39,6 +39,19 @@ function getLocalIP() {
 
     return localIP;
 }
+
+// Function to fetch MAC address based on IP
+const getMacAddress = (ip) => {
+    return new Promise((resolve, reject) => {
+        arp.getMAC(ip, (err, mac) => {
+            if (err || !mac) {
+                reject(`Could not fetch MAC address for IP: ${ip}`);
+            } else {
+                resolve(mac);
+            }
+        });
+    });
+};
 
 const app = express();
 const localIP = getLocalIP();
