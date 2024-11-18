@@ -5,13 +5,21 @@ const fs = require('fs');
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const path = require('path')
 require('dotenv').config()
+const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
 
 let startTime;
 let endTime;
+const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
+const SECRET_KEY = process.env.SECRET_KEY;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
 const PORT = process.env.PORT || 1111;
 if (!studentDetailsPath) {
     console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    process.exit(0);
+}
+if (!SECRET_KEY) {
+    console.log("Please create .env file in the project root and set SECRET_KEY'")
     process.exit(0);
 }
 const app = express()
@@ -44,6 +52,9 @@ setInterval(() => {
 app.use(express.json());
 app.use(cors());
 
+// Use cookie-parser middleware
+app.use(cookieParser(SECRET_KEY));
+
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, 'public/static')));
 
@@ -66,35 +77,57 @@ function getLocalIP() {
     return localIP;
 }
 
-const handleRegistration = (ip, info) => {
-    const details = studentDetails[ip];
-    if (details == undefined) {
-        console.log("Registering ", info.name);
-        studentDetails[ip] = info;
-        currentRegistration[ip] = info;
+const generateID = () => {
+    return crypto.randomBytes(16).toString('hex');
+}
+
+// Returns the student object if he already registerd
+const getAlreadyRegistered = (usn) => {
+    const StudentValues = Object.values(studentDetails);
+    return StudentValues.find(student => student?.usn === info.usn);
+
+}
+
+const handleRegistration = (id, info, res) => {
+    if (id === undefined) {
+        // Checking wheather the student is already registed or not based on USN
+        const alreadyRegistered = getAlreadyRegistered(info.usn);
+        if (alreadyRegistered) {
+            errrorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if there is any issues.`
+            console.error(`${info.name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
+            const error = new Error(errrorMessage);
+            error.code = 409;
+            throw error;
+        }
+        // Setting unique ID as Cookie 
+        const uniqueId = generateID()
+        res.cookie('id', uniqueId, { signed: true, maxAge: 4 * 365 * 24 * 60 * 60 * 1000, httpOnly: true }); //expiry time for 4 years
+        studentDetails[uniqueId] = info;
+        currentRegistration[uniqueId] = info;
+        console.log(green, "Registering " + info.name);
     } else {
-        console.log(info.name, " tried to register twice");
         let errrorMessage;
-        if (studentDetails[ip].name === info.name && (studentDetails[ip].usn === info.usn)) {
-            errrorMessage = `${studentDetails[ip].name} is already registered`
-            console.log(errrorMessage)
+        console.error(studentDetails[id].name, " tried to register twice");
+        if (studentDetails[id].name === info.name && (studentDetails[id].usn === info.usn)) {
+            errrorMessage = `${studentDetails[id].name} is already registered`
+            console.error(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        }else  if (studentDetails[ip].name === info.name &&(studentDetails[ip].usn !== info.usn)){
-            errrorMessage = `Your USN is ${studentDetails[ip].usn} right?<br>Please contact the admin if there is any issues.`
-            console.log(errrorMessage)
+        } else if (studentDetails[id].name === info.name && (studentDetails[id].usn !== info.usn)) {
+            errrorMessage = `Your USN is ${studentDetails[id].usn} right?<br>Please contact the admin if there is any issues.`
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        }else {
-            errrorMessage = `${studentDetails[ip].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
-            console.log(errrorMessage)
+        } else{
+            errrorMessage = `${studentDetails[id].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
+            console.error(`${studentDetails[id].name} is trying to register ${info.name}`)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
+        }
     }
-}};
+};
 
 app.get('/', (req, res) => {
     const filePath = path.join(__dirname, 'public', 'register.html');
@@ -111,19 +144,21 @@ app.get('/', (req, res) => {
 
 // Handle form submission with cooldown logic
 app.post('/register', (req, res) => {
-    console.log("Received request");
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    // const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const id = req.signedCookies.id;
+    console.log(id);
     const info = req.body.info;
 
     try {
-        handleRegistration(ip, info)
+        handleRegistration(id, info, res)
     } catch (error) {
         if (error.code === 409) {
-            console.log("Caught : ",error.message);
-            return res.status(error.code).json({ message:error.message});
+            // console.log("Caught : ", error.message);
+            return res.status(error.code).json({ message: error.message });
         }
     }
-    res.status(200).json({ message: "Registration Sucessfull" });
+    // console.log("Registration Successfull")
+    res.status(200).json({ message: "Registration Successfull" });
 });
 
 // Start the server
@@ -143,7 +178,7 @@ const killServer = () => {
     for (const info of Object.values(currentRegistration)) {
         console.log(info.name);
     }
-    fs.writeFileSync('attendance/info.json', JSON.stringify(studentDetails));
+    fs.writeFileSync(filePath, JSON.stringify(studentDetails));
     console.log("\n--------------------------\n\n");
     console.log("Student details updated Succesfully!")
     server.close(() => {
