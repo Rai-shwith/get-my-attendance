@@ -90,11 +90,11 @@ const getAlreadyRegistered = (usn) => {
 
 const handleRegistration = (id, info, res) => {
     // If the id (Cookie) is empty then he either cleared his browser info(Already Registered) or New Registration
+    const alreadyRegistered = getAlreadyRegistered(info.usn);
     if (id === undefined) {
         // Checking wheather the student is already registed or not based on USN
-        const alreadyRegistered = getAlreadyRegistered(info.usn);
         // If the user is not registerd before a unique id is set to users Cookie and the registration completes
-        if (!alreadyRegistered) { 
+        if (!alreadyRegistered) {
             // Setting unique ID as Cookie 
             const uniqueId = generateID()
             res.cookie('id', uniqueId, { signed: true, maxAge: 4 * 365 * 24 * 60 * 60 * 1000, httpOnly: true }); //expiry time for 4 years
@@ -102,41 +102,43 @@ const handleRegistration = (id, info, res) => {
             currentRegistration[uniqueId] = info;
             console.log(green, "Registering " + info.name);
         } // If the user is already registered he have to contact the admin to log him
-        else if ((alreadyRegistered.name !== info.name)){
+        else if ((alreadyRegistered.name !== info.name)) {
             errrorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if there is any issues.`
             console.error(`${info.name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        }else{
+        } else {
             errrorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if you want to login.`
             console.error(`${info.name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
         }
-// If the user has id (Cookie) then,
-    // CASE 1: He may be trying to register again
-    // CASE 2 : He may be trying to register again with another USN
-    // CASE 3: Register Others
+        // If the user has id (Cookie) then,
+        // CASE 1: He may be trying to register again
+        // CASE 2 : He may be trying to register again with another USN
+        // CASE 3: Register Others
+        // CASE 4: His information is erased from Student Details
+        // 
     } else {
         let errrorMessage;
         // CASE 1:
         if (studentDetails[id].name === info.name && (studentDetails[id].usn === info.usn)) {
             errrorMessage = `${studentDetails[id].name} is already registered`
-            console.log(yellow,errrorMessage)
+            console.log(yellow, errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
         }
         // CASE 2:
-         else if (studentDetails[id].name === info.name && (studentDetails[id].usn !== info.usn)) {
+        else if (studentDetails[id].name === info.name && (studentDetails[id].usn !== info.usn)) {
             errrorMessage = `Your USN is ${studentDetails[id].usn} right?<br>Please contact the admin if there is any issues.`
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-         } 
-         // CASE 3:
+        }
+        // CASE 3:
         else {
             errrorMessage = `${studentDetails[id].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
             console.error(`${studentDetails[id].name} is trying to register ${info.name}`)
@@ -165,23 +167,22 @@ app.post('/register', (req, res) => {
     // const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const id = req.signedCookies.id;
     const info = req.body.info;
-
     try {
         handleRegistration(id, info, res)
+        return res.status(200).json({ message: "Registration Successfull" });
     } catch (error) {
         if (error.code === 409) {
             // console.log("Caught : ", error.message);
             return res.status(error.code).json({ message: error.message });
         }
     }
-    // console.log("Registration Successfull")
-    res.status(200).json({ message: "Registration Successfull" });
+    res.status(500).json({ message: "Something Went Wrong Please Contact the Admin" });
 });
 
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
-    console.log(green,`link -> http://${localIP}:${PORT}`);
+    console.log(green, `link -> http://${localIP}:${PORT}`);
 });
 
 
@@ -189,19 +190,19 @@ const killServer = () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
-    console.log(yellow,"\n--------------------------");
-    console.log(yellow,"----------RESULT----------\n");
-    console.log(green,"Registerd Students in this session");
+    console.log(yellow, "\n--------------------------");
+    console.log(yellow, "----------RESULT----------\n");
+    console.log(green, "Registerd Students in this session");
     // List the students who registered in this session
     for (const info of Object.values(currentRegistration)) {
-        console.log(green,info.name);
+        console.log(green, info.name);
     }
     fs.writeFileSync(studentDetailsPath, JSON.stringify(studentDetails));
-    console.log(yellow,"\n--------------------------");
-    console.log(yellow,"--------------------------");
-    console.log(green,"Student details updated Succesfully!")
+    console.log(yellow, "\n--------------------------");
+    console.log(yellow, "--------------------------");
+    console.log(green, "Student details updated Succesfully!")
     server.close(() => {
-        console.log(green,'Server stopped gracefully.');
+        console.log(green, 'Server stopped gracefully.');
         process.exit(0);
     });
 }
@@ -211,6 +212,6 @@ setTimeout(() => {
 }, WINDOWINTERVAL);
 
 process.on('SIGINT', () => {
-    console.log(yellow,'Performing cleanup...');
+    console.log(yellow, 'Performing cleanup...');
     killServer()
 });
