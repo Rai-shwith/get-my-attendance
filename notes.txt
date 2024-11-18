@@ -1,0 +1,2 @@
+if message == <USN> is already registered by <STUDENT1>! Please contact the admin if you want to login.
+    solution = delete the student data from Attendance Details and if required make that student go through deleteCookie.js and register again this will fix the issue
