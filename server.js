@@ -82,7 +82,7 @@ app.post('/submit', (req, res) => {
 
     if (attendedList.has(ip)) {
         proxyList.add(ip)
-        return res.status(429).json({ message: `Attendance already taken!.<br style="color: red;">THIS INCIDENT WILL BE REPORTED!!!`});
+        return res.status(429).json({ message: `Number Already Submitted.<br style="color: red;">THIS INCIDENT WILL BE REPORTED!!!`});
     }
 
     attendedList.add(ip);
