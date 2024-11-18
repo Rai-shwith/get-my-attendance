@@ -5,21 +5,29 @@ const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
 require('dotenv').config();
+const cookieParser = require('cookie-parser');
 
 let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
+const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
+const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
 const outputFilePath = process.env.OUTPUT_FILE_PATH;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+const SECRET_KEY = process.env.SECRET_KEY;
 const PORT = process.env.PORT || 1111;
 
 
 if (!outputFilePath) {
-    console.log("Please create .env file in the project root and set OUTPUT_FILE_PATH")
+    console.error("Please create .env file in the project root and set OUTPUT_FILE_PATH")
     process.exit(0);
 }
 if (!studentDetailsPath) {
-    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    console.error("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    process.exit(0);
+}
+if (!SECRET_KEY) {
+    console.error("Please create .env file in the project root and set SECRET_KEY'")
     process.exit(0);
 }
 // Ask for the input and wait synchronously
@@ -67,6 +75,8 @@ const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
 // Middleware
 app.use(express.json());
 app.use(cors());
+// Use cookie-parser middleware
+app.use(cookieParser(SECRET_KEY));
 
 // Server uptime in milliseconds
 let WINDOWINTERVAL = interval * 1000;
@@ -80,7 +90,7 @@ const getHTML = (condition, name, usn) => {
     } else if (condition === "notRegistered") {
         hideInfo = true;
         color = "#ff9800";
-        message = "You are not registered for this class!";
+        message = "You are not registered!<br> Please contact the admin.";
     } else {
         color = "#4caf50";
         message = "Attendance taken successfully!";
@@ -188,20 +198,21 @@ const getHTML = (condition, name, usn) => {
 
 // Route to serve the main HTML file
 app.get('/', (req, res) => {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    if (presentList[ip]) {
-        console.log(presentList[ip].name + " already gave attendance!");
-        const html = getHTML("alreadyGiven", presentList[ip].name, presentList[ip].usn);
+    const id = req.signedCookies.id;
+    
+    if (presentList[id]) {
+        console.error(yellow,presentList[id].name + " already gave attendance!");
+        const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
         return res.status(429).send(html);
     }
-    if (!studentDetails[ip]) {
-        console.log(ip + " is not registered for this class!");
+    if (!studentDetails[id]) {
+        console.error("Student not registered!");
         const html = getHTML("notRegistered");
         return res.status(403).send(html);
     }
-    const html = getHTML("normal", studentDetails[ip].name, studentDetails[ip].usn);
-    presentList[ip] = studentDetails[ip];
-    console.log(`Attendance given to ${presentList[ip].name} [${presentList[ip].usn}]`);
+    const html = getHTML("normal", studentDetails[id].name, studentDetails[id].usn);
+    presentList[id] = studentDetails[id];
+    console.log(green,`Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
     return res.status(200).send(html);
 });
 
@@ -219,28 +230,28 @@ const killServer = async () => {
     console.log(`Shutting down the server after ${serverDuration} seconds...`);
 
     const absentList = {};
-    for (const ip in studentDetails) {
-        if (!presentList[ip]) {
-            absentList[ip] = studentDetails[ip];
+    for (const id in studentDetails) {
+        if (!presentList[id]) {
+            absentList[id] = studentDetails[id];
         }
     }
 
-    console.log("\n----------RESULT----------");
-    console.log("\n----------PRESENT----------");
-    Object.values(presentList).forEach(({ usn, name }) => console.log(`${usn} : ${name}`));
-    console.log("\n----------ABSENT----------");
-    Object.values(absentList).forEach(({ usn, name }) => console.log(`${usn} : ${name}`));
+    console.log(yellow,"\n----------RESULT----------");
+    console.log(green,"\n----------PRESENT----------");
+    Object.values(presentList).forEach(({ usn, name }) => console.log(green,`${usn} : ${name}`));
+    console.error("\n----------ABSENT----------");
+    Object.values(absentList).forEach(({ usn, name }) => console.error(`${usn} : ${name}`));
 
     try {
-        console.log("Generating PDF...");
+        console.log(yellow,"Generating PDF...");
         await generatePDF(outputFilePath, presentList, absentList); // Wait for PDF generation
-        console.log("PDF successfully generated!");
+        console.log(green,"PDF successfully generated!");
     } catch (err) {
         console.error("Error during PDF generation:", err);
     }
 
     server.close(() => {
-        console.log('Server stopped gracefully.');
+        console.log(green,'Server stopped gracefully.');
         process.exit(0);
     });
 };
