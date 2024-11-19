@@ -9,7 +9,7 @@ require('dotenv').config()
 
 let startTime;
 let endTime;
-const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+const studentDetailsPath = process.env.STUDENT_DETAILS_PATH_canvas;
 const PORT = process.env.PORT || 1111;
 const SECRET_KEY = process.env.SECRET_KEY;
 if (!studentDetailsPath) {
