@@ -32,8 +32,11 @@ const generatePDF = (outputFilePath, present, absent) => {
 
         const filePath = `${outputFilePath.split('.pdf')[0]}${String(formattedDate).replace(':', '-')}.pdf`
 
+        // automatically set the page height
+        const docHeight = combinedData.length * 20 + 200;
+
         // Create PDF and set up stream
-        const doc = new PDFDocument();
+        const doc = new PDFDocument({ size: [600, docHeight], margin: 50 });
         const stream = fs.createWriteStream(filePath);
 
         // Handle stream completion
