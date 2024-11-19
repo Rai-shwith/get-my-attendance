@@ -3,6 +3,19 @@ const numberForm = document.getElementById('numberForm');
 const registerForm = document.getElementById('registerForm');
 const message = document.getElementById('message');
 const submitBtn = document.getElementById('submitBtn');
+
+// Generate canvas fingerprint
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+
+ctx.textBaseline = "top";
+ctx.font = "14px Arial";
+ctx.fillText("get-my-attendance", 2, 2);
+
+// Get the canvas data URL (the fingerprint)
+const fingerprint = canvas.toDataURL();
+
+
 const getInnerText = (id) => {
     let element = document.getElementById(id);
     if (element) {
@@ -58,26 +71,6 @@ numberForm.addEventListener('submit', async (e) => {
 
 
     try {
-
-        // Local storage to keep track of one's roll no
-        // let localRollNo = localStorage.getItem('rollno');
-        // if (localRollNo == undefined) {
-        //     console.log("first time")
-        //     localStorage.setItem('rollno', String(number));
-        // } else if (localRollNo !== String(number)) {
-        //     console.log("proxy")
-        //     message.innerHTML = `${localRollNo} was your Rollno right?<br>Proxy?        🤡🤡.<br>This incident will be reported!!🤷‍♂️<br>Retry`;
-        //     message.classList.remove('hidden');
-        //     setTimeout(() => {
-        //         message.innerHTML = "";
-        //         message.classList.add('hidden');
-        //     }, 10000);
-        //     await new Promise(resolve => setTimeout(resolve,10000));
-        //     return
-        // }
-
-
-
         // Make the POST request to the server
         const response = await fetch(submitUrl, {
             method: "POST",
@@ -117,7 +110,7 @@ if (registerForm) {
         const usn = document.getElementById('usn').value.toUpperCase().trim();
         const name = document.getElementById('studentName').value.trim();
         console.log(`${name} : ${usn}`);
-        const info = { "name": name, "usn": usn }
+        const info = { name,usn }
 
 
         try {
@@ -128,7 +121,7 @@ if (registerForm) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({"info":info}),
+                body: JSON.stringify({"info":info,fingerprint}),
             });
 
             // Handle the response based on its status

@@ -5,6 +5,7 @@ const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
 require('dotenv').config();
+const crypto = require('crypto');
 
 let interval = 5 * 60; // in seconds
 let startTime;
@@ -12,6 +13,7 @@ let endTime;
 const outputFilePath = process.env.OUTPUT_FILE_PATH;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
 const PORT = process.env.PORT || 1111;
+const SECRET_KEY = process.env.SECRET_KEY;
 
 
 if (!outputFilePath) {
@@ -20,6 +22,10 @@ if (!outputFilePath) {
 }
 if (!studentDetailsPath) {
     console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    process.exit(0);
+}
+if (!SECRET_KEY) {
+    console.log("Please create .env file in the project root and set SECRET_KEY'")
     process.exit(0);
 }
 // Ask for the input and wait synchronously
@@ -141,7 +147,7 @@ const getHTML = (condition, name, usn) => {
         <h1>${message}</h1>
     </div>
     <br>
-    <div class="container" ${hideInfo?'hidden':''}>
+    <div class="container" ${hideInfo ? 'hidden' : ''}>
         <section>
             <h2>${name} : ${usn}</h2>
         </section>
@@ -188,23 +194,63 @@ const getHTML = (condition, name, usn) => {
 
 // Route to serve the main HTML file
 app.get('/', (req, res) => {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    if (presentList[ip]) {
-        console.log(presentList[ip].name + " already gave attendance!");
-        const html = getHTML("alreadyGiven", presentList[ip].name, presentList[ip].usn);
-        return res.status(429).send(html);
-    }
-    if (!studentDetails[ip]) {
-        console.log(ip + " is not registered for this class!");
-        const html = getHTML("notRegistered");
-        return res.status(403).send(html);
-    }
-    const html = getHTML("normal", studentDetails[ip].name, studentDetails[ip].usn);
-    presentList[ip] = studentDetails[ip];
-    console.log(`Attendance given to ${presentList[ip].name} [${presentList[ip].usn}]`);
+    const html = `
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+    // Generate canvas fingerprint
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        ctx.textBaseline = "top";
+        ctx.font = "14px Arial";
+        ctx.fillText("get-my-attendance", 2, 2);
+
+        // Get the canvas data URL (the fingerprint)
+        const fingerprint = canvas.toDataURL();
+         // Send the hash to the backend
+    fetch('/get-my-attendance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fingerprint}),
+    })
+    .then(response =>  response.text())
+    .then(html =>  document.body.innerHTML = html)
+    .catch(err => console.error("Error sending fingerprint:", err));
+        </script>
+</body>
+</html>`
     return res.status(200).send(html);
 });
 
+
+app.post('/get-my-attendance', (req, res) => {
+    const { fingerprint } = req.body;
+    // Generate HMAC hash
+    const hash = crypto.createHmac('sha256', SECRET_KEY)
+        .update(fingerprint)
+        .digest('hex');
+    if (presentList[hash]) {
+        console.log(presentList[hash].name + " already gave attendance!");
+        const html = getHTML("alreadyGiven", presentList[hash].name, presentList[hash].usn);
+        return res.status(429).send(html);
+    }
+    if (!studentDetails[hash]) {
+        console.log(hash + " is not registered for this class!");
+        const html = getHTML("notRegistered");
+        return res.status(403).send(html);
+    }
+    const html = getHTML("normal", studentDetails[hash].name, studentDetails[hash].usn);
+    presentList[hash] = studentDetails[hash];
+    console.log(`Attendance given to ${presentList[hash].name} [${presentList[hash].usn}]`);
+    return res.status(200).send(html);
+});
 
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {

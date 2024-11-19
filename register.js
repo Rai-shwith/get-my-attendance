@@ -4,14 +4,20 @@ const os = require('os');
 const fs = require('fs');
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const path = require('path')
+const crypto = require('crypto');
 require('dotenv').config()
 
 let startTime;
 let endTime;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
 const PORT = process.env.PORT || 1111;
+const SECRET_KEY = process.env.SECRET_KEY;
 if (!studentDetailsPath) {
-    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    console.error("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    process.exit(0);
+}
+if (!SECRET_KEY) {
+    console.error("Please create .env file in the project root and set SECRET_KEY")
     process.exit(0);
 }
 const app = express()
@@ -22,7 +28,6 @@ const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
 
 
 let interval = 5 * 60; // in seconds
-const totalRegistrationCount = studentDetails.length;
 let currentRegistration = {};
 
 // Ask for the input and wait synchronously
@@ -66,35 +71,36 @@ function getLocalIP() {
     return localIP;
 }
 
-const handleRegistration = (ip, info) => {
-    const details = studentDetails[ip];
+const handleRegistration = (hash, info) => {
+    const details = studentDetails[hash];
     if (details == undefined) {
         console.log("Registering ", info.name);
-        studentDetails[ip] = info;
-        currentRegistration[ip] = info;
+        studentDetails[hash] = info;
+        currentRegistration[hash] = info;
     } else {
         console.log(info.name, " tried to register twice");
         let errrorMessage;
-        if (studentDetails[ip].name === info.name && (studentDetails[ip].usn === info.usn)) {
-            errrorMessage = `${studentDetails[ip].name} is already registered`
+        if (studentDetails[hash].name === info.name && (studentDetails[hash].usn === info.usn)) {
+            errrorMessage = `${studentDetails[hash].name} is already registered`
             console.log(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        }else  if (studentDetails[ip].name === info.name &&(studentDetails[ip].usn !== info.usn)){
-            errrorMessage = `Your USN is ${studentDetails[ip].usn} right?<br>Please contact the admin if there is any issues.`
+        } else if (studentDetails[hash].name === info.name && (studentDetails[hash].usn !== info.usn)) {
+            errrorMessage = `Your USN is ${studentDetails[hash].usn} right?<br>Please contact the admin if there is any issues.`
             console.log(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
-        }else {
-            errrorMessage = `${studentDetails[ip].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
+        } else {
+            errrorMessage = `${studentDetails[hash].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
             console.log(errrorMessage)
             const error = new Error(errrorMessage);
             error.code = 409;
             throw error;
+        }
     }
-}};
+};
 
 app.get('/', (req, res) => {
     const filePath = path.join(__dirname, 'public', 'register.html');
@@ -112,15 +118,21 @@ app.get('/', (req, res) => {
 // Handle form submission with cooldown logic
 app.post('/register', (req, res) => {
     console.log("Received request");
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const info = req.body.info;
+    const { fingerprint, info } = req.body;
+    if (!fingerprint) {
+        return res.status(400).json({ message: "Fingerprint is required!" });
+    }
 
+    // Generate HMAC hash
+    const hash = crypto.createHmac('sha256', SECRET_KEY)
+        .update(fingerprint)
+        .digest('hex');
     try {
-        handleRegistration(ip, info)
+        handleRegistration(hash, info)
     } catch (error) {
         if (error.code === 409) {
-            console.log("Caught : ",error.message);
-            return res.status(error.code).json({ message:error.message});
+            console.log("Caught : ", error.message);
+            return res.status(error.code).json({ message: error.message });
         }
     }
     res.status(200).json({ message: "Registration Sucessfull" });
