@@ -13,7 +13,7 @@ let endTime;
 const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
 const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
 const SECRET_KEY = process.env.SECRET_KEY;
-const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+const studentDetailsPath = process.env.STUDENT_DETAILS_PATH_cookie;
 const PORT = process.env.PORT || 1111;
 if (!studentDetailsPath) {
     console.error("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
