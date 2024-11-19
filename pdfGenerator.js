@@ -54,7 +54,7 @@ const generatePDF = (outputFilePath, present, absent) => {
         doc.fontSize(18).text(`Attendance Report  ${formattedDate}`, { align: 'center' }).moveDown(0.5);
         
         // Add Table Header
-        const startX = 50;
+        const startX = 10;
         let y = 100;
         const rowHeight = 20;
         const colWidths = { usn: 150, name: 300, status: 100 };
