@@ -57,7 +57,7 @@ const generatePDF = (outputFilePath, present, absent) => {
         const startX = 50;
         let y = 100;
         const rowHeight = 20;
-        const colWidths = { usn: 120, name: 200, status: 100 };
+        const colWidths = { usn: 120, name: 300, status: 100 };
 
         // Header Row Background and Text
         doc.rect(startX, y, colWidths.usn, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
