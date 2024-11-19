@@ -6,6 +6,7 @@ const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
+const { CLIENT_RENEG_LIMIT } = require('tls');
 
 let interval = 5 * 60; // in seconds
 let startTime;
@@ -84,13 +85,20 @@ let WINDOWINTERVAL = interval * 1000;
 const getHTML = (condition, name, usn) => {
     let color, message;
     let hideInfo = false;
+    let showResons = false;
     if (condition === "alreadyGiven") {
-        color = "#f44336";
+        color = "#ff9800";
         message = "Attendance already taken!";
     } else if (condition === "notRegistered") {
+        showResons = true;
         hideInfo = true;
-        color = "#ff9800";
+        color = "#f44336";
         message = "You are not registered!<br> Please contact the admin.";
+    } else if (condition === "detailsMissing") {
+        // This is the rare case when the details of student is removed from the Attendance info
+        hideInfo = true;
+        color = "#f44336";
+        message = "Your Details gone missing.<br> Please Register Again";
     } else {
         color = "#4caf50";
         message = "Attendance taken successfully!";
@@ -149,6 +157,14 @@ const getHTML = (condition, name, usn) => {
     <header >Time remaining : <span id="timer" style="color: red;">${WINDOWINTERVAL}</span></header>
     <div class="container">
         <h1>${message}</h1>
+        <h2 style="text-align: left;" ${showResons?'':'hidden'}>Reasons :
+    <ul>
+        <li>You did not register</li>
+        <li>You registered in incognito mode</li>
+        <li>You registered in another Browser</li>
+        <li>You cleared the Cookies or Browser cache</li>
+    </ul>
+</h2>
     </div>
     <br>
     <div class="container" ${hideInfo?'hidden':''}>
@@ -200,15 +216,21 @@ const getHTML = (condition, name, usn) => {
 app.get('/', (req, res) => {
     const id = req.signedCookies.id;
     
-    if (presentList[id]) {
-        console.error(yellow,presentList[id].name + " already gave attendance!");
-        const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
-        return res.status(429).send(html);
-    }
-    if (!studentDetails[id]) {
+    if (!id) {
         console.error("Student not registered!");
         const html = getHTML("notRegistered");
         return res.status(403).send(html);
+    }
+    if (presentList[id]) {
+        console.log(yellow,presentList[id].name + " already gave attendance!");
+        const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
+        return res.status(429).send(html);
+    }
+    if (!studentDetails[id]){
+        res.clearCookie('id');
+        console.error("Someone's Details have been Missing");
+        const html = getHTML("detailsMissing");
+        return res.status(429).send(html);
     }
     const html = getHTML("normal", studentDetails[id].name, studentDetails[id].usn);
     presentList[id] = studentDetails[id];
