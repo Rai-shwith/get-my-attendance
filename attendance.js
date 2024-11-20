@@ -200,7 +200,7 @@ app.get('/', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Register</title>
 </head>
 <body>
     <script>
@@ -221,7 +221,11 @@ app.get('/', (req, res) => {
       body: JSON.stringify({ fingerprint}),
     })
     .then(response =>  response.text())
-    .then(html =>  document.body.innerHTML = html)
+    .then(html =>  {
+        document.open();        
+        document.write(html);  
+        document.close();
+        })
     .catch(err => console.error("Error sending fingerprint:", err));
         </script>
 </body>
