@@ -9,10 +9,10 @@ const arp = require('node-arp');
 
 let startTime;
 let endTime;
-const studentDetailsPath = process.env.STUDENT_DETAILS_PATH;
+const studentDetailsPath = process.env.STUDENT_DETAILS_PATH_mac;
 const PORT = process.env.PORT || 1111;
 if (!studentDetailsPath) {
-    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
+    console.log("Please create .env file in the project root and set STUDENT_DETAILS_PATH_mac='path/to/student/details.json'")
     process.exit(0);
 }
 
@@ -24,7 +24,6 @@ const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
 
 
 let interval = 5 * 60; // in seconds
-const totalRegistrationCount = studentDetails.length;
 let currentRegistration = {};
 
 // Ask for the input and wait synchronously
