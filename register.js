@@ -155,7 +155,7 @@ const killServer = () => {
     for (const info of Object.values(currentRegistration)) {
         console.log(info.name);
     }
-    fs.writeFileSync('attendance/info.json', JSON.stringify(studentDetails));
+    fs.writeFileSync(studentDetailsPath, JSON.stringify(studentDetails));
     console.log("\n--------------------------\n\n");
     console.log("Student details updated Succesfully!")
     server.close(() => {
