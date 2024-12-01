@@ -30,7 +30,7 @@ const generatePDF = (outputFilePath, present, absent) => {
 
         const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
 
-        const filePath = `${outputFilePath.split('.pdf')[0]}${String(formattedDate).replace(':', '-')}.pdf`
+        const filePath = outputFilePath+String(formattedDate).replace(':', '-')+'.pdf';
 
         // automatically set the page height
         const docHeight = combinedData.length * 20 + 200;
@@ -42,7 +42,7 @@ const generatePDF = (outputFilePath, present, absent) => {
         // Handle stream completion
         stream.on('finish', () => {
             console.log(`PDF successfully written to ${filePath}`);
-            resolve(); // Resolve the promise
+            resolve(filePath); // Resolve the promise
         });
 
         stream.on('error', (err) => {
