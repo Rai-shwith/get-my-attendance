@@ -6,14 +6,14 @@ const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
-const { CLIENT_RENEG_LIMIT } = require('tls');
+const path = require('path');
 
 let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
 const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
 const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
-const outputFilePath = process.env.OUTPUT_FILE_PATH;
+let outputFilePath = process.env.OUTPUT_FILE_PATH;
 const studentDetailsPath = process.env.STUDENT_DETAILS_PATH_cookie;
 const SECRET_KEY = process.env.SECRET_KEY;
 const PORT = process.env.PORT || 1111;
@@ -246,6 +246,14 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 });
 
 
+// Function to close the server
+const closeServer = async () =>{
+    server.close(() => {
+        console.log(yellow,'Server stopped gracefully.');
+        process.exit(0);
+    });
+}
+
 const killServer = async () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
@@ -268,32 +276,148 @@ const killServer = async () => {
     console.log(yellow,"--------------------------");
     try {
         console.log(yellow,"Generating PDF...");
-        await generatePDF(outputFilePath, presentList, absentList); // Wait for PDF generation
+        // To store the modified output path with date
+        outputFilePath  = await generatePDF(outputFilePath, presentList, absentList); // Wait for PDF generation
         console.log(green,"PDF successfully generated!");
     } catch (err) {
         console.error("Error during PDF generation:", err);
     }
-
-    server.close(() => {
-        console.log(yellow,'Server stopped gracefully.');
-        process.exit(0);
-    });
 };
 
 
+app.get('/pdf',(req,res) => {
+    const baseFileName = path.basename(outputFilePath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
+    res.sendFile(path.resolve(outputFilePath), (err) => {
+        if (err) {
+            console.error('Error sending file:', err);
+            res.status(500).send('Error downloading the file.');
+        }
+    });
+    console.log(green,"PDF Sent.")
+});
 
+app.get('/download',(req,res)=>{
+    let container;
+    if(isShuttingDown){
+        container = `<div class="container">
+        <h1>Download the PDF</h1>
+        <button id="downloadBtn" type="button">Download</button>
+    </div>`;
+    } else {
+        container = `<div class="container">
+        <h1>Attendance is currently in progress. Please return once it is completed.</h1>
+    </div>`
+    }
+    htmlString = `<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #ff9800;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            margin-top: 3em;
+            width: 75vw;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        }
+            button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+        button:active{
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+
+<body>
+    ${container}
+</body>
+<script>
+const downloadBtn = document.getElementById("downloadBtn");
+downloadBtn.addEventListener('click',async ()=>{
+    fetch('/pdf')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    // Extract the file name from the Content-Disposition header
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let fileName = 'Attendance.pdf'; // Default file name
+
+                    if (contentDisposition && contentDisposition.includes('filename=')) {
+                        const match = contentDisposition.match(/filename="(.+)"/);
+                        if (match && match[1]) {
+                            fileName = match[1];
+                        }
+                    }
+
+                    return response.blob().then(blob => ({ blob, fileName }));
+                })
+                .then(({ blob, fileName }) => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName; // Use the file name from the server
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(error => console.error('Error during file download:', error));
+        });
+</script>
+</html>`;
+res.send(htmlString);
+});
 
 let isShuttingDown = false;
 
 const shutdownHandler = async () => {
     if (isShuttingDown) {
-        console.log(yellow,"Server is already shutting down. Please wait...");
-        return;
+        console.log(yellow,"Server is shutting down..");
+        await closeServer()
     }
     isShuttingDown = true;
-    console.log(yellow,"Initiating server shutdown...");
-    await killServer();
+    console.log(yellow,"Closing attendance portal...");
+    await killServer(); // To save the pdf
+    console.log(green,`Visit http://${localIP}:${PORT}/download to download the attendance report.`);
+
 };
 
 // Set a timeout to call the shutdown handler
