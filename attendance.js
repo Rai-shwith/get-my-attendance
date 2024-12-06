@@ -7,31 +7,16 @@ const generatePDF = require('./pdfGenerator');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword } = require('./config/env')
+let { OUTPUT_FILE_PATH } = require('./config/env')
+
 
 let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
 const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
 const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
-let outputFilePath = process.env.OUTPUT_FILE_PATH;
-const studentDetailsPath = process.env.STUDENT_DETAILS_PATH_cookie;
-const SECRET_KEY = process.env.SECRET_KEY;
-const PORT = process.env.PORT || 1111;
-// This will be asked when tried to download the attendance details from the web interface
-const attendanceDownloadPassword = Math.floor(Math.random()*9000)+1000
 
-if (!outputFilePath) {
-    console.error("Please create .env file in the project root and set OUTPUT_FILE_PATH")
-    process.exit(0);
-}
-if (!studentDetailsPath) {
-    console.error("Please create .env file in the project root and set STUDENT_DETAILS_PATH='path/to/student/details.json'")
-    process.exit(0);
-}
-if (!SECRET_KEY) {
-    console.error("Please create .env file in the project root and set SECRET_KEY'")
-    process.exit(0);
-}
 // Ask for the input and wait synchronously
 const time = prompt('Enter the duration (in minutes) for recording attendance:');
 
@@ -42,37 +27,19 @@ if (time.trim() === "") {
     console.log(`Server will be active for ${time} minutes`);
 }
 
-function getLocalIP() {
-    const interfaces = os.networkInterfaces();
-    let localIP = '0.0.0.0'; // Default fallback IP in case no valid address is found
-
-    // Loop through all network interfaces
-    for (const iface in interfaces) {
-        for (const alias of interfaces[iface]) {
-            // Check if the alias is IPv4 and not internal (loopback address)
-            if (alias.family === 'IPv4' && !alias.internal) {
-                localIP = alias.address; // Use the first non-internal IPv4 address
-                break; // Stop further searching once a valid IP is found
-            }
-        }
-        if (localIP !== '0.0.0.0') break; // If a valid IP is found, exit the loop
-    }
-
-    return localIP;
-}
 
 const app = express();
 const localIP = getLocalIP();
 
 // To display how much time left
 setInterval(() => {
-    WINDOWINTERVAL -= 1000
+    attendanceWindowDuration -= 1000
 }, 1000);
 
 // To keep track of students who gave attendance
 const presentList = new Object();
 // Load the student details from the file
-const studentDetails = JSON.parse(fs.readFileSync(studentDetailsPath, 'utf8'));
+const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
 
 // Middleware
 app.use(express.json());
@@ -81,28 +48,28 @@ app.use(cors());
 app.use(cookieParser(SECRET_KEY));
 
 // Server uptime in milliseconds
-let WINDOWINTERVAL = interval * 1000;
+let attendanceWindowDuration = interval * 1000;
 
 const getHTML = (condition, name, usn) => {
     let color, message;
     let hideInfo = false;
-    let showResons = false;
+    let showReasons = false;
     if (condition === "alreadyGiven") {
         color = "#ff9800";
-        message = "Attendance already taken!";
+        message = "Attendance already taken! 🙅‍♂️";
     } else if (condition === "notRegistered") {
-        showResons = true;
+        showReasons = true;
         hideInfo = true;
         color = "#f44336";
-        message = "You are not registered!<br> Please contact the admin.";
+        message = "You are not registered! 📋<br> Please contact the admin. 👨‍💻";
     } else if (condition === "detailsMissing") {
         // This is the rare case when the details of student is removed from the Attendance info
         hideInfo = true;
         color = "#f44336";
-        message = "Your Details gone missing.<br> Please Register Again";
+        message = "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄";
     } else {
         color = "#4caf50";
-        message = "Attendance taken successfully!";
+        message = "Attendance taken successfully! ✅";
     }
     htmlString = `<!DOCTYPE html>
 <html lang="en">
@@ -155,10 +122,10 @@ const getHTML = (condition, name, usn) => {
 </head>
 
 <body class="column">
-    <header >Time remaining : <span id="timer" style="color: red;">${WINDOWINTERVAL}</span></header>
+    <header >Time remaining : <span id="timer" style="color: red;">${attendanceWindowDuration}</span></header>
     <div class="container">
         <h1>${message}</h1>
-        <h2 style="text-align: left;" ${showResons?'':'hidden'}>Reasons :
+        <h2 style="text-align: left;" ${showReasons ? '' : 'hidden'}>Reasons :
     <ul>
         <li>You did not register</li>
         <li>You registered in incognito mode</li>
@@ -168,7 +135,7 @@ const getHTML = (condition, name, usn) => {
 </h2>
     </div>
     <br>
-    <div class="container" ${hideInfo?'hidden':''}>
+    <div class="container" ${hideInfo ? 'hidden' : ''}>
         <section>
             <h2>${name} : ${usn}</h2>
         </section>
@@ -214,10 +181,10 @@ const getHTML = (condition, name, usn) => {
 
 // Route to serve the main HTML file
 app.get('/', (req, res) => {
-    if (isShuttingDown){
+    if (isShuttingDown) {
         // When the attendance portal is shutting down server different html 
         let container;
-        if(isShuttingDown){
+        if (isShuttingDown) {
             container = `<div class="container">
             <h1>Attendance Details</h1>
             <form id="downloadForm">
@@ -379,23 +346,23 @@ app.get('/', (req, res) => {
         </script>
     </body>
     </html>`;
-    res.send(htmlString);
-    return 
+        res.send(htmlString);
+        return
     }
 
     const id = req.signedCookies.id;
-    
+
     if (!id) {
         console.error("Student not registered!");
         const html = getHTML("notRegistered");
         return res.status(403).send(html);
     }
     if (presentList[id]) {
-        console.log(yellow,presentList[id].name + " already gave attendance!");
+        console.log(yellow, presentList[id].name + " already gave attendance!");
         const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
         return res.status(429).send(html);
     }
-    if (!studentDetails[id]){
+    if (!studentDetails[id]) {
         res.clearCookie('id');
         console.error("Someone's Details have been Missing");
         const html = getHTML("detailsMissing");
@@ -403,7 +370,7 @@ app.get('/', (req, res) => {
     }
     const html = getHTML("normal", studentDetails[id].name, studentDetails[id].usn);
     presentList[id] = studentDetails[id];
-    console.log(green,`Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
+    console.log(green, `Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
     return res.status(200).send(html);
 });
 
@@ -412,15 +379,15 @@ app.get('/', (req, res) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
     console.log("Password to Download the pdf\n");
-    console.error(attendanceDownloadPassword,'\n');
-    console.log(green,`Attendance link -> http://${localIP}:${PORT}`);
+    console.error(attendanceDownloadPassword, '\n');
+    console.log(green, `Attendance link -> http://${localIP}:${PORT}`);
 });
 
 
 // Function to close the server
-const closeServer = async () =>{
+const closeServer = async () => {
     server.close(() => {
-        console.log(yellow,'Server stopped gracefully.');
+        console.log(yellow, 'Server stopped gracefully.');
         process.exit(0);
     });
 }
@@ -429,7 +396,7 @@ const closeServer = async () =>{
 const killServer = async () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
-    console.log(yellow,`Shutting down the server after ${serverDuration} seconds...`);
+    console.log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
 
     const absentList = {};
     for (const id in studentDetails) {
@@ -438,41 +405,41 @@ const killServer = async () => {
         }
     }
 
-    console.log(yellow,"\n--------------------------");
-    console.log(yellow,"----------RESULT----------");
-    console.log(green,"\n----------PRESENT----------");
-    Object.values(presentList).forEach(({ usn, name }) => console.log(green,`${usn} : ${name}`));
+    console.log(yellow, "\n--------------------------");
+    console.log(yellow, "----------RESULT----------");
+    console.log(green, "\n----------PRESENT----------");
+    Object.values(presentList).forEach(({ usn, name }) => console.log(green, `${usn} : ${name}`));
     console.error("\n----------ABSENT----------");
     Object.values(absentList).forEach(({ usn, name }) => console.error(`${usn} : ${name}`));
-    console.log(yellow,"\n--------------------------");
-    console.log(yellow,"--------------------------");
+    console.log(yellow, "\n--------------------------");
+    console.log(yellow, "--------------------------");
     try {
-        console.log(yellow,"Generating PDF...");
+        console.log(yellow, "Generating PDF...");
         // To store the modified output path with date
-        outputFilePath  = await generatePDF(outputFilePath, presentList, absentList); // Wait for PDF generation
-        console.log(green,"PDF successfully generated!");
+        OUTPUT_FILE_PATH = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+        console.log(green, "PDF successfully generated!");
     } catch (err) {
         console.error("Error during PDF generation:", err);
     }
 };
 
 
-app.post('/pdf',(req,res) => {
-    const {password} = req.body;
-    if (password != attendanceDownloadPassword){
-        res.status(400).json({message:"invalid Credentials"});
-        return 
+app.post('/pdf', (req, res) => {
+    const { password } = req.body;
+    if (password != attendanceDownloadPassword) {
+        res.status(400).json({ message: "invalid Credentials" });
+        return
     }
-    const baseFileName = path.basename(outputFilePath);
+    const baseFileName = path.basename(OUTPUT_FILE_PATH);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
-    res.sendFile(path.resolve(outputFilePath), (err) => {
+    res.sendFile(path.resolve(OUTPUT_FILE_PATH), (err) => {
         if (err) {
             console.error('Error sending file:', err);
             res.status(500).send('Error downloading the file.');
         }
     });
-    console.log(green,"PDF Sent.")
+    console.log(green, "PDF Sent.")
 });
 
 
@@ -480,25 +447,25 @@ let isShuttingDown = false;
 
 const shutdownHandler = async () => {
     if (isShuttingDown) {
-        console.log(yellow,"Server is shutting down..");
+        console.log(yellow, "Server is shutting down..");
         await closeServer()
     }
     isShuttingDown = true;
-    console.log(yellow,"Closing attendance portal...");
+    console.log(yellow, "Closing attendance portal...");
     await killServer(); // To save the pdf
     console.log("Password to Download the pdf\n");
-    console.error(attendanceDownloadPassword,'\n');
-    console.log(green,`Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
+    console.error(attendanceDownloadPassword, '\n');
+    console.log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
 
 };
 
 // Set a timeout to call the shutdown handler
 setTimeout(() => {
     shutdownHandler();
-}, WINDOWINTERVAL);
+}, attendanceWindowDuration);
 
 // Handle SIGINT for graceful shutdown
 process.on("SIGINT", async () => {
-    console.log(yellow,"Performing cleanup due to SIGINT...");
+    console.log(yellow, "Performing cleanup due to SIGINT...");
     await shutdownHandler();
 });

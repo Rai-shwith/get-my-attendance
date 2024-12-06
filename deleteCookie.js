@@ -41,10 +41,10 @@ if (time.trim() === "") {
     console.log(`Server will be active for ${time} minutes`);
 }
 
-let WINDOWINTERVAL = interval * 1000;
+let attendanceWindowDuration = interval * 1000;
 
 setInterval(() => {
-    WINDOWINTERVAL -= 1000
+    attendanceWindowDuration -= 1000
 }, 1000);
 
 app.use(express.json());
@@ -102,7 +102,7 @@ const killServer = () => {
 
 setTimeout(() => {
     killServer()
-}, WINDOWINTERVAL);
+}, attendanceWindowDuration);
 
 process.on('SIGINT', () => {
     console.log(yellow, 'Performing cleanup...');
