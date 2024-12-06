@@ -131,3 +131,5 @@ dist
 
 *.pdf
 attendance/info.json
+.vscode/
+imp.txt
