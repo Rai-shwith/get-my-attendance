@@ -11,11 +11,16 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@faker-js/faker": "^9.3.0",
+    "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
+    "cookie-signature": "^1.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "node-fetch": "^2.7.0",
     "pdfkit": "^0.15.1",
+    "perf_hooks": "^0.0.1",
     "prompt-sync": "^4.2.0"
   }
 }
