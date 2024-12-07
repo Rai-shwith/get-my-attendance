@@ -2,6 +2,9 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const generatePDF = (outputFilePath, present, absent) => {
     return new Promise((resolve, reject) => {
+        const absentCount = Object.keys(absent).length;
+        const presentCount = Object.keys(present).length;
+        const totalCount = absentCount + presentCount
         // Combine and prepare data with status
         const combinedData = [
             ...Object.entries(absent).map(([_, value]) => ({ ...value, status: 'Absent' })),
@@ -21,7 +24,7 @@ const generatePDF = (outputFilePath, present, absent) => {
         // Formatting Date
         const options = {
             day: '2-digit',
-            month: 'short',  
+            month: 'short',
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
@@ -30,10 +33,10 @@ const generatePDF = (outputFilePath, present, absent) => {
 
         const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
 
-        const filePath = outputFilePath+String(formattedDate).replace(':', '-')+'.pdf';
+        const filePath = outputFilePath + String(formattedDate).replace(':', '-') + '.pdf';
 
         // automatically set the page height
-        const docHeight = combinedData.length * 20 + 200;
+        const docHeight = combinedData.length * 25 + 300;
 
         // Create PDF and set up stream
         const doc = new PDFDocument({ size: [600, docHeight], margin: 50 });
@@ -59,8 +62,13 @@ const generatePDF = (outputFilePath, present, absent) => {
         // Add Table Header
         const startX = 10;
         let y = 100;
-        const rowHeight = 20;
+        const rowHeight = 25;
         const colWidths = { usn: 150, name: 300, status: 100 };
+
+        doc.fillColor("#000000").text(`Total Students: ${totalCount}`, startX + 5, y ,{ align: 'left' });
+        doc.fillColor("#D32F2F").text(`Absent: ${absentCount}`, startX + 5, y + rowHeight,{ align: 'left' });
+        doc.fillColor("#388E3C").text(`Present: ${presentCount}`, startX + 5, y + rowHeight * 2,{ align: 'left' });
+        y+=rowHeight*4;
 
         // Header Row Background and Text
         doc.rect(startX, y, colWidths.usn, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
@@ -91,11 +99,6 @@ const generatePDF = (outputFilePath, present, absent) => {
 
             y += rowHeight;
 
-            // Handle page breaks
-            if (y > doc.page.height - 50) {
-                doc.addPage();
-                y = 50;
-            }
         });
 
         // Finalize PDF
