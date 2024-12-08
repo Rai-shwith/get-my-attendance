@@ -118,6 +118,17 @@ const getHTML = (condition, name, usn) => {
             border-radius: 12px;
             box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
         }
+        footer{
+                position: absolute;
+                bottom: 0;
+                text-align: center;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 0.5em;
+                width: 100vw;
+                font-size: small;
+                border-radius: 12px;
+                box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 
@@ -140,6 +151,10 @@ const getHTML = (condition, name, usn) => {
             <h2>${name} : ${usn}</h2>
         </section>
     </div>
+        <footer>
+        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> . Licensed under
+        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+    </footer>
     <script>
         const totalTime = document.getElementById('timer').innerText;
         function startTimer(timeString) {
@@ -273,11 +288,26 @@ app.get('/', (req, res) => {
             .hidden{
                 visibility: hidden;
             }
+            footer{
+                position: absolute;
+                bottom: 0;
+                text-align: center;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 0.5em;
+                width: 100vw;
+                font-size: small;
+                border-radius: 12px;
+                box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+            }
         </style>
     </head>
     
     <body>
         ${container}
+        <footer>
+        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> . Licensed under
+        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+        </footer>
         <script>
             const message = document.getElementById('message');
             const downloadForm = document.getElementById('downloadForm');
