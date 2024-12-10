@@ -2,30 +2,16 @@ const os = require('os');
 const express = require('express');
 const cors = require('cors');
 const fs = require("fs");
-const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword } = require('./config/env')
-let { OUTPUT_FILE_PATH } = require('./config/env')
+const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword,log,red,yellow,green,interval} = require('./config/env')
+let { OUTPUT_FILE_PATH } = require('./config/env');
 
 
-let interval = 5 * 60; // in seconds
 let startTime;
 let endTime;
-const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
-const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
-
-// Ask for the input and wait synchronously
-const time = prompt('Enter the duration (in minutes) for recording attendance:');
-
-if (time.trim() === "") {
-    console.log("Default duration -> 5 min");
-} else {
-    interval = parseInt(time) * 60; // Convert minutes to seconds
-    console.log(`Server will be active for ${time} minutes`);
-}
 
 
 const app = express();
@@ -383,24 +369,24 @@ app.get('/', (req, res) => {
     const id = req.signedCookies.id;
 
     if (!id) {
-        console.error("Student not registered!");
+        log(red,"Student not registered!");
         const html = getHTML("notRegistered");
         return res.status(403).send(html);
     }
     if (presentList[id]) {
-        console.log(yellow, presentList[id].name + " already gave attendance!");
+        log(yellow, presentList[id].name + " already gave attendance!");
         const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
         return res.status(429).send(html);
     }
     if (!studentDetails[id]) {
         res.clearCookie('id');
-        console.error("Someone's Details have been Missing");
+        log(red,"Someone's Details have been Missing");
         const html = getHTML("detailsMissing");
         return res.status(429).send(html);
     }
     const html = getHTML("normal", studentDetails[id].name, studentDetails[id].usn);
     presentList[id] = studentDetails[id];
-    console.log(green, `Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
+    log(green, `Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
     return res.status(200).send(html);
 });
 
@@ -408,16 +394,16 @@ app.get('/', (req, res) => {
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
-    console.log("Password to Download the pdf\n");
-    console.error(attendanceDownloadPassword, '\n');
-    console.log(green, `Attendance link -> http://${localIP}:${PORT}`);
+    log("Password to Download the pdf\n");
+    log(red,attendanceDownloadPassword, '\n');
+    log(green, `Attendance link -> http://${localIP}:${PORT}`);
 });
 
 
 // Function to close the server
 const closeServer = async () => {
     server.close(() => {
-        console.log(yellow, 'Server stopped gracefully.');
+        log(yellow, 'Server stopped gracefully.');
         process.exit(0);
     });
 }
@@ -426,7 +412,7 @@ const closeServer = async () => {
 const killServer = async () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
-    console.log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
+    log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
 
     const absentList = {};
     for (const id in studentDetails) {
@@ -435,21 +421,21 @@ const killServer = async () => {
         }
     }
 
-    console.log(yellow, "\n--------------------------");
-    console.log(yellow, "----------RESULT----------");
-    console.log(green, "\n----------PRESENT----------");
-    Object.values(presentList).forEach(({ usn, name }) => console.log(green, `${usn} : ${name}`));
-    console.error("\n----------ABSENT----------");
-    Object.values(absentList).forEach(({ usn, name }) => console.error(`${usn} : ${name}`));
-    console.log(yellow, "\n--------------------------");
-    console.log(yellow, "--------------------------");
+    log(yellow, "\n--------------------------");
+    log(yellow, "----------RESULT----------");
+    log(green, "\n----------PRESENT----------");
+    Object.values(presentList).forEach(({ usn, name }) => log(green, `${usn} : ${name}`));
+    log(red,"\n----------ABSENT----------");
+    Object.values(absentList).forEach(({ usn, name }) => log(red,`${usn} : ${name}`));
+    log(yellow, "\n--------------------------");
+    log(yellow, "--------------------------");
     try {
-        console.log(yellow, "Generating PDF...");
+        log(yellow, "Generating PDF...");
         // To store the modified output path with date
         OUTPUT_FILE_PATH = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
-        console.log(green, "PDF successfully generated!");
+        log(green, "PDF successfully generated!");
     } catch (err) {
-        console.error("Error during PDF generation:", err);
+        log(red,"Error during PDF generation:", err);
     }
 };
 
@@ -465,11 +451,11 @@ app.post('/pdf', (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
     res.sendFile(path.resolve(OUTPUT_FILE_PATH), (err) => {
         if (err) {
-            console.error('Error sending file:', err);
+            log(red,'Error sending file:', err);
             res.status(500).send('Error downloading the file.');
         }
     });
-    console.log(green, "PDF Sent.")
+    log(green, "PDF Sent.")
 });
 
 
@@ -477,15 +463,15 @@ let isShuttingDown = false;
 
 const shutdownHandler = async () => {
     if (isShuttingDown) {
-        console.log(yellow, "Server is shutting down..");
+        log(yellow, "Server is shutting down..");
         await closeServer()
     }
     isShuttingDown = true;
-    console.log(yellow, "Closing attendance portal...");
+    log(yellow, "Closing attendance portal...");
     await killServer(); // To save the pdf
-    console.log("Password to Download the pdf\n");
-    console.error(attendanceDownloadPassword, '\n');
-    console.log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
+    log("Password to Download the pdf\n");
+    log(red,attendanceDownloadPassword, '\n');
+    log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
 
 };
 
@@ -496,6 +482,6 @@ setTimeout(() => {
 
 // Handle SIGINT for graceful shutdown
 process.on("SIGINT", async () => {
-    console.log(yellow, "Performing cleanup due to SIGINT...");
+    log(yellow, "Performing cleanup due to SIGINT...");
     await shutdownHandler();
 });

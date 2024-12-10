@@ -7,17 +7,14 @@ const express = require('express');
 const cors = require('cors');
 const os = require('os');
 const fs = require('fs');
-const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const path = require('path')
 require('dotenv').config()
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
-const { SECRET_KEY, PORT, STUDENT_DETAILS_PATH, getLocalIP } = require('./config/env');
+const { SECRET_KEY, PORT, STUDENT_DETAILS_PATH, getLocalIP,interval,log,green,red,yellow } = require('./config/env');
 
 let startTime;
 let endTime;
-const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
-const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
 const app = express()
 // Get the local IP address of the server
 const localIP = getLocalIP();
@@ -25,17 +22,6 @@ const localIP = getLocalIP();
 const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
 
 
-let interval = 5 * 60; // in seconds
-
-// Ask for the input and wait synchronously
-const time = prompt('Enter the duration (in minutes) for recording attendance:');
-
-if (time.trim() === "") {
-    console.log("Default duration -> 5 min");
-} else {
-    interval = parseInt(time) * 60; // Convert minutes to seconds
-    console.log(`Server will be active for ${time} minutes`);
-}
 
 let attendanceWindowDuration = interval * 1000;
 
@@ -64,16 +50,16 @@ app.get('/', (req, res) => {
 // Start the server
 const server = app.listen(PORT, '0.0.0.0', () => {
     startTime = new Date();
-    console.log(green, `link -> http://${localIP}:${PORT}`);
+    log(green, `link -> http://${localIP}:${PORT}`);
 });
 
 
 const killServer = () => {
     endTime = new Date();
     const serverDuration = Math.floor((endTime - startTime) / 1000);
-    console.log(`Shutting down the server after ${serverDuration} seconds...`);
+    log(`Shutting down the server after ${serverDuration} seconds...`);
     server.close(() => {
-        console.log(green, 'Server stopped gracefully.');
+        log(green, 'Server stopped gracefully.');
         process.exit(0);
     });
 }
@@ -83,6 +69,6 @@ setTimeout(() => {
 }, attendanceWindowDuration);
 
 process.on('SIGINT', () => {
-    console.log(yellow, 'Performing cleanup...');
+    log(yellow, 'Performing cleanup...');
     killServer()
 });
