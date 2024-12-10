@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="static/css/master.css">
+</head>
+
+<body>
+    <header>
+        Attendance Portal
+        <!-- Settings icon -->
+        <div class="header-icon right" onclick="showSection('settingsSection')">
+            <img src="static/images/svg/settings.svg" alt="settings icon" srcset="">
+        </div>
+        
+        <!-- back icon -->
+        <div id="backIcon" class="header-icon left hidden" onclick="showSection('homePage')">
+            <img src="static/images/svg/back.svg" alt="Home icon" srcset="">
+        </div>
+    </header>
+
+
+    <!-- Home page section -->
+    <section id="homePage" class="">
+        <div class="container">
+            <!-- Attendance Card -->
+            <div class="card">
+                <h2>Attendance</h2>
+                <a href="#" class="button" onclick="showSection('attendanceSection')">Take Attendance</a>
+                <!-- <a href="#" class="button">See History</a> -->
+                <a href="#" class="button" onclick="showSection('enrolledStudentsSection')" >View Enrolled Students</a>
+            </div>
+
+
+            <!-- Registration Card -->
+            <div class="card">
+                <h2>Registration</h2>
+                <a href="#" class="button" onclick="showSection('registrationPhase')">Start Registration</a>
+                <a href="#" class="button">Edit Registered Students</a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Registration Phase (Hidden Initially) -->
+    <section class="container hidden" id="registrationPhase">
+        <div class="card ">
+            <h2>Set Registration Time Window</h2>
+            <label for="timeWindow">Enter Time Window in minutes:</label>
+            <input type="text" id="timeWindow" placeholder="5">
+            <button class="button" onclick="submitRegistrationTime()">Submit</button>
+
+            <div id="linkContainer" class="link-container hidden">
+                <span class="output-link" id="generatedLink">https://example.com/register</span>
+                <button class="copy-button" onclick="copyToClipboard()">Copy Link</button>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Attendance Section -->
+    <section class="card hidden" id="attendanceSection">
+        <h2>Attendance Logs</h2>
+
+        <!-- Countdown Timer -->
+        <div class="countdown-timer">
+            Time Remaining: <span class="countdown" id="countdownTimer">00:30</span>
+        </div>
+
+        <!-- Log Container -->
+        <div class="log-container">
+            <ul class="logs" id="logView">
+                <li class="log-item log-success">Attendance successfully recorded for <b>John Doe [1MS23EC029]</b>.</li>
+                <li class="log-item log-info">John Doe <b>[1MS23EC029]</b> has already marked attendance.</li>
+                <li class="log-item log-warning">An unregistered user attempted to mark attendance.</li>
+                <li class="log-item log-error">John Doe's information has been erased from the system.</li>
+            </ul>
+        </div>
+
+        <!-- Stop Attendance Button -->
+        <div class="stop-container">
+            <button class="button stop-button">Stop Attendance</button>
+        </div>
+    </section>
+
+
+
+
+    <!-- Settings Section -->
+    <section class="card hidden" id="settingsSection">
+        <h2>Settings</h2>
+
+        <!-- Registration Time Window Input -->
+        <div class="form-group">
+            <label for="registrationTimeWindow">Set Registration Time Window:</label>
+            <input type="number" id="registrationTimeWindow" class="input-field" placeholder="e.g., 5 (minutes)">
+        </div>
+
+        <!-- Attendance Time Window Input -->
+        <div class="form-group">
+            <label for="attendanceTimeWindow">Set Attendance Time Window:</label>
+            <input type="number" id="attendanceTimeWindow" class="input-field" placeholder="e.g., 5 (minutes)">
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-button-container">
+            <button class="button" onclick="saveSettings()">Save Settings</button>
+        </div>
+    </section>
+
+
+
+<!-- Enrolled Students Section -->
+<section class="card hidden" id="enrolledStudentsSection">
+    <h2>Enrolled Students</h2>
+
+    <!-- Table Container -->
+    <div class="table-container">
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>USN</th>
+                    <th>Date of Registration</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+                <!-- Example of dynamically generated rows -->
+                <tr>
+                    <td>John Doe</td>
+                    <td>1MS23EC029</td>
+                    <td>2023-11-15</td>
+                </tr>
+                <tr>
+                    <td>Jane Smith</td>
+                    <td>1MS23EC030</td>
+                    <td>2023-11-20</td>
+                </tr>
+                <tr>
+                    <td>Ali Khan</td>
+                    <td>1MS23EC031</td>
+                    <td>2023-12-01</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+
+    <script src="static/js/master.js"></script>
+    <footer>
+        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> . Licensed under
+        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,295 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header {
+    background-color: #6200ea;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.container {
+    padding: 1rem;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 1rem 0;
+    padding: 1rem;
+    text-align: center;
+}
+
+.card h2 {
+    margin: 0.5rem 0;
+    color: #6200ea;
+}
+
+.button {
+    display: inline-block;
+    background-color: #6200ea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+.button:hover {
+    background-color: #3700b3;
+}
+
+.hidden {
+    display: none;
+}
+
+.link-container {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.output-link {
+    display: inline-block;
+    background-color: #f1f1f1;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.copy-button {
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.copy-button:hover {
+    background-color: #3700b3;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #eee;
+    margin-top: 1rem;
+}
+
+footer a {
+    color: #6200ea;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+.header-icon{
+    position: absolute;
+    top:0;
+    z-index: 1000;
+}
+
+.right{
+    right: 0;
+}
+
+.left{
+    left: 0;
+}
+
+.header-icon:active{
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+/* Countdown Timer */
+.countdown-timer {
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    color: #333;
+}
+
+.log-header {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.logs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.logs li {
+    margin: 0.3rem 0;
+    padding: 0.3rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.stop-container {
+    margin-top: 1rem;
+}
+
+.stop-button {
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.stop-button:hover {
+    background-color: #3700b3;
+}
+
+
+.log-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background-color: #fafafa;
+    margin: 0.5rem 0;
+}
+
+.log-item {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.log-success {
+    color: green;
+}
+
+.log-info {
+    color: #555;
+}
+
+.log-warning {
+    color: orange;
+}
+
+.log-error {
+    color: red;
+}
+
+.log-button-container {
+    margin: 1rem 0;
+}
+
+.log-btn {
+    background-color: #6200ea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.log-btn:hover {
+    background-color: #3700b3;
+}
+
+
+.form-group {
+    margin: 1rem 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: #555;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: #6200ea;
+}
+
+/* Submit Button */
+.form-button-container {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.button {
+    background-color: #6200ea;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    border: none;
+}
+
+.button:hover {
+    background-color: #3700b3;
+}
+/* Table Container */
+.table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+/* Students Table */
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    font-size: 0.9rem;
+}
+
+.students-table th,
+.students-table td {
+    border: 1px solid #ddd;
+    padding: 0.75rem 1rem;
+    text-align: center;
+}
+
+.students-table th {
+    background-color: #6200ea;
+    color: white;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.students-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.students-table tbody tr:hover {
+    background-color: #e0e0e0;
+}
+
+/* Table Header */
+.students-table thead th {
+    padding: 0.5rem;
+    border-bottom: 2px solid #6200ea;
+}
