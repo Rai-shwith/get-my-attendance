@@ -1,40 +1,31 @@
-const os = require('os');
-const express = require('express');
-const cors = require('cors');
-const fs = require("fs");
 const generatePDF = require('./pdfGenerator');
-require('dotenv').config();
-const cookieParser = require('cookie-parser');
-const path = require('path');
 const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword,log,red,yellow,green,interval} = require('./config/env')
+const fs = require('fs');
+const path = require('path')
 let { OUTPUT_FILE_PATH } = require('./config/env');
 
+const attendance = (app,PORT) => {
+
+// Get the local IP address of the server
+const localIP = getLocalIP();
+
+// load the student details from the JSON file
+const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
+
+// To keep track of the time left for the server to be active
+let attendanceWindowDuration = interval * 1000;
+
+// Decrease the time left every second
+setInterval(() => {
+    attendanceWindowDuration -= 1000
+}, 1000);
 
 let startTime;
 let endTime;
 
 
-const app = express();
-const localIP = getLocalIP();
-
-// To display how much time left
-setInterval(() => {
-    attendanceWindowDuration -= 1000
-}, 1000);
-
 // To keep track of students who gave attendance
 const presentList = new Object();
-// Load the student details from the file
-const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
-
-// Middleware
-app.use(express.json());
-app.use(cors());
-// Use cookie-parser middleware
-app.use(cookieParser(SECRET_KEY));
-
-// Server uptime in milliseconds
-let attendanceWindowDuration = interval * 1000;
 
 const getHTML = (condition, name, usn) => {
     let color, message;
@@ -485,3 +476,6 @@ process.on("SIGINT", async () => {
     log(yellow, "Performing cleanup due to SIGINT...");
     await shutdownHandler();
 });
+}
+
+module.exports = attendance;

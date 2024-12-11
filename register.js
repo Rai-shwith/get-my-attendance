@@ -1,6 +1,28 @@
+const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword,log,red,yellow,green,interval} = require('./config/env')
+const fs = require('fs');
+const path = require('path')
 
+const register = (app,PORT) => {
+    
+// Get the local IP address of the server
+const localIP = getLocalIP();
 
-const register = (app) => {
+// load the student details from the JSON file
+const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
+
+// To keep track of the time left for the server to be active
+let attendanceWindowDuration = interval * 1000;
+
+// Decrease the time left every second
+setInterval(() => {
+    attendanceWindowDuration -= 1000
+}, 1000);
+
+let startTime;
+let endTime;
+
+let currentRegistration = {};
+
     const generateID = () => {
         return crypto.randomBytes(16).toString('hex');
     }

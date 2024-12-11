@@ -3,19 +3,15 @@ USE THIS SCRIPT WITH CAUTION:
 This script is used to remove the id Cookie from the browser.
 After running this script, the user can not give attendance until he registers again and students info must be deleted from attendance info manually.
 `
-const express = require('express');
-const cors = require('cors');
-const os = require('os');
 const fs = require('fs');
 const path = require('path')
-require('dotenv').config()
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const { SECRET_KEY, PORT, STUDENT_DETAILS_PATH, getLocalIP,interval,log,green,red,yellow } = require('./config/env');
 
+const deleteCookie = (app,PORT) => {
 let startTime;
 let endTime;
-const app = express()
 // Get the local IP address of the server
 const localIP = getLocalIP();
 // load the student details from the JSON file
@@ -28,12 +24,6 @@ let attendanceWindowDuration = interval * 1000;
 setInterval(() => {
     attendanceWindowDuration -= 1000
 }, 1000);
-
-app.use(express.json());
-app.use(cors());
-
-// Use cookie-parser middleware
-app.use(cookieParser(SECRET_KEY));
 
 
 app.get('/', (req, res) => {
@@ -72,3 +62,6 @@ process.on('SIGINT', () => {
     log(yellow, 'Performing cleanup...');
     killServer()
 });
+}
+
+module.exports = deleteCookie;
