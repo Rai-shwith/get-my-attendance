@@ -1,5 +1,6 @@
 require('dotenv').config();
 const os = require('os');
+const arp = require('node-arp');
 
 const SECRET_KEY = process.env.SECRET_KEY;
 const STUDENT_DETAILS_PATH = process.env.STUDENT_DETAILS_PATH_cookie;
@@ -40,4 +41,18 @@ const getLocalIP = () => {
     return localIP;
 };
 
-module.exports = { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword, OUTPUT_FILE_PATH};
+// Function to fetch MAC address based on IP
+const getMacAddress = async (ip) => {
+    console.log("first line of getMacAddress")
+    return new Promise((resolve, reject) => {
+        arp.getMAC(ip, (err, mac) => {
+            if (err || !mac) {
+                reject(`Could not fetch MAC address for IP: ${ip}`);
+            } else {
+                resolve(mac);
+            }
+        });
+    });
+};
+
+module.exports = { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP,getMacAddress, attendanceDownloadPassword, OUTPUT_FILE_PATH};

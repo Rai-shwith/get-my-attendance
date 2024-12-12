@@ -7,7 +7,7 @@ const path = require('path')
 require('dotenv').config()
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
-const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP } = require('./config/env')
+const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, getMacAddress } = require('./config/env')
 
 
 let startTime;
@@ -76,18 +76,51 @@ app.get('/', (req, res) => {
     });
 });
 
+
+// const handleRegistration = (macAddress, info) => {
+//     const details = studentDetails[macAddress];
+//     if (details == undefined) {
+//         console.log("Registering ", info.name);
+//         studentDetails[macAddress] = info;
+//         currentRegistration[macAddress] = info;
+//     } else {
+//         console.log(info.name, " tried to register twice");
+//         let errrorMessage;
+//         if (studentDetails[macAddress].name === info.name && (studentDetails[macAddress].usn === info.usn)) {
+//             errrorMessage = `${studentDetails[macAddress].name} is already registered`
+//             console.log(errrorMessage)
+//             const error = new Error(errrorMessage);
+//             error.code = 409;
+//             throw error;
+//         }else  if (studentDetails[macAddress].name === info.name &&(studentDetails[macAddress].usn !== info.usn)){
+//             errrorMessage = `Your USN is ${studentDetails[macAddress].usn} right?<br>Please contact the admin if there is any issues.`
+//             console.log(errrorMessage)
+//             const error = new Error(errrorMessage);
+//             error.code = 409;
+//             throw error;
+//         }else {
+//             errrorMessage = `${studentDetails[macAddress].name} is trying to register ${info.name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
+//             console.log(errrorMessage)
+//             const error = new Error(errrorMessage);
+//             error.code = 409;
+//             throw error;
+//     }
+// }};
+
 const handleRegistration = (id, info, res) => {
+    // TODO: update the documentation for Mac Address
     // If the id (Cookie) is empty then he either cleared his browser info(Already Registered) or New Registration
     const alreadyRegistered = getAlreadyRegistered(info.usn);
-    if (id === undefined) {
+    const details = studentDetails[id];
+    if (details === undefined) {
         // Checking whether the student is already registered or not based on USN
         // If the user is not registered before a unique id is set to users Cookie and the registration completes
         if (!alreadyRegistered) {
             // Setting unique ID as Cookie 
-            const uniqueId = generateID()
-            res.cookie('id', uniqueId, { signed: true, maxAge: 4 * 365 * 24 * 60 * 60 * 1000, httpOnly: true }); //expiry time for 4 years
-            studentDetails[uniqueId] = info;
-            currentRegistration[uniqueId] = info;
+            // const uniqueId = generateID()
+            // res.cookie('id', uniqueId, { signed: true, maxAge: 4 * 365 * 24 * 60 * 60 * 1000, httpOnly: true }); //expiry time for 4 years
+            studentDetails[id] = info;
+            currentRegistration[id] = info;
             console.log(green, "Registering " + info.name);
         } // If the user is already registered he have to contact the admin to log him
         // This could have happened if he deleted his browser cookies or cache.
@@ -149,9 +182,17 @@ const handleRegistration = (id, info, res) => {
 
 
 // Handle form submission with cool down logic
-app.post('/register', (req, res) => {
-    // const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const id = req.signedCookies.id;
+app.post('/register', async (req, res) => {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log(ip)
+    try {
+        const id = await getMacAddress(ip);
+        console.log("Mac Address: ", id);
+    } catch (err) {
+        console.log(err)
+    }
+    res.send("Your request is being processed. Please wait for the response.");
+    return
     const info = req.body.info;
     try {
         handleRegistration(id, info, res)
