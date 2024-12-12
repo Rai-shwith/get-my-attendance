@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require("fs");
 const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const generatePDF = require('./pdfGenerator');
+const generateExcel = require('./excelGenerator')
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const path = require('path');
@@ -16,6 +17,9 @@ let startTime;
 let endTime;
 const green = '\x1b[32m%s\x1b[0m' // for showing green output in the terminal
 const yellow = '\x1b[33m%s\x1b[0m' // for showing yellow output in the terminal
+
+let pdfOutputPath;
+let excelOutputPath;
 
 // Ask for the input and wait synchronously
 const time = prompt('Enter the duration (in minutes) for recording attendance:');
@@ -204,7 +208,10 @@ app.get('/', (req, res) => {
             <h1>Attendance Details</h1>
             <form id="downloadForm">
                 <input type="password" id="password" name="number" placeholder="Enter the password" required>
-                <button id="submitBtn" type="submit">Download</button>
+                <div class="group">
+                    <button id="pdfSubmitBtn" type="button">Download PDF</button>
+                    <button id="excelSubmitBtn" type="button">Download EXCEL</button>
+                </div>
                 <p id="message" class="hidden">😑</p>
             </form>
         </div>`;
@@ -299,6 +306,10 @@ app.get('/', (req, res) => {
                 border-radius: 12px;
                 box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
             }
+            .group {
+                display: flex;
+                gap: 10px;
+            }
         </style>
     </head>
     
@@ -310,69 +321,79 @@ app.get('/', (req, res) => {
         </footer>
         <script>
             const message = document.getElementById('message');
-            const downloadForm = document.getElementById('downloadForm');
-            downloadForm.addEventListener('submit', async (e) => {
-                e.preventDefault();  // Prevent page refresh when the numberForm is submitted
-        
-                // Get the password
-                const password = document.getElementById('password').value.trim();
-        
-                console.log("Sending Download Request with Password =", password);
-        
-                fetch('/pdf',{
-                    method:'POST',
-                    headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({password}),
-                })
-                    .then(response => {
-                            if (response.status == 400) {
-                                message.innerText = '😑Incorrect Password😑'
-                                message.classList.remove('hidden');
-                                setTimeout(() => {
-                                    message.classList.add('hidden');
-                                }, 5000);
-                                throw new Error('Incorrect Password');
-                            } else if (!response.ok) {
-                                message.innerText = '😨Something went wrong😨'
-                                message.classList.remove('hidden');
-                                setTimeout(() => {
-                                    message.classList.add('hidden');
-                                }, 5000);
-                            throw new Error('Network response was not ok');
-                            }
-                                message.innerText = '👍Save the file'
-                                message.classList.remove('hidden');
-                                setTimeout(() => {
-                                    message.classList.add('hidden');
-                                }, 5000);
-                        // Extract the file name from the Content-Disposition header
-                        const contentDisposition = response.headers.get('Content-Disposition');
-                        let fileName = 'Attendance.pdf'; // Default file name
-        
-                        if (contentDisposition && contentDisposition.includes('filename=')) {
-                            const match = contentDisposition.match(/filename="(.+)"/);
-                            if (match && match[1]) {
-                                fileName = match[1];
-                            }
+        const pdfSubmitBtn = document.getElementById('pdfSubmitBtn');
+        const excelSubmitBtn = document.getElementById('excelSubmitBtn');
+
+        // function to download pdf or excel 
+        // here type can be pdf or xlsx
+        const downloadHandler = (type) => {
+            // Get the password
+            const password = document.getElementById('password').value.trim();
+
+            console.log("Sending Download Request with Password =", password);
+
+            fetch(\`/\${type}\`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ password }),
+            })
+                .then(response => {
+                    if (response.status == 400) {
+                        message.innerText = '😑Incorrect Password😑'
+                        message.classList.remove('hidden');
+                        setTimeout(() => {
+                            message.classList.add('hidden');
+                        }, 5000);
+                        throw new Error('Incorrect Password');
+                    } else if (!response.ok) {
+                        message.innerText = '😨Something went wrong😨'
+                        message.classList.remove('hidden');
+                        setTimeout(() => {
+                            message.classList.add('hidden');
+                        }, 5000);
+                        throw new Error('Network response was not ok');
+                    }
+                    message.innerText = '👍Save the file'
+                    message.classList.remove('hidden');
+                    setTimeout(() => {
+                        message.classList.add('hidden');
+                    }, 5000);
+                    // Extract the file name from the Content-Disposition header
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let fileName = \`Attendance.\${type}\`; // Default file name
+
+                    if (contentDisposition && contentDisposition.includes('filename=')) {
+                        const match = contentDisposition.match(/filename="(.+)"/);
+                        if (match && match[1]) {
+                            fileName = match[1];
                         }
+                    }
+
+                    return response.blob().then(blob => ({ blob, fileName }));
+                })
+                .then(({ blob, fileName }) => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName; // Use the file name from the server
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(error => console.error('Error during file download:', error));
+
+
+        }
+
+        pdfSubmitBtn.addEventListener('click', async (e) => {
+            downloadHandler('pdf')
+        });
         
-                        return response.blob().then(blob => ({ blob, fileName }));
-                    })
-                    .then(({ blob, fileName }) => {
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = fileName; // Use the file name from the server
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                    })
-                    .catch(error => console.error('Error during file download:', error));
-        
-                
-            });
+        excelSubmitBtn.addEventListener('click', async (e) => {
+            downloadHandler('xlsx')
+        });
         </script>
     </body>
     </html>`;
@@ -446,7 +467,9 @@ const killServer = async () => {
     try {
         console.log(yellow, "Generating PDF...");
         // To store the modified output path with date
-        OUTPUT_FILE_PATH = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+        excelOutputPath = await generateExcel(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+        console.log(green, "EXCEL successfully generated!");
+        pdfOutputPath = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
         console.log(green, "PDF successfully generated!");
     } catch (err) {
         console.error("Error during PDF generation:", err);
@@ -460,16 +483,35 @@ app.post('/pdf', (req, res) => {
         res.status(400).json({ message: "invalid Credentials" });
         return
     }
-    const baseFileName = path.basename(OUTPUT_FILE_PATH);
+    const baseFileName = path.basename(pdfOutputPath);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
-    res.sendFile(path.resolve(OUTPUT_FILE_PATH), (err) => {
+    res.sendFile(path.resolve(pdfOutputPath), (err) => {
         if (err) {
             console.error('Error sending file:', err);
             res.status(500).send('Error downloading the file.');
         }
     });
     console.log(green, "PDF Sent.")
+});
+
+// Endpoint to download the excel file
+app.post('/xlsx', (req, res) => {
+    const { password } = req.body;
+    if (password != attendanceDownloadPassword) {
+        res.status(400).json({ message: "invalid Credentials" });
+        return
+    }
+    const baseFileName = path.basename(excelOutputPath);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
+    res.sendFile(path.resolve(excelOutputPath), (err) => {
+        if (err) {
+            console.error('Error sending file:', err);
+            res.status(500).send('Error downloading the file.');
+        }
+    });
+    console.log(green, "EXCEL Sent.")
 });
 
 
