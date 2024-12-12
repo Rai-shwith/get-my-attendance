@@ -5,6 +5,7 @@ const prompt = require('prompt-sync')();  // Initialize the prompt-sync function
 const SECRET_KEY = process.env.SECRET_KEY;
 const STUDENT_DETAILS_PATH = process.env.STUDENT_DETAILS_PATH_cookie;
 const PORT = process.env.PORT || 1111;
+const HOSTPORT = process.env.HOSTPORT || 1112;
 let OUTPUT_FILE_PATH = process.env.OUTPUT_FILE_PATH;
 const ENABLE_LOGGING = process.env.ENABLE_LOGGING.trim()==('true') ? true: false; // Disable logging by default
 
@@ -64,4 +65,4 @@ if (ENABLE_LOGGING) {
         log(`Server will be active for ${time} minutes`);
     }
 }
-module.exports = { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword, OUTPUT_FILE_PATH, log, red, yellow, green, interval };
+module.exports = { PORT,HOSTPORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword, OUTPUT_FILE_PATH, log, red, yellow, green, interval };
