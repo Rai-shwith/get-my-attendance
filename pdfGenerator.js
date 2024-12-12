@@ -1,5 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
+const mainSortBy = 'status';
+
 const generatePDF = (outputFilePath, present, absent) => {
     return new Promise((resolve, reject) => {
         const absentCount = Object.keys(absent).length;
@@ -11,14 +13,20 @@ const generatePDF = (outputFilePath, present, absent) => {
             ...Object.entries(present).map(([_, value]) => ({ ...value, status: 'Present' })),
         ];
 
-        // Sort data
-        combinedData.sort((a, b) => {
-            if (a.status === b.status) {
-                return a.usn.localeCompare(b.usn); // Sort by USN if statuses are the same
-            }
-            return a.status === 'Absent' ? -1 : 1; // Absent first
-        });
-
+        if (mainSortBy == 'status') {
+            // Sort data
+            combinedData.sort((a, b) => {
+                if (a.status === b.status) {
+                    return a.usn.localeCompare(b.usn); // Sort by USN if statuses are the same
+                }
+                return a.status === 'Absent' ? -1 : 1; // Absent first
+            });
+        } else {
+            // Sort data
+            combinedData.sort((a, b) => {
+                return a.usn.localeCompare(b.usn); // Sort by USN
+            });
+        }
         const date = new Date();
 
         // Formatting Date
@@ -39,7 +47,7 @@ const generatePDF = (outputFilePath, present, absent) => {
         const docHeight = combinedData.length * 25 + 300;
 
         // Create PDF and set up stream
-        const doc = new PDFDocument({ size: [600, docHeight], margin: 50 });
+        const doc = new PDFDocument({ size: [700, docHeight], margin: 50 });
         const stream = fs.createWriteStream(filePath);
 
         // Handle stream completion
@@ -63,21 +71,23 @@ const generatePDF = (outputFilePath, present, absent) => {
         const startX = 10;
         let y = 100;
         const rowHeight = 25;
-        const colWidths = { usn: 150, name: 300, status: 100 };
+        const colWidths = { serialNumber:75,usn: 150, name: 300, status: 100 };
 
-        doc.fillColor("#000000").text(`Total Students: ${totalCount}`, startX + 5, y ,{ align: 'left' });
-        doc.fillColor("#D32F2F").text(`Absent: ${absentCount}`, startX + 5, y + rowHeight,{ align: 'left' });
-        doc.fillColor("#388E3C").text(`Present: ${presentCount}`, startX + 5, y + rowHeight * 2,{ align: 'left' });
-        y+=rowHeight*4;
+        doc.fillColor("#000000").text(`Total Students: ${totalCount}`, startX + 5, y, { align: 'left' });
+        doc.fillColor("#D32F2F").text(`Absent: ${absentCount}`, startX + 5, y + rowHeight, { align: 'left' });
+        doc.fillColor("#388E3C").text(`Present: ${presentCount}`, startX + 5, y + rowHeight * 2, { align: 'left' });
+        y += rowHeight * 4;
 
         // Header Row Background and Text
         doc.rect(startX, y, colWidths.usn, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
-        doc.rect(startX + colWidths.usn, y, colWidths.name, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
-        doc.rect(startX + colWidths.usn + colWidths.name, y, colWidths.status, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
+        doc.rect(startX +colWidths.serialNumber,  y, colWidths.usn, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
+        doc.rect(startX + colWidths.serialNumber + colWidths.usn, y, colWidths.name, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
+        doc.rect(startX + colWidths.serialNumber + colWidths.usn + colWidths.name, y, colWidths.status, rowHeight).fillAndStroke('#D8E6FF', '#B0BEC5');
         doc.fillColor('black')
-            .text('USN', startX + 5, y + 5)
-            .text('Name', startX + colWidths.usn + 5, y + 5)
-            .text('Status', startX + colWidths.usn + colWidths.name + 5, y + 5);
+            .text('S no.', startX + 5, y + 5)
+            .text('USN', startX + colWidths.serialNumber + 5, y + 5)
+            .text('Name', startX + colWidths.serialNumber + colWidths.usn + 5, y + 5)
+            .text('Status', startX + colWidths.serialNumber + colWidths.usn + colWidths.name + 5, y + 5);
         y += rowHeight;
 
         // Add Table Rows with Colors
@@ -88,14 +98,16 @@ const generatePDF = (outputFilePath, present, absent) => {
 
             // Draw row background
             doc.rect(startX, y, colWidths.usn, rowHeight).fillAndStroke(rowBgColor, '#B0BEC5');
-            doc.rect(startX + colWidths.usn, y, colWidths.name, rowHeight).fillAndStroke(rowBgColor, '#B0BEC5');
-            doc.rect(startX + colWidths.usn + colWidths.name, y, colWidths.status, rowHeight).fillAndStroke(rowBgColor, '#B0BEC5');
+            doc.rect(startX + colWidths.serialNumber, y, colWidths.usn, rowHeight).fillAndStroke(rowBgColor, '#B0BEC5');
+            doc.rect(startX + colWidths.serialNumber + colWidths.usn, y, colWidths.name, rowHeight).fillAndStroke(rowBgColor, '#B0BEC5');
+            doc.rect(startX + colWidths.serialNumber + colWidths.usn + colWidths.name, y, colWidths.status, rowHeight).fillAndStroke(rowBgColor, '#B0BEC5');
 
             // Write row text
             doc.fillColor(textColor)
-                .text(student.usn, startX + 5, y + 5)
-                .text(student.name, startX + colWidths.usn + 5, y + 5)
-                .text(student.status, startX + colWidths.usn + colWidths.name + 5, y + 5);
+                .text(index+1, startX + 5, y + 5)
+                .text(student.usn, startX +colWidths.serialNumber + 5, y + 5)
+                .text(student.name, startX +colWidths.serialNumber + colWidths.usn + 5, y + 5)
+                .text(student.status, startX +colWidths.serialNumber + colWidths.usn + colWidths.name + 5, y + 5);
 
             y += rowHeight;
 
