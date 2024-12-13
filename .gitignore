@@ -130,6 +130,7 @@ dist
 .pnp.*
 
 *.pdf
+*.xlsx
 attendance/info.json
 .vscode/
 imp.txt

@@ -465,7 +465,7 @@ const killServer = async () => {
     console.log(yellow, "\n--------------------------");
     console.log(yellow, "--------------------------");
     try {
-        console.log(yellow, "Generating PDF...");
+        console.log(yellow, "Generating Download Details...");
         // To store the modified output path with date
         excelOutputPath = await generateExcel(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
         console.log(green, "EXCEL successfully generated!");
@@ -503,7 +503,7 @@ app.post('/xlsx', (req, res) => {
         return
     }
     const baseFileName = path.basename(excelOutputPath);
-    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Type', 'application/xlsx');
     res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
     res.sendFile(path.resolve(excelOutputPath), (err) => {
         if (err) {
