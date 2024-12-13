@@ -21,6 +21,7 @@
     "node-fetch": "^2.7.0",
     "pdfkit": "^0.15.1",
     "perf_hooks": "^0.0.1",
-    "prompt-sync": "^4.2.0"
+    "prompt-sync": "^4.2.0",
+    "xlsx": "^0.18.5"
   }
 }

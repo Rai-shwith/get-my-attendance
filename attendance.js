@@ -1,54 +1,56 @@
 const generatePDF = require('./pdfGenerator');
-const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword,log,red,yellow,green,interval} = require('./config/env')
+const generateExcel = require('./excelGenerator')
 const fs = require('fs');
-const path = require('path')
-let { OUTPUT_FILE_PATH } = require('./config/env');
+const path = require('path');
+const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword,log,red,yellow,green,interval} = require('./config/env')
+let { OUTPUT_FILE_PATH } = require('./config/env')
 
-const attendance = (app,PORT) => {
+const attendance = (app, PORT) => {
+    let pdfOutputPath;
+    let excelOutputPath;
+    // Get the local IP address of the server
+    const localIP = getLocalIP();
 
-// Get the local IP address of the server
-const localIP = getLocalIP();
+    // load the student details from the JSON file
+    const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
 
-// load the student details from the JSON file
-const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
+    // To keep track of the time left for the server to be active
+    let attendanceWindowDuration = interval * 1000;
 
-// To keep track of the time left for the server to be active
-let attendanceWindowDuration = interval * 1000;
+    // Decrease the time left every second
+    setInterval(() => {
+        attendanceWindowDuration -= 1000
+    }, 1000);
 
-// Decrease the time left every second
-setInterval(() => {
-    attendanceWindowDuration -= 1000
-}, 1000);
-
-let startTime;
-let endTime;
+    let startTime;
+    let endTime;
 
 
-// To keep track of students who gave attendance
-const presentList = new Object();
+    // To keep track of students who gave attendance
+    const presentList = new Object();
 
-const getHTML = (condition, name, usn) => {
-    let color, message;
-    let hideInfo = false;
-    let showReasons = false;
-    if (condition === "alreadyGiven") {
-        color = "#ff9800";
-        message = "Attendance already taken! 🙅‍♂️";
-    } else if (condition === "notRegistered") {
-        showReasons = true;
-        hideInfo = true;
-        color = "#f44336";
-        message = "You are not registered! 📋<br> Please contact the admin. 👨‍💻";
-    } else if (condition === "detailsMissing") {
-        // This is the rare case when the details of student is removed from the Attendance info
-        hideInfo = true;
-        color = "#f44336";
-        message = "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄";
-    } else {
-        color = "#4caf50";
-        message = "Attendance taken successfully! ✅";
-    }
-    htmlString = `<!DOCTYPE html>
+    const getHTML = (condition, name, usn) => {
+        let color, message;
+        let hideInfo = false;
+        let showReasons = false;
+        if (condition === "alreadyGiven") {
+            color = "#ff9800";
+            message = "Attendance already taken! 🙅‍♂️";
+        } else if (condition === "notRegistered") {
+            showReasons = true;
+            hideInfo = true;
+            color = "#f44336";
+            message = "You are not registered! 📋<br> Please contact the admin. 👨‍💻";
+        } else if (condition === "detailsMissing") {
+            // This is the rare case when the details of student is removed from the Attendance info
+            hideInfo = true;
+            color = "#f44336";
+            message = "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄";
+        } else {
+            color = "#4caf50";
+            message = "Attendance taken successfully! ✅";
+        }
+        htmlString = `<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -168,29 +170,32 @@ const getHTML = (condition, name, usn) => {
 </body>
 
 </html>`
-    return htmlString;
-}
+        return htmlString;
+    }
 
-// Route to serve the main HTML file
-app.get('/', (req, res) => {
-    if (isShuttingDown) {
-        // When the attendance portal is shutting down server different html 
-        let container;
+    // Route to serve the main HTML file
+    app.get('/', (req, res) => {
         if (isShuttingDown) {
-            container = `<div class="container">
+            // When the attendance portal is shutting down server different html 
+            let container;
+            if (isShuttingDown) {
+                container = `<div class="container">
             <h1>Attendance Details</h1>
             <form id="downloadForm">
                 <input type="password" id="password" name="number" placeholder="Enter the password" required>
-                <button id="submitBtn" type="submit">Download</button>
+                <div class="group">
+                    <button id="pdfSubmitBtn" type="button">Download PDF</button>
+                    <button id="excelSubmitBtn" type="button">Download EXCEL</button>
+                </div>
                 <p id="message" class="hidden">😑</p>
             </form>
         </div>`;
-        } else {
-            container = `<div class="container">
+            } else {
+                container = `<div class="container">
             <h1>Attendance is currently in progress. Please return once it is completed.</h1>
         </div>`
-        }
-        htmlString = `<!DOCTYPE html>
+            }
+            htmlString = `<!DOCTYPE html>
     <html lang="en">
     
     <head>
@@ -276,6 +281,10 @@ app.get('/', (req, res) => {
                 border-radius: 12px;
                 box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
             }
+            .group {
+                display: flex;
+                gap: 10px;
+            }
         </style>
     </head>
     
@@ -287,195 +296,226 @@ app.get('/', (req, res) => {
         </footer>
         <script>
             const message = document.getElementById('message');
-            const downloadForm = document.getElementById('downloadForm');
-            downloadForm.addEventListener('submit', async (e) => {
-                e.preventDefault();  // Prevent page refresh when the numberForm is submitted
-        
-                // Get the password
-                const password = document.getElementById('password').value.trim();
-        
-                console.log("Sending Download Request with Password =", password);
-        
-                fetch('/pdf',{
-                    method:'POST',
-                    headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({password}),
-                })
-                    .then(response => {
-                            if (response.status == 400) {
-                                message.innerText = '😑Incorrect Password😑'
-                                message.classList.remove('hidden');
-                                setTimeout(() => {
-                                    message.classList.add('hidden');
-                                }, 5000);
-                                throw new Error('Incorrect Password');
-                            } else if (!response.ok) {
-                                message.innerText = '😨Something went wrong😨'
-                                message.classList.remove('hidden');
-                                setTimeout(() => {
-                                    message.classList.add('hidden');
-                                }, 5000);
-                            throw new Error('Network response was not ok');
-                            }
-                                message.innerText = '👍Save the file'
-                                message.classList.remove('hidden');
-                                setTimeout(() => {
-                                    message.classList.add('hidden');
-                                }, 5000);
-                        // Extract the file name from the Content-Disposition header
-                        const contentDisposition = response.headers.get('Content-Disposition');
-                        let fileName = 'Attendance.pdf'; // Default file name
-        
-                        if (contentDisposition && contentDisposition.includes('filename=')) {
-                            const match = contentDisposition.match(/filename="(.+)"/);
-                            if (match && match[1]) {
-                                fileName = match[1];
-                            }
+        const pdfSubmitBtn = document.getElementById('pdfSubmitBtn');
+        const excelSubmitBtn = document.getElementById('excelSubmitBtn');
+
+        // function to download pdf or excel 
+        // here type can be pdf or xlsx
+        const downloadHandler = (type) => {
+            // Get the password
+            const password = document.getElementById('password').value.trim();
+
+            console.log("Sending Download Request with Password =", password);
+
+            fetch(\`/\${type}\`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ password }),
+            })
+                .then(response => {
+                    if (response.status == 400) {
+                        message.innerText = '😑Incorrect Password😑'
+                        message.classList.remove('hidden');
+                        setTimeout(() => {
+                            message.classList.add('hidden');
+                        }, 5000);
+                        throw new Error('Incorrect Password');
+                    } else if (!response.ok) {
+                        message.innerText = '😨Something went wrong😨'
+                        message.classList.remove('hidden');
+                        setTimeout(() => {
+                            message.classList.add('hidden');
+                        }, 5000);
+                        throw new Error('Network response was not ok');
+                    }
+                    message.innerText = '👍Save the file'
+                    message.classList.remove('hidden');
+                    setTimeout(() => {
+                        message.classList.add('hidden');
+                    }, 5000);
+                    // Extract the file name from the Content-Disposition header
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let fileName = \`Attendance.\${type}\`; // Default file name
+
+                    if (contentDisposition && contentDisposition.includes('filename=')) {
+                        const match = contentDisposition.match(/filename="(.+)"/);
+                        if (match && match[1]) {
+                            fileName = match[1];
                         }
+                    }
+
+                    return response.blob().then(blob => ({ blob, fileName }));
+                })
+                .then(({ blob, fileName }) => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName; // Use the file name from the server
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(error => console.error('Error during file download:', error));
+
+
+        }
+
+        pdfSubmitBtn.addEventListener('click', async (e) => {
+            downloadHandler('pdf')
+        });
         
-                        return response.blob().then(blob => ({ blob, fileName }));
-                    })
-                    .then(({ blob, fileName }) => {
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = fileName; // Use the file name from the server
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                    })
-                    .catch(error => console.error('Error during file download:', error));
-        
-                
-            });
+        excelSubmitBtn.addEventListener('click', async (e) => {
+            downloadHandler('xlsx')
+        });
         </script>
     </body>
     </html>`;
-        res.send(htmlString);
-        return
-    }
-
-    const id = req.signedCookies.id;
-
-    if (!id) {
-        log(red,"Student not registered!");
-        const html = getHTML("notRegistered");
-        return res.status(403).send(html);
-    }
-    if (presentList[id]) {
-        log(yellow, presentList[id].name + " already gave attendance!");
-        const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
-        return res.status(429).send(html);
-    }
-    if (!studentDetails[id]) {
-        res.clearCookie('id');
-        log(red,"Someone's Details have been Missing");
-        const html = getHTML("detailsMissing");
-        return res.status(429).send(html);
-    }
-    const html = getHTML("normal", studentDetails[id].name, studentDetails[id].usn);
-    presentList[id] = studentDetails[id];
-    log(green, `Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
-    return res.status(200).send(html);
-});
-
-
-// Start the server
-const server = app.listen(PORT, '0.0.0.0', () => {
-    startTime = new Date();
-    log("Password to Download the pdf\n");
-    log(red,attendanceDownloadPassword, '\n');
-    log(green, `Attendance link -> http://${localIP}:${PORT}`);
-});
-
-
-// Function to close the server
-const closeServer = async () => {
-    server.close(() => {
-        log(yellow, 'Server stopped gracefully.');
-        process.exit(0);
-    });
-}
-
-// TODO: Rename the function because kill server doesn't actually kill whole server it just generates pdf and makes the download possible from web
-const killServer = async () => {
-    endTime = new Date();
-    const serverDuration = Math.floor((endTime - startTime) / 1000);
-    log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
-
-    const absentList = {};
-    for (const id in studentDetails) {
-        if (!presentList[id]) {
-            absentList[id] = studentDetails[id];
+            res.send(htmlString);
+            return
         }
-    }
 
-    log(yellow, "\n--------------------------");
-    log(yellow, "----------RESULT----------");
-    log(green, "\n----------PRESENT----------");
-    Object.values(presentList).forEach(({ usn, name }) => log(green, `${usn} : ${name}`));
-    log(red,"\n----------ABSENT----------");
-    Object.values(absentList).forEach(({ usn, name }) => log(red,`${usn} : ${name}`));
-    log(yellow, "\n--------------------------");
-    log(yellow, "--------------------------");
-    try {
-        log(yellow, "Generating PDF...");
-        // To store the modified output path with date
-        OUTPUT_FILE_PATH = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
-        log(green, "PDF successfully generated!");
-    } catch (err) {
-        log(red,"Error during PDF generation:", err);
-    }
-};
+        const id = req.signedCookies.id;
 
-
-app.post('/pdf', (req, res) => {
-    const { password } = req.body;
-    if (password != attendanceDownloadPassword) {
-        res.status(400).json({ message: "invalid Credentials" });
-        return
-    }
-    const baseFileName = path.basename(OUTPUT_FILE_PATH);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
-    res.sendFile(path.resolve(OUTPUT_FILE_PATH), (err) => {
-        if (err) {
-            log(red,'Error sending file:', err);
-            res.status(500).send('Error downloading the file.');
+        if (!id) {
+            log(red, "Student not registered!");
+            const html = getHTML("notRegistered");
+            return res.status(403).send(html);
         }
+        if (presentList[id]) {
+            log(yellow, presentList[id].name + " already gave attendance!");
+            const html = getHTML("alreadyGiven", presentList[id].name, presentList[id].usn);
+            return res.status(429).send(html);
+        }
+        if (!studentDetails[id]) {
+            res.clearCookie('id');
+            log(red, "Someone's Details have been Missing");
+            const html = getHTML("detailsMissing");
+            return res.status(429).send(html);
+        }
+        const html = getHTML("normal", studentDetails[id].name, studentDetails[id].usn);
+        presentList[id] = studentDetails[id];
+        log(green, `Attendance given to ${presentList[id].name} [${presentList[id].usn}]`);
+        return res.status(200).send(html);
     });
-    log(green, "PDF Sent.")
-});
 
 
-let isShuttingDown = false;
+    // Start the server
+    const server = app.listen(PORT, '0.0.0.0', () => {
+        startTime = new Date();
+        log("Password to Download the pdf\n");
+        log(red, attendanceDownloadPassword, '\n');
+        log(green, `Attendance link -> http://${localIP}:${PORT}`);
+    });
 
-const shutdownHandler = async () => {
-    if (isShuttingDown) {
-        log(yellow, "Server is shutting down..");
-        await closeServer()
+
+    // Function to close the server
+    const closeServer = async () => {
+        server.close(() => {
+            log(yellow, 'Server stopped gracefully.');
+            process.exit(0);
+        });
     }
-    isShuttingDown = true;
-    log(yellow, "Closing attendance portal...");
-    await killServer(); // To save the pdf
-    log("Password to Download the pdf\n");
-    log(red,attendanceDownloadPassword, '\n');
-    log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
 
-};
+    // TODO: Rename the function because kill server doesn't actually kill whole server it just generates pdf and makes the download possible from web
+    const killServer = async () => {
+        endTime = new Date();
+        const serverDuration = Math.floor((endTime - startTime) / 1000);
+        log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
 
-// Set a timeout to call the shutdown handler
-setTimeout(() => {
-    shutdownHandler();
-}, attendanceWindowDuration);
+        const absentList = {};
+        for (const id in studentDetails) {
+            if (!presentList[id]) {
+                absentList[id] = studentDetails[id];
+            }
+        }
 
-// Handle SIGINT for graceful shutdown
-process.on("SIGINT", async () => {
-    log(yellow, "Performing cleanup due to SIGINT...");
-    await shutdownHandler();
-});
+        log(yellow, "\n--------------------------");
+        log(yellow, "----------RESULT----------");
+        log(green, "\n----------PRESENT----------");
+        Object.values(presentList).forEach(({ usn, name }) => log(green, `${usn} : ${name}`));
+        log(red, "\n----------ABSENT----------");
+        Object.values(absentList).forEach(({ usn, name }) => log(red, `${usn} : ${name}`));
+        log(yellow, "\n--------------------------");
+        log(yellow, "--------------------------");
+        try {
+            console.log(yellow, "Generating Download Details...");
+            // To store the modified output path with date
+            excelOutputPath = await generateExcel(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+            console.log(green, "EXCEL successfully generated!");
+            pdfOutputPath = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+            console.log(green, "PDF successfully generated!");
+        } catch (err) {
+            log(red, "Error during PDF generation:", err);
+        }
+    };
+
+
+    app.post('/pdf', (req, res) => {
+        const { password } = req.body;
+        if (password != attendanceDownloadPassword) {
+            res.status(400).json({ message: "invalid Credentials" });
+            return
+        }
+        const baseFileName = path.basename(pdfOutputPath);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
+        res.sendFile(path.resolve(pdfOutputPath), (err) => {
+            if (err) {
+                log(red, 'Error sending file:', err);
+                res.status(500).send('Error downloading the file.');
+            }
+        });
+        log(green, "PDF Sent.")
+    });
+
+    // Endpoint to download the excel file
+    app.post('/xlsx', (req, res) => {
+        const { password } = req.body;
+        if (password != attendanceDownloadPassword) {
+            res.status(400).json({ message: "invalid Credentials" });
+            return
+        }
+        const baseFileName = path.basename(excelOutputPath);
+        res.setHeader('Content-Type', 'application/xlsx');
+        res.setHeader('Content-Disposition', `attachment; filename="${baseFileName}"`);
+        res.sendFile(path.resolve(excelOutputPath), (err) => {
+            if (err) {
+                console.error('Error sending file:', err);
+                res.status(500).send('Error downloading the file.');
+            }
+        });
+        console.log(green, "EXCEL Sent.")
+    });
+
+
+    let isShuttingDown = false;
+
+    const shutdownHandler = async () => {
+        if (isShuttingDown) {
+            log(yellow, "Server is shutting down..");
+            await closeServer()
+        }
+        isShuttingDown = true;
+        log(yellow, "Closing attendance portal...");
+        await killServer(); // To save the pdf
+        log("Password to Download the pdf\n");
+        log(red, attendanceDownloadPassword, '\n');
+        log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
+
+    };
+
+    // Set a timeout to call the shutdown handler
+    setTimeout(() => {
+        shutdownHandler();
+    }, attendanceWindowDuration);
+
+    // Handle SIGINT for graceful shutdown
+    process.on("SIGINT", async () => {
+        log(yellow, "Performing cleanup due to SIGINT...");
+        await shutdownHandler();
+    });
 }
 
 module.exports = attendance;
