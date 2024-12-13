@@ -2,177 +2,241 @@ const generatePDF = require('./pdfGenerator');
 const generateExcel = require('./excelGenerator')
 const fs = require('fs');
 const path = require('path');
-const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword,log,red,yellow,green,interval} = require('./config/env')
+const { PORT, SECRET_KEY, STUDENT_DETAILS_PATH, getLocalIP, attendanceDownloadPassword, log, red, yellow, green, interval } = require('./config/env')
 let { OUTPUT_FILE_PATH } = require('./config/env')
 
-const attendance = (app, PORT) => {
-    let pdfOutputPath;
-    let excelOutputPath;
-    // Get the local IP address of the server
-    const localIP = getLocalIP();
 
-    // load the student details from the JSON file
-    const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
+let pdfOutputPath;
+let excelOutputPath;
 
-    // To keep track of the time left for the server to be active
-    let attendanceWindowDuration = interval * 1000;
+// Get the local IP address of the server
+const localIP = getLocalIP();
 
-    // Decrease the time left every second
-    setInterval(() => {
-        attendanceWindowDuration -= 1000
-    }, 1000);
+// load the student details from the JSON file
+const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
 
-    let startTime;
-    let endTime;
+// To keep track of the time left for the server to be active
+let attendanceWindowDuration = interval * 1000;
+
+// Decrease the time left every second
+setInterval(() => {
+    attendanceWindowDuration -= 1000
+}, 1000);
+
+let startTime;
+let endTime;
 
 
-    // To keep track of students who gave attendance
-    const presentList = new Object();
+// To keep track of students who gave attendance
+const presentList = new Object();
 
-    const getHTML = (condition, name, usn) => {
-        let color, message;
-        let hideInfo = false;
-        let showReasons = false;
-        if (condition === "alreadyGiven") {
-            color = "#ff9800";
-            message = "Attendance already taken! 🙅‍♂️";
-        } else if (condition === "notRegistered") {
-            showReasons = true;
-            hideInfo = true;
-            color = "#f44336";
-            message = "You are not registered! 📋<br> Please contact the admin. 👨‍💻";
-        } else if (condition === "detailsMissing") {
-            // This is the rare case when the details of student is removed from the Attendance info
-            hideInfo = true;
-            color = "#f44336";
-            message = "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄";
-        } else {
-            color = "#4caf50";
-            message = "Attendance taken successfully! ✅";
-        }
-        htmlString = `<!DOCTYPE html>
+const getHTML = (condition, name, usn) => {
+    let color, message;
+    let hideInfo = false;
+    let showReasons = false;
+    if (condition === "alreadyGiven") {
+        color = "#ff9800";
+        message = "Attendance already taken! 🙅‍♂️";
+    } else if (condition === "notRegistered") {
+        showReasons = true;
+        hideInfo = true;
+        color = "#f44336";
+        message = "You are not registered! 📋<br> Please contact the admin. 👨‍💻";
+    } else if (condition === "detailsMissing") {
+        // This is the rare case when the details of student is removed from the Attendance info
+        hideInfo = true;
+        color = "#f44336";
+        message = "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄";
+    } else {
+        color = "#4caf50";
+        message = "Attendance taken successfully! ✅";
+    }
+    htmlString = `<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+    }
 
-        h1 {
-            color: ${color}
+    h1 {
+        color: ${color}
 
-            ;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
+        ;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
 
-        .container {
-            margin-top: 3em;
-            width: 75vw;
+    .container {
+        margin-top: 3em;
+        width: 75vw;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px 40px;
+        border-radius: 12px;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    header {
+        text-align: center;
+        margin-top: 10px;
+        width: 90vw;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px 40px;
+        border-radius: 12px;
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    footer{
+            position: absolute;
+            bottom: 0;
             text-align: center;
             background: rgba(255, 255, 255, 0.1);
-            padding: 20px 40px;
+            padding: 0.5em;
+            width: 100vw;
+            font-size: small;
             border-radius: 12px;
             box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        header {
-            text-align: center;
-            margin-top: 10px;
-            width: 90vw;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px 40px;
-            border-radius: 12px;
-            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-        }
-        footer{
-                position: absolute;
-                bottom: 0;
-                text-align: center;
-                background: rgba(255, 255, 255, 0.1);
-                padding: 0.5em;
-                width: 100vw;
-                font-size: small;
-                border-radius: 12px;
-                box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+    }
+</style>
 </head>
 
 <body class="column">
-    <header >Time remaining : <span id="timer" style="color: red;">${attendanceWindowDuration}</span></header>
-    <div class="container">
-        <h1>${message}</h1>
-        <h2 style="text-align: left;" ${showReasons ? '' : 'hidden'}>Reasons :
-    <ul>
-        <li>You did not register</li>
-        <li>You registered in incognito mode</li>
-        <li>You registered in another Browser</li>
-        <li>You cleared the Cookies or Browser cache</li>
-    </ul>
+<header >Time remaining : <span id="timer" style="color: red;">${attendanceWindowDuration}</span></header>
+<div class="container">
+    <h1>${message}</h1>
+    <h2 style="text-align: left;" ${showReasons ? '' : 'hidden'}>Reasons :
+<ul>
+    <li>You did not register</li>
+    <li>You registered in incognito mode</li>
+    <li>You registered in another Browser</li>
+    <li>You cleared the Cookies or Browser cache</li>
+</ul>
 </h2>
-    </div>
-    <br>
-    <div class="container" ${hideInfo ? 'hidden' : ''}>
-        <section>
-            <h2>${name} : ${usn}</h2>
-        </section>
-    </div>
-        <footer>
-        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> . Licensed under
-        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
-    </footer>
-    <script>
-        const totalTime = document.getElementById('timer').innerText;
-        function startTimer(timeString) {
-            // Parse the input time string to milliseconds
-            let totalMilliseconds = Number(timeString);
+</div>
+<br>
+<div class="container" ${hideInfo ? 'hidden' : ''}>
+    <section>
+        <h2>${name} : ${usn}</h2>
+    </section>
+</div>
+    <footer>
+    © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> . Licensed under
+    <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+</footer>
+<script>
+    const totalTime = document.getElementById('timer').innerText;
+    function startTimer(timeString) {
+        // Parse the input time string to milliseconds
+        let totalMilliseconds = Number(timeString);
 
-            // Create a reference to the DOM element where you want to display the timer
-            const timerDisplay = document.getElementById("timer");
+        // Create a reference to the DOM element where you want to display the timer
+        const timerDisplay = document.getElementById("timer");
 
-            // Function to update the time and display it
-            function updateTimer() {
-                if (totalMilliseconds <= 0) {
-                    clearInterval(timerInterval); // Stop the timer when it reaches 0
-                    timerDisplay.innerHTML = "Time's up!";
-                } else {
-                    totalMilliseconds -= 1000; // Decrease the time by 1 second (1000ms)
+        // Function to update the time and display it
+        function updateTimer() {
+            if (totalMilliseconds <= 0) {
+                clearInterval(timerInterval); // Stop the timer when it reaches 0
+                timerDisplay.innerHTML = "Time's up!";
+            } else {
+                totalMilliseconds -= 1000; // Decrease the time by 1 second (1000ms)
 
-                    let minutesLeft = Math.floor(totalMilliseconds / 60000); // Get minutes
-                    let secondsLeft = Math.floor((totalMilliseconds % 60000) / 1000); // Get seconds
+                let minutesLeft = Math.floor(totalMilliseconds / 60000); // Get minutes
+                let secondsLeft = Math.floor((totalMilliseconds % 60000) / 1000); // Get seconds
 
-                    // Format the time in "mm:ss"
-                    timerDisplay.innerHTML = \`${"${String(minutesLeft).padStart(2, '0')}"}:${"${String(secondsLeft).padStart(2, '0')}"}\`;
-                }
+                // Format the time in "mm:ss"
+                timerDisplay.innerHTML = \`${"${String(minutesLeft).padStart(2, '0')}"}:${"${String(secondsLeft).padStart(2, '0')}"}\`;
             }
-
-            // Start the interval to update the timer every second (1000ms)
-            const timerInterval = setInterval(updateTimer, 1000);
-
-            // Initial call to display the starting time
-            updateTimer();
         }
-        startTimer(totalTime);   
-    </script>
+
+        // Start the interval to update the timer every second (1000ms)
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        // Initial call to display the starting time
+        updateTimer();
+    }
+    startTimer(totalTime);   
+</script>
 </body>
 
 </html>`
-        return htmlString;
+    return htmlString;
+}
+
+const generateResult = async () => {
+    endTime = new Date();
+    const serverDuration = Math.floor((endTime - startTime) / 1000);
+    log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
+
+    const absentList = {};
+    for (const id in studentDetails) {
+        if (!presentList[id]) {
+            absentList[id] = studentDetails[id];
+        }
     }
 
+    log(yellow, "\n--------------------------");
+    log(yellow, "----------RESULT----------");
+    log(green, "\n----------PRESENT----------");
+    Object.values(presentList).forEach(({ usn, name }) => log(green, `${usn} : ${name}`));
+    log(red, "\n----------ABSENT----------");
+    Object.values(absentList).forEach(({ usn, name }) => log(red, `${usn} : ${name}`));
+    log(yellow, "\n--------------------------");
+    log(yellow, "--------------------------");
+    try {
+        log(yellow, "Generating Download Details...");
+        // To store the modified output path with date
+        excelOutputPath = await generateExcel(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+        log(green, "EXCEL successfully generated!");
+        pdfOutputPath = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
+        console.log(green, "PDF successfully generated!");
+    } catch (err) {
+        log(red, "Error during PDF generation:", err);
+    }
+};
+
+let isShuttingDown = false;
+
+const shutdownHandler = async () => {
+    if (isShuttingDown) {
+        log(yellow, "Server is shutting down..");
+        await closeServer()
+    }
+    isShuttingDown = true;
+    log(yellow, "Closing attendance portal...");
+    await killServer(); // To save the pdf
+    log("Password to Download the pdf\n");
+    log(red, attendanceDownloadPassword, '\n');
+    log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
+
+};
+
+// Set a timeout to call the shutdown handler
+setTimeout(() => {
+    shutdownHandler();
+}, attendanceWindowDuration);
+
+
+
+
+// Handle SIGINT for graceful shutdown
+// process.on("SIGINT", async () => {
+//     log(yellow, "Performing cleanup due to SIGINT...");
+//     await shutdownHandler();
+// });
+
+const startAttendance = (app, PORT) => {
     // Route to serve the main HTML file
     app.get('/', (req, res) => {
         if (isShuttingDown) {
@@ -400,58 +464,6 @@ const attendance = (app, PORT) => {
         return res.status(200).send(html);
     });
 
-
-    // Start the server
-    const server = app.listen(PORT, '0.0.0.0', () => {
-        startTime = new Date();
-        log("Password to Download the pdf\n");
-        log(red, attendanceDownloadPassword, '\n');
-        log(green, `Attendance link -> http://${localIP}:${PORT}`);
-    });
-
-
-    // Function to close the server
-    const closeServer = async () => {
-        server.close(() => {
-            log(yellow, 'Server stopped gracefully.');
-            process.exit(0);
-        });
-    }
-
-    // TODO: Rename the function because kill server doesn't actually kill whole server it just generates pdf and makes the download possible from web
-    const killServer = async () => {
-        endTime = new Date();
-        const serverDuration = Math.floor((endTime - startTime) / 1000);
-        log(yellow, `Shutting down the server after ${serverDuration} seconds...`);
-
-        const absentList = {};
-        for (const id in studentDetails) {
-            if (!presentList[id]) {
-                absentList[id] = studentDetails[id];
-            }
-        }
-
-        log(yellow, "\n--------------------------");
-        log(yellow, "----------RESULT----------");
-        log(green, "\n----------PRESENT----------");
-        Object.values(presentList).forEach(({ usn, name }) => log(green, `${usn} : ${name}`));
-        log(red, "\n----------ABSENT----------");
-        Object.values(absentList).forEach(({ usn, name }) => log(red, `${usn} : ${name}`));
-        log(yellow, "\n--------------------------");
-        log(yellow, "--------------------------");
-        try {
-            console.log(yellow, "Generating Download Details...");
-            // To store the modified output path with date
-            excelOutputPath = await generateExcel(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
-            console.log(green, "EXCEL successfully generated!");
-            pdfOutputPath = await generatePDF(OUTPUT_FILE_PATH, presentList, absentList); // Wait for PDF generation
-            console.log(green, "PDF successfully generated!");
-        } catch (err) {
-            log(red, "Error during PDF generation:", err);
-        }
-    };
-
-
     app.post('/pdf', (req, res) => {
         const { password } = req.body;
         if (password != attendanceDownloadPassword) {
@@ -489,33 +501,33 @@ const attendance = (app, PORT) => {
         console.log(green, "EXCEL Sent.")
     });
 
-
-    let isShuttingDown = false;
-
-    const shutdownHandler = async () => {
-        if (isShuttingDown) {
-            log(yellow, "Server is shutting down..");
-            await closeServer()
-        }
-        isShuttingDown = true;
-        log(yellow, "Closing attendance portal...");
-        await killServer(); // To save the pdf
+    // Start the server
+    const server = app.listen(PORT, '0.0.0.0', () => {
+        startTime = new Date();
         log("Password to Download the pdf\n");
         log(red, attendanceDownloadPassword, '\n');
-        log(green, `Refresh the page or visit http://${localIP}:${PORT} to download the attendance report.`);
+        log(green, `Attendance link -> http://${localIP}:${PORT}`);
+    });
 
-    };
+    return server;
 
-    // Set a timeout to call the shutdown handler
+}
+
+const endAttendance = async (server) => {
+    await generateResult();
     setTimeout(() => {
-        shutdownHandler();
-    }, attendanceWindowDuration);
+        closeServer(server);
+    }, interval * 1000);
+}
 
-    // Handle SIGINT for graceful shutdown
-    process.on("SIGINT", async () => {
-        log(yellow, "Performing cleanup due to SIGINT...");
-        await shutdownHandler();
+// Function to close the server
+const closeServer = async (server) => {
+    server.close(() => {
+        log(yellow, 'Server stopped gracefully.');
+        process.exit(0);
     });
 }
 
-module.exports = attendance;
+
+
+module.exports = { startAttendance, endAttendance, closeServer };
