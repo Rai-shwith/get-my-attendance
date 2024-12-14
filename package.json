@@ -22,6 +22,7 @@
     "pdfkit": "^0.15.1",
     "perf_hooks": "^0.0.1",
     "prompt-sync": "^4.2.0",
+    "winston": "^3.17.0",
     "xlsx": "^0.18.5"
   }
 }
