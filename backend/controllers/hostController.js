@@ -39,9 +39,16 @@ const getLoginPage = (req, res) =>{
 // Route to handle the login request
 const login = (req, res) => {
     const { username, password } = req.body;
-    if (username === 'host' && password === '1234') {
+    if (username === 'admin' && password === '1234') {
         req.session.isLoggedIn = true; // Mark host as logged in
-        res.redirect('/hostHomepage');
+        // Set the default window for the attendance 
+        const interval = 5;
+        res.cookie('interval', 5, {
+            maxAge: 31104000000, // 1 year
+            httpOnly: false, 
+            secure: false,   
+        });
+        res.redirect('/host');
     } else {
         res.render('error', { message: "Invalid credentials!" });
     }
@@ -63,4 +70,4 @@ const logout = (req, res) => {
 };
 
 
-module.exports = { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage };
+module.exports = { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage,logout };

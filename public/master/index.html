@@ -18,7 +18,7 @@
         </div>
 
         <!-- back icon -->
-        <div id="backIcon" class="header-icon left hidden" onclick="showSection('homePage')">
+        <div id="backIcon" class="header-icon left " onclick="showSection('homePage')">
             <img src="images/svg/back.svg" alt="Home icon" srcset="">
         </div>
     </header>
@@ -47,14 +47,14 @@
 
 
     <!-- Registration Phase (Hidden Initially) -->
-    <section class="container hidden" id="registrationPhase">
+    <section class="container " id="registrationPhase">
         <div class="card ">
             <h2>Set Registration Time Window</h2>
             <label for="timeWindow">Enter Time Window in minutes:</label>
             <input type="text" id="timeWindow" placeholder="5">
             <button class="button" onclick="submitRegistrationTime()">Submit</button>
 
-            <div id="linkContainer" class="link-container hidden">
+            <div id="linkContainer" class="link-container ">
                 <span class="output-link" id="generatedLink">https://example.com/register</span>
                 <button class="copy-button" onclick="copyToClipboard()">Copy Link</button>
             </div>
@@ -64,7 +64,7 @@
 
 
     <!-- Attendance Section -->
-    <section class="card hidden" id="attendanceSection">
+    <section class="card " id="attendanceSection">
         <!-- <h2>Attendance Logs</h2> -->
 
         <!-- Countdown Timer -->
@@ -97,7 +97,7 @@
 
 
     <!-- Settings Section -->
-    <section class="card hidden" id="settingsSection">
+    <section class="card " id="settingsSection">
         <h2>Settings</h2>
 
         <!-- Registration Time Window Input -->
@@ -121,7 +121,7 @@
 
 
     <!-- Enrolled Students Section -->
-    <section class="card hidden" id="enrolledStudentsSection">
+    <section class="card " id="enrolledStudentsSection">
         <h2>Enrolled Students</h2>
 
         <!-- Table Container -->
