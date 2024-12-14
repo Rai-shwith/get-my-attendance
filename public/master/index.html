@@ -16,7 +16,7 @@
         <div class="header-icon right" onclick="showSection('settingsSection')">
             <img src="images/svg/settings.svg" alt="settings icon" srcset="">
         </div>
-        
+
         <!-- back icon -->
         <div id="backIcon" class="header-icon left hidden" onclick="showSection('homePage')">
             <img src="images/svg/back.svg" alt="Home icon" srcset="">
@@ -30,16 +30,16 @@
             <!-- Attendance Card -->
             <div class="card">
                 <h2>Attendance</h2>
-                <a href="#" class="button" onclick="showSection('attendanceSection')">Take Attendance</a>
+                <a href="#" id="startRegistrationBtn" class="button" onclick="showSection('attendanceSection')">Take Attendance</a>
                 <!-- <a href="#" class="button">See History</a> -->
-                <a href="#" class="button" onclick="showSection('enrolledStudentsSection')" >View Enrolled Students</a>
+                <a href="#" class="button" onclick="showSection('enrolledStudentsSection')">View Enrolled Students</a>
             </div>
 
 
             <!-- Registration Card -->
             <div class="card">
                 <h2>Registration</h2>
-                <a href="#" class="button" onclick="showSection('registrationPhase')">Start Registration</a>
+                <a href="#" class="button" onclick="showSection('registrationPhase')" >Start Registration</a>
                 <a href="#" class="button">Edit Registered Students</a>
             </div>
         </div>
@@ -65,26 +65,31 @@
 
     <!-- Attendance Section -->
     <section class="card hidden" id="attendanceSection">
-        <h2>Attendance Logs</h2>
+        <!-- <h2>Attendance Logs</h2> -->
 
         <!-- Countdown Timer -->
-        <div class="countdown-timer">
+        <!-- <div class="countdown-timer">
             Time Remaining: <span class="countdown" id="countdownTimer">00:30</span>
-        </div>
+        </div> -->
 
         <!-- Log Container -->
-        <div class="log-container">
+        <!-- <div class="log-container">
             <ul class="logs" id="logView">
                 <li class="log-item log-success">Attendance successfully recorded for <b>John Doe [1MS23EC029]</b>.</li>
                 <li class="log-item log-info">John Doe <b>[1MS23EC029]</b> has already marked attendance.</li>
                 <li class="log-item log-warning">An unregistered user attempted to mark attendance.</li>
                 <li class="log-item log-error">John Doe's information has been erased from the system.</li>
             </ul>
-        </div>
+        </div> -->
 
+        <!-- display Link -->
+        <div id="linkContainer" class="link-container">
+            <span class="output-link" id="attendanceGeneratedLink"></span>
+            <button type="button" class="copy-button" onclick="copyToClipboard()">Copy Link</button>
+        </div>
         <!-- Stop Attendance Button -->
         <div class="stop-container">
-            <button class="button stop-button">Stop Attendance</button>
+            <button type="button" class="button stop-button">Stop Attendance</button>
         </div>
     </section>
 
@@ -115,41 +120,41 @@
 
 
 
-<!-- Enrolled Students Section -->
-<section class="card hidden" id="enrolledStudentsSection">
-    <h2>Enrolled Students</h2>
+    <!-- Enrolled Students Section -->
+    <section class="card hidden" id="enrolledStudentsSection">
+        <h2>Enrolled Students</h2>
 
-    <!-- Table Container -->
-    <div class="table-container">
-        <table class="students-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>USN</th>
-                    <th>Date of Registration</th>
-                </tr>
-            </thead>
-            <tbody id="studentsTableBody">
-                <!-- Example of dynamically generated rows -->
-                <tr>
-                    <td>John Doe</td>
-                    <td>1MS23EC029</td>
-                    <td>2023-11-15</td>
-                </tr>
-                <tr>
-                    <td>Jane Smith</td>
-                    <td>1MS23EC030</td>
-                    <td>2023-11-20</td>
-                </tr>
-                <tr>
-                    <td>Ali Khan</td>
-                    <td>1MS23EC031</td>
-                    <td>2023-12-01</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
+        <!-- Table Container -->
+        <div class="table-container">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>USN</th>
+                        <th>Date of Registration</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <!-- Example of dynamically generated rows -->
+                    <tr>
+                        <td>John Doe</td>
+                        <td>1MS23EC029</td>
+                        <td>2023-11-15</td>
+                    </tr>
+                    <tr>
+                        <td>Jane Smith</td>
+                        <td>1MS23EC030</td>
+                        <td>2023-11-20</td>
+                    </tr>
+                    <tr>
+                        <td>Ali Khan</td>
+                        <td>1MS23EC031</td>
+                        <td>2023-12-01</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
 
 

@@ -11,7 +11,7 @@ const deleteCookie = require('./deleteCookie');
 const register = require('./register');
 const { link } = require('pdfkit');
 
-const isAppServing = false; // Flag to check if the app is serving or not
+let isAppServing = false; // Flag to check if the app is serving or not
 let service; // Service name
 let server ; // Server object
 
@@ -38,7 +38,7 @@ const hostServer = host.listen(HOSTPORT, '0.0.0.0', () => {
 
 
 
-host.post('/start', (res, req) => {
+host.post('/start', (req, res) => {
     if (isAppServing) {
         res.status(400).json({message:'Server is already serving'});
         return;
@@ -62,10 +62,10 @@ host.post('/start', (res, req) => {
         return;
     }
     isAppServing = true;
-    res.status(200).json({ message: 'Server started', service: serverObject,link: `http://${localIP}:${PORT}` });
+    res.status(200).json({ message: 'Server started',link: `http://${localIP}:${PORT}` });
 });
 
-host.get('/end', (res, req) => {
+host.get('/end', (req, res) => {
     if (!isAppServing) {
         res.status(400).send('Server is not serving');
         return;
@@ -82,8 +82,9 @@ host.get('/end', (res, req) => {
 });
 
 
-host.get('/', (res, req) => {
-});
+// host.get('/', (req, res) => {
+//     res.send("hello ");
+// });
 
 
 

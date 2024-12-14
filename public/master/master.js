@@ -1,3 +1,4 @@
+
 function showRegistrationPhase() {
     document.getElementById('registrationPhase').classList.remove('hidden');
 }
@@ -28,6 +29,24 @@ function addLogEntry() {
 }
 
 
+function startServer(serverObject){
+    fetch('/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({serverObject}),
+    }).then(response => response.json())
+    .then(data => {
+        console.log('Success:', data.message);
+        console.log("Link: ",data.link);
+        document.getElementById('attendanceGeneratedLink').textContent = data.link;
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 
 // Function to close all other sections and open only given section
 function showSection(id){
@@ -45,3 +64,8 @@ function showSection(id){
 
     document.getElementById(id).classList.remove('hidden');
 }
+
+document.getElementById('startRegistrationBtn').addEventListener('click',()=>{
+    console.log("Calling attendance");
+    startServer('attendance');
+})
