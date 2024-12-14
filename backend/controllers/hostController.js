@@ -1,11 +1,6 @@
-// backend/controllers/hostController.js
-const logger = require('../utils/logger'); // Import the logger
+const {logger} = require('../utils/logger'); // Import the logger
+const { authenticateHost } = require('../utils/auth'); // Import the authentication service
 
-// Dummy authentication function for the host (teacher)
-const authenticateHost = (password) => {
-    const correctPassword = process.env.HOST_PASSWORD; // Assuming you store the password in .env
-    return password === correctPassword;
-};
 
 // Route to start attendance
 const startAttendance = (req, res) => {

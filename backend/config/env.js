@@ -19,6 +19,7 @@ module.exports = {
 
     // Authentication configuration
     auth: {
+        password: process.env.AUTH_PASSWORD || 'your-password',
         secretKey: process.env.AUTH_SECRET_KEY || 'your-secret-key',
         sessionTimeout: process.env.SESSION_TIMEOUT || 3600, // 1 hour session default
     },

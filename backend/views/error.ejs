@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #dc3545;
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1><%= status || 500 %> - <%= message || "Something went wrong" %></h1>
+    <p><%= error || "An unexpected error occurred. Please try again later." %></p>
+    <a href="/">Go back to Home</a>
+</body>
+</html>
