@@ -13,7 +13,7 @@ const checkAuth = (req, res, next) => {
 };
 
 // Start attendance
-router.post('/host/start-attendance', checkAuth, attendanceController.startAttendance);
+router.post('/attendance', checkAuth, attendanceController.startAttendance);
 
 // Stop attendance
 router.post('/host/stop-attendance', checkAuth, attendanceController.stopAttendance);

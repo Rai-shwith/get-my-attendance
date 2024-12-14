@@ -1,13 +1,15 @@
-// backend/server.js
+// backend/auth.js
 
 const express = require('express');
-const session = require('express-session');
+const session = require('express-session'); 
 const path = require('path');
 const hostRoutes = require('./routes/hostRoutes');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const registerRoutes = require('./routes/registerRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const deleteCookieRoutes = require('./routes/deleteCookieRoutes');
+const {auth} = require('./config/env');
 
 const app = express();
 
@@ -16,10 +18,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Cookie Parser middleware
-host.use(cookieParser(SECRET_KEY));
+app.use(cookieParser(auth.secretKey));
+
+// Session middleware
+app.use(session({
+    secret: auth.secretKey,      // Secret key for signing the cookie
+    resave: false,               // Prevent resaving unmodified sessions
+    saveUninitialized: true,     // Save new, empty sessions
+    cookie: { maxAge: 31104000000 }  // Session expires in 1 year
+}));
 
 // Static files (e.g., images, styles)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public/static')));
 
 // Set 'views' directory for any views being rendered
 app.set('views', path.join(__dirname, 'views'));
@@ -32,7 +42,7 @@ app.get('/', (req, res) => {
 });
 
 // Use the route handlers
-app.use('/', hostRoutes);
+app.use('/host', hostRoutes);
 app.use('/', attendanceRoutes);
 app.use('/', registerRoutes);
 app.use('/', deleteCookieRoutes);
@@ -50,7 +60,7 @@ app.use((err, req, res, next) => {
     res.status(status).render('error', { status, message, error });
 });
 
-// Start the server
+// Start the auth
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

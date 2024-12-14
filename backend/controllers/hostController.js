@@ -31,4 +31,36 @@ const stopAttendance = (req, res) => {
     }
 };
 
-module.exports = { startAttendance, stopAttendance };
+// Route to serve the login page
+const getLoginPage = (req, res) =>{
+    res.render('hostLogin');
+};
+
+// Route to handle the login request
+const login = (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'host' && password === '1234') {
+        req.session.isLoggedIn = true; // Mark host as logged in
+        res.redirect('/hostHomepage');
+    } else {
+        res.render('error', { message: "Invalid credentials!" });
+    }
+};
+
+// Route to serve the webpage
+const getHostHomepage = (req, res) => {
+    res.render('hostHomepage');
+}
+
+// Route to logout 
+const logout = (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error("Error destroying session:", err);
+        }
+        res.redirect('/login');
+    });
+};
+
+
+module.exports = { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage };

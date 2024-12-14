@@ -7,6 +7,7 @@ module.exports = {
     // Server configuration
     server: {
         port: process.env.PORT || 3000, // Default to 3000 if not set in .env
+        secretKey: process.env.SERVER_SECRET_KEY || 3000, // 
     },
 
     // Database configuration (Example)
