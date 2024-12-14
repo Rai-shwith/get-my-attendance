@@ -15,7 +15,7 @@ function ensureLogin(req, res, next) {
 router.get('/',ensureLogin,getHostHomepage);
 
 // Route to start attendance
-router.post('/start-attendance',ensureLogin, startAttendance);
+router.get('/start-attendance',ensureLogin, startAttendance);
 
 // Route to stop attendance
 router.post('/stop-attendance',ensureLogin, stopAttendance);

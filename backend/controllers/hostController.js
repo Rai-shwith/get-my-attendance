@@ -1,19 +1,22 @@
-const {logger} = require('../utils/logger'); // Import the logger
+const { logger } = require('../utils/logger'); // Import the logger
 const { authenticateHost } = require('../utils/auth'); // Import the authentication service
+const { getAttendanceState, setAttendanceState } = require('../states/attendanceState');
 
 
 // Route to start attendance
 const startAttendance = (req, res) => {
-    const { password } = req.body; // Assuming the password is sent in the request body
-
-    // Authenticate the host (teacher)
-    if (authenticateHost(password)) {
+    if (!getAttendanceState()) {
+        const interval = req.cookies.interval || 5;
         logger.info('Attendance process started by host');
-        // Logic to start attendance (e.g., mark the session as active)
-        res.status(200).json({ message: 'Attendance process started' });
+        //TODO: Logic to start attendance 
+        setAttendanceState(true);
+
+        // TODO: pass the actual link of the server
+        const link = 'http://localhost:3000/attendance';
+        res.render('hostAttendanceSection', { interval, link});
     } else {
-        logger.warn('Failed attendance start attempt by unauthorized user');
-        res.status(403).json({ message: 'Unauthorized' });
+        logger.warn('Failed attendance start attempt while attendance is already active');
+        // res.render()
     }
 };
 
@@ -32,7 +35,7 @@ const stopAttendance = (req, res) => {
 };
 
 // Route to serve the login page
-const getLoginPage = (req, res) =>{
+const getLoginPage = (req, res) => {
     res.render('hostLogin');
 };
 
@@ -45,8 +48,8 @@ const login = (req, res) => {
         const interval = 5;
         res.cookie('interval', 5, {
             maxAge: 31104000000, // 1 year
-            httpOnly: false, 
-            secure: false,   
+            httpOnly: false,
+            secure: false,
         });
         res.redirect('/host');
     } else {
@@ -70,4 +73,4 @@ const logout = (req, res) => {
 };
 
 
-module.exports = { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage,logout };
+module.exports = { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, logout };

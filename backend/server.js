@@ -10,6 +10,8 @@ const registerRoutes = require('./routes/registerRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const deleteCookieRoutes = require('./routes/deleteCookieRoutes');
 const {auth} = require('./config/env');
+const FileStore = require('session-file-store')(session);
+
 
 const app = express();
 
@@ -25,7 +27,13 @@ app.use(session({
     secret: auth.secretKey,      // Secret key for signing the cookie
     resave: false,               // Prevent resaving unmodified sessions
     saveUninitialized: true,     // Save new, empty sessions
-    cookie: { maxAge: 31104000000 }  // Session expires in 1 year
+    cookie: { maxAge: 31104000000 },  // Session expires in 1 year
+    store: new FileStore({
+        path: './sessions',  // Directory to store session files
+        ttl: 31536000000,    // Time-to-live for each session in milliseconds (1 year)
+        retries: 0,          // Number of retries to access the file store
+        cleanupInterval: 86400  // Cleanup interval (every 24 hours)
+    })
 }));
 
 // Static files (e.g., images, styles)
