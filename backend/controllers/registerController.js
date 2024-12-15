@@ -4,9 +4,9 @@ const helpers = require('../utils/helpers');
 const {getStudentByUSN,currentRegistration,getStudentById,addStudent} = require('../models/studentDetails');
 const { getRegistrationState, setRegistrationState } = require('../states/registerState');
 const { logger } = require('../utils/logger');
-const { id_ID } = require('@faker-js/faker');
 
 
+// TODO: Break this into middlewares as attendanceRoutes.js
 const handleRegistration = (registerID,name,usn, req) => {
     logger.debug(`Entering handleRegistration : Id[${registerID}] Name[${name}] USN[${usn}]`);
     // If the registerID (Cookie) is empty then he either cleared his browser info(Already Registered) or New Registration

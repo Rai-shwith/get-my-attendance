@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance</title>
+    <style>
+        h1 {
+            color: <%=color %>;
+        }
+    </style>
+    <link rel="stylesheet" href="/css/attendance.css">
+</head>
+
+<body class="column">
+    <% if (attendanceStarted) { %>
+        <header>Time remaining : <span id="timer" style="color: red;"><%= interval %></span></header>
+        <div class="container">
+            <h1>
+                <%= message %>
+            </h1>
+            <% if (showReasons) { %>
+                <h2 style="text-align: left;">Reasons :
+                    <ul>
+                        <li>You did not register</li>
+                        <li>You registered in incognito mode</li>
+                        <li>You registered in another Browser</li>
+                        <li>You cleared the Cookies or Browser cache</li>
+                    </ul>
+                </h2>
+                <% } %>
+        </div>
+        <br>
+
+        <% if (hideInfo) { %>
+            <div class="container">
+                <section>
+                    <h2><%= name %> : <%= usn %></h2>
+                </section>
+            </div>
+            <% } %>
+
+    <% } else { %>
+        <div class="container">
+            <h1>The Attendance process has not been initiated by the host.</h1>
+        </div>
+    <% } %>
+                    <footer>
+                        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> .
+                        Licensed under
+                        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC
+                            BY-NC-SA 4.0</a>.
+                    </footer>
+                    <script src="/js/attendance.js"></script>
+</body>
+
+</html>

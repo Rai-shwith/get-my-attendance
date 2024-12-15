@@ -10,6 +10,7 @@ const registerRoutes = require('./routes/registerRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const deleteCookieRoutes = require('./routes/deleteCookieRoutes');
 const {auth} = require('./config/env');
+const { logger } = require('./utils/logger');
 const FileStore = require('session-file-store')(session);
 
 
@@ -63,7 +64,7 @@ app.use((err, req, res, next) => {
     const status = err.status || 500;
     const message = err.message || 'Internal Server Error';
     const error = req.app.get('env') === 'development' ? err.stack : '';
-
+    logger.error(`Error: ${message}`);
     // Render the error.ejs template
     res.status(status).render('error', { status, message, error });
 });

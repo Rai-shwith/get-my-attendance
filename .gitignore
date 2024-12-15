@@ -134,3 +134,6 @@ dist
 attendance/info.json
 .vscode/
 NOTES/
+
+sessions/
+backend/data/

@@ -5,6 +5,7 @@ const router = express.Router();
 const registerController = require('../controllers/registerController');
 
 
+
 // Router to render the registration page
 router.get('/register', registerController.getRegistrationPage);
 

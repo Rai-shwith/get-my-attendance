@@ -4,6 +4,7 @@ const { logger } = require('../utils/logger');
 
 let studentCache = {};  // Using an object to store the details of student
 let currentRegistrationCache = {}; // Students Registered in a session
+let presentStudentCache = {}; // Students present in a attendance session
 
 
 // Load data into cache once at startup
@@ -71,6 +72,22 @@ currentRegistration.addStudent = (id, student) => {
     currentRegistrationCache[id] = student;
 };
 
+// Object to store operations on attendance
+const attendance = {};
+
+// Function to get the details of student who gave attendance
+attendance.getPresentStudentByID = (id) => {
+    const student = presentStudentCache[id] || null;  // Return null if the student doesn't exist
+    logger.debug(`attendance.getStudentByID :${id} -> ${student}]`)
+    return student
+};
+
+// Function to add student to presentStudentCache
+attendance.addStudent = (id, student) => {
+    logger.debug(`attendance.addStudent :${id} -> ${student.name}[${student.usn}]`)
+    presentStudentCache[id] = student;
+};
+
 loadStudentData()
 
-module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, currentRegistration };
+module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, currentRegistration,attendance };

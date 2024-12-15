@@ -7,7 +7,7 @@ const { saveStudentData } = require('../models/studentDetails');
 
 // Route to start attendance
 const startAttendance = (req, res) => {
-    const interval = req.cookies.interval || 5;
+    const interval = req.cookies.interval || 5*60*1000;
     const link = 'http://localhost:3000/attendance';
     if (getRegistrationState()) {
         logger.warn('Failed attendance start attempt while registration is active');
@@ -34,7 +34,7 @@ const stopAttendance = (req, res) => {
     logger.debug("stopAttendance :Entering");
     if (getAttendanceState()){
         setAttendanceState(false);
-        saveStudentData();
+        
         // TODO: render hostAttendanceReport
         res.redirect('/host') 
         logger.info("Stopping the Attendance Process")
@@ -103,7 +103,7 @@ const login = (req, res) => {
     if (username === 'admin' && password === '1234') {
         req.session.isLoggedIn = true; // Mark host as logged in
         // TODO: Set the default window for the attendance 
-        const interval = 5;
+        const interval = 5*60*1000;
         res.cookie('interval', 5, {
             maxAge: 31104000000, // 1 year
             httpOnly: false,
