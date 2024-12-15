@@ -11,7 +11,7 @@ const logFormat = winston.format.combine(
 
 // Create the logger with different transports (e.g., console and file)
 const logger = winston.createLogger({
-    level: 'info', // Default logging level
+    level: 'debug',
     format: logFormat,
     transports: [
         // Log to console

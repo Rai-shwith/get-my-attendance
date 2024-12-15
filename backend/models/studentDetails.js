@@ -1,15 +1,19 @@
 const fs = require('fs');
 const { filePaths } = require('../config/env');
+const { logger } = require('../utils/logger');
 
-let studentCache = {};  // Using an object instead of an array
+let studentCache = {};  // Using an object to store the details of student
+let currentRegistrationCache = {}; // Students Registered in a session
+
 
 // Load data into cache once at startup
 const loadStudentData = () => {
     try {
         const data = fs.readFileSync(filePaths.studentDetailsPath, 'utf8');
         studentCache = JSON.parse(data);
+        logger.debug('Student data loaded successfully');
     } catch (error) {
-        console.error('Failed to load student data:', error);
+        logger.error('Failed to load student data:', error);
     }
 };
 
@@ -17,25 +21,31 @@ const loadStudentData = () => {
 const saveStudentData = () => {
     try {
         fs.writeFileSync(filePaths.studentDetailsPath, JSON.stringify(studentCache, null, 2), 'utf8');
+        logger.debug('Student Data Saved .')
     } catch (error) {
-        console.error('Failed to save student data:', error);
+        logger.error('Failed to save student data:', error);
     }
 };
 
 // Add a student to the cache
 const addStudent = (id, student) => {
+    logger.debug(`addStudent :${id} -> ${student.name}[${student.usn}]`)
     studentCache[id] = student;  // Use the unique ID as the key
 };
 
 // Get student by ID
 const getStudentById = (id) => {
-    return studentCache[id] || null;  // Return null if the student doesn't exist
+    const student = studentCache[id] || null;  // Return null if the student doesn't exist
+    logger.debug(`getStudentByID :${id} -> ${student}]`)
+    return student
 };
 
 // Get student by name 
 const getStudentByName = (name) => {
+
     for (let id in studentCache) {
         if (studentCache[id].name === name) {
+            logger.debug(`getStudentByName :${name} -> ${id}[${student.usn}]`)
             return studentCache[id];  // Return student if name matches
         }
     }
@@ -46,6 +56,7 @@ const getStudentByName = (name) => {
 const getStudentByUSN = (usn) => {
     for (let id in studentCache) {
         if (studentCache[id].usn === usn) {
+            logger.debug(`getStudentByUSN :${usn} -> ${id}[${studentCache[id].name}]`)
             return studentCache[id];  // Return student if USN matches
         }
     }
@@ -53,4 +64,13 @@ const getStudentByUSN = (usn) => {
 };
 
 
-module.exports = { loadStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN };
+// Object to store operation on current Registration
+const currentRegistration = {};
+currentRegistration.addStudent = (id, student) => {
+    logger.debug(`currentRegistration.addStudent :${id} -> ${student.name}[${student.usn}]`)
+    currentRegistrationCache[id] = student;
+};
+
+loadStudentData()
+
+module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, currentRegistration };

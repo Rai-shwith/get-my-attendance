@@ -1,66 +1,115 @@
 // backend/controllers/registerController.js
 
 const helpers = require('../utils/helpers');
-const studentDetails = require('../models/studentDetails');
+const {getStudentByUSN,currentRegistration,getStudentById,addStudent} = require('../models/studentDetails');
+const { getRegistrationState, setRegistrationState } = require('../states/registerState');
+const { logger } = require('../utils/logger');
+const { id_ID } = require('@faker-js/faker');
 
-exports.startRegister = (req, res) => {
-    // Logic to start the registration process
-    res.send('Registration started');
-};
 
-exports.registerStudent = (req, res) => {
-    const { name, usn } = req.body;
-
-    // Simple validation
-    if (!name || !usn) {
-        return res.status(400).send('Name and USN are required');
+const handleRegistration = (registerID,name,usn, req) => {
+    logger.debug(`Entering handleRegistration : Id[${registerID}] Name[${name}] USN[${usn}]`);
+    // If the registerID (Cookie) is empty then he either cleared his browser info(Already Registered) or New Registration
+    const alreadyRegistered = getStudentByUSN(usn);
+    if (registerID === undefined) {
+        logger.debug("ID is undefined")
+        // Checking whether the student is already registered or not based on USN
+        // If the user is not registered before a unique registerID is set to users Cookie and the registration completes
+        if (!alreadyRegistered) {
+            logger.debug("New Registration")
+            // Setting unique ID as Cookie 
+            const uniqueId = helpers.generateID()
+            req.session.registerID = uniqueId;
+            logger.debug("registerID set in the cache")
+            addStudent(uniqueId,{name,usn});
+            currentRegistration.addStudent(uniqueId,{name,usn});
+            logger.info("Registering " + name);
+        } // If the user is already registered he have to contact the admin to log him
+        // This could have happened if he deleted his browser cookies or cache.
+        // Solution : Delete the information about the student from student details json file. (Be careful ) 
+        else if ((alreadyRegistered.name !== name)) {
+            errorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if there is any issues.`
+            logger.error(`${name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
+            const error = new Error(errorMessage);
+            error.code = 409;
+            throw error;
+        } else {
+            errorMessage = `${alreadyRegistered.usn} is already registered by ${alreadyRegistered.name}!<br>Please contact the admin if you want to login.`
+            logger.error(`${name} is trying to register ${alreadyRegistered.usn}:${alreadyRegistered.name}`)
+            const error = new Error(errorMessage);
+            error.code = 409;
+            throw error;
+        }
+        // If the user has registerID (Cookie) then,
+        // CASE 1: He may be trying to register again
+        // CASE 2 : He may be trying to register again with another USN
+        // CASE 3: He may be trying to register Others
+        // CASE 4: His information is erased from Student Details
+} else {
+        let errorMessage;
+        // CASE 4: 
+        // Solution for CASE4: Run the deleteCookie.js script to delete the cookie form this user and then run this (register.js) script to register him again
+        if (getStudentById(registerID) === null) {
+            errorMessage = "Your information is erased from the system. Please contact the admin."
+            logger.error(`${name}'s information is erased from the system`)
+            const error = new Error(errorMessage);
+            error.code = 409;
+            throw error;
+        }
+        // CASE 1:
+        if (getStudentById(registerID).name === name && (getStudentById(registerID).usn === usn)) {
+            errorMessage = `${getStudentById(registerID).name} is already registered`
+            logger.warn( errorMessage)
+            const error = new Error(errorMessage);
+            error.code = 409;
+            throw error;
+        }
+        // CASE 2:
+        else if (getStudentById(registerID).name === name && (getStudentById(registerID).usn !== usn)) {
+            errorMessage = `Your USN is ${getStudentById(registerID).usn} right?<br>Please contact the admin if there is any issues.`
+            const error = new Error(errorMessage);
+            error.code = 409;
+            throw error;
+        }
+        // CASE 3:
+        else {
+            errorMessage = `${getStudentById(registerID).name} is trying to register ${name}.<br>THIS INCIDENT WILL BE REPORTED!!!!`
+            logger.error(`${getStudentById(registerID).name} is trying to register ${name}`)
+            const error = new Error(errorMessage);
+            error.code = 409;
+            throw error;
+        }
     }
-
-    // Store the student data (e.g., in a database or in memory)
-    studentDetails.addStudent(name, usn);
-
-    // Respond with success
-    res.send('Student registered');
 };
 
-// jsut a kdsalfadksjlask
 
-// const fs = require('fs');
-// const path = require('path');
-// const { getLocalIP, log, green, red, yellow, interval, STUDENT_DETAILS_PATH } = require('../../config/env');
-// const { generateID, getAlreadyRegistered } = require('../utils/helpers');
 
-// const localIP = getLocalIP();
-// const studentDetails = JSON.parse(fs.readFileSync(STUDENT_DETAILS_PATH, 'utf8'));
-// let attendanceWindowDuration = interval * 1000;
-// let currentRegistration = {};
+exports.getRegistrationPage = (req, res) => {
+    logger.info('GET /register');
+    // check if the registration is started
+    if (getRegistrationState()) {
+    // TODO: Logic to get the time left for registration
+    let timer = 1000*60*5;
+    res.render('register', { timer,registerStarted: true });
+    } else {
+    logger.info('Registration not started');
+    res.render('register', { timer: 0,registerStarted: false });
+    }
+};
 
-// const register = (req, res) => {
-//     const filePath = path.join(__dirname, '../public', 'register.html');
-//     fs.readFile(filePath, 'utf8', (err, data) => {
-//         if (err) {
-//             return res.status(500).send('Error reading the file.');
-//         }
-//         const registerUrl = `http://${localIP}:${PORT}/register`;
-//         let modifiedHtml = data.replace('%registerUrl%', registerUrl);
-//         modifiedHtml = modifiedHtml.replace('%timer%', String(attendanceWindowDuration));
-//         res.send(modifiedHtml);
-//     });
-// };
-
-// const handleRegistration = (req, res) => {
-//     const id = req.signedCookies.id;
-//     const info = req.body.info;
-//     try {
-//         // Registration logic here
-//         // ...
-//         return res.status(200).json({ message: "Registration Successful" });
-//     } catch (error) {
-//         if (error.code === 409) {
-//             return res.status(error.code).json({ message: error.message });
-//         }
-//     }
-//     res.status(500).json({ message: "Something Went Wrong Please Contact the Admin" });
-// };
-
-// module.exports = { register, handleRegistration };
+//  Router to register Student
+exports.registerStudent = (req, res) => {
+    const registerID = req.session.registerID;
+    const { name, usn } = req.body;
+    logger.info(`POST /register ${name} : ${usn}`);
+    try {
+        handleRegistration(registerID, name, usn, req)
+        return res.status(200).json({ message: "Registration Successful" });
+    } catch (error) {
+        logger.error(error.message)
+        if (error.code === 409) {
+            return res.status(error.code).json({ message: error.message });
+        }
+    }
+    res.status(500).json({ message: "Something Went Wrong Please Contact the Admin" });
+};

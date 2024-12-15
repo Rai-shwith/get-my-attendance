@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+body.column{
+    display: flex;
+    flex-direction: column;
+}
+
+body.column > .container{
+    margin: 0;
+}
+
+.AttendanceSuccess{
+    color: #45a049;
+}
+
+#timer{
+color: red;
+}
+
+header{
+    position: absolute;
+    text-align: center;
+    z-index: 10;
+    top: 10px;
+    width: 90vw;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px 40px;
+    border-radius: 12px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2); 
+}
+
+.container {
+    margin: auto 3%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px 40px;
+    border-radius: 12px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+input[type="number"],[type="text"] {
+    padding: 10px;
+    width: 80%;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #4caf50;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+button:active{
+    transform: scale(1.2);
+}
+
+#message {
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #ffdd57;
+}
+
+.hidden {
+    display: none;
+}
+
+footer{position: absolute;bottom: 0;text-align: center;background: rgba(255, 255, 255, 0.1);padding: 0.5em;width: 100vw;font-size: small;border-radius: 12px;box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);}

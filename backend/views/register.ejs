@@ -1,16 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="stylesheet" href="/css/register.css">
 </head>
+
 <body>
-    <h1>Registration Page</h1>
-    <% if (registrationOpen) { %>
-        <p>Registration is open. Please fill in your details.</p>
-    <% } else { %>
-        <p>Registration is closed. Please check back later.</p>
-    <% } %>
+    
+    <% if (registerStarted) { %>
+        <header class="container">Time remaining : <span id="timer"><%= timer%></span></header>
+        <div class="container">
+            <h1>Enter Your Details</h1>
+            <form id="registerForm">
+                <input type="text" id="studentName" name="name" placeholder="Full Name" required>
+                <input type="text" id="usn" name="usn" placeholder="USN" required>
+                <button id="submitBtn" type="submit">Register</button>
+                <p id="message" class="hidden"></p>
+            </form>
+        </div>
+      <% } else { %>
+        <div class="container">
+            <h1>The registration process has not been initiated by the host.</h1>
+        </div>
+      <% } %>
+
+
+
+    <footer>
+        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a> . Licensed under
+        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+    </footer>
+
+    <script src="/js/register.js"></script>
 </body>
+
 </html>

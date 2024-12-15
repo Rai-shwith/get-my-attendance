@@ -53,7 +53,7 @@ app.get('/', (req, res) => {
 app.use('/host', hostRoutes);
 app.use('/', attendanceRoutes);
 app.use('/', registerRoutes);
-app.use('/', deleteCookieRoutes);
+// app.use('/', deleteCookieRoutes);
 
 
 

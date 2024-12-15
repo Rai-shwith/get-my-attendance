@@ -13,10 +13,10 @@ const checkAuth = (req, res, next) => {
 };
 
 // Start attendance
-router.post('/attendance', checkAuth, attendanceController.startAttendance);
+router.get('/attendance', checkAuth, attendanceController.startAttendance);
 
-// Stop attendance
-router.post('/host/stop-attendance', checkAuth, attendanceController.stopAttendance);
+// // Stop attendance
+// router.post('/host/stop-attendance', checkAuth, attendanceController.stopAttendance);
 
 // Get attendance report (PDF/Excel)
 router.get('/attendance/report', checkAuth, attendanceController.getAttendanceReport);

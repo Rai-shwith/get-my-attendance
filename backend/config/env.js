@@ -27,6 +27,7 @@ module.exports = {
 
     // File paths for reports (just an example)
     filePaths: {
+        studentDetailsPath: process.env.STUDENT_DETAILS_PATH, // Path to student details file
         pdfPath: process.env.PDF_REPORT_PATH || './data/attendace-reports/pdf',
         excelPath: process.env.EXCEL_REPORT_PATH || './data/attendace-reports/excel',
     },

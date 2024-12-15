@@ -5,59 +5,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Take Attendance</title>
-    <link rel="stylesheet" href="/css/attendance.css"> 
+    <link rel="stylesheet" href="/css/attendance.css">
 </head>
 
 <body>
     <header>
         Attendance Portal - Take Attendance
     </header>
+    <!-- TODO: implement timer feature -->
     <%= interval%>
-    <section id="attendanceSection" class="container">
-        <h1>Share Attendance Link</h1>
+        <% if (otherProcessRunning) { %>
+            <div class="container">
+                <h1>Another process is already in progress. Please complete or stop the current process before starting
+                    a new one.</h1>
+            </div>
+            <% } else { %>
+                <section id="attendanceSection" class="container">
+                    <!-- Notification -->
+                    <div id="attendanceNotification"></div>
+                    <h1>Share Attendance Link</h1>
 
-        <!-- Attendance Link Section -->
-        <div class="attendance-link-container">
-            <input type="text" id="attendanceLink" value="<%= link%>" readonly>
-            <button id="copyLink" class="button">Copy Link</button>
-        </div>
+                    <!-- Attendance Link Section -->
+                    <div class="attendance-link-container">
+                        <input type="text" id="attendanceLink" value="<%= link%>" readonly>
+                        <button id="copyLink" class="button">Copy Link</button>
+                    </div>
 
-        <!-- QR Code Section -->
-        <div id="qrcode-container">
-            <div id="qrcode"></div>
-        </div>
+                    <!-- QR Code Section -->
+                    <div id="qrcode-container">
+                        <div id="qrcode"></div>
+                    </div>
+                    <a href="/host/stop-attendance">
+                        <div class="button stop-button">Stop Attendance</div>
+                    </a>
+                </section>
+                <% } %>
 
-        <div id="stopAttendanceButton" class="button stop-button">Stop Attendance</div>
-    </section>
+                    <footer>
+                        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a>.
+                        Licensed
+                        under
+                        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC
+                            BY-NC-SA
+                            4.0</a>.
+                    </footer>
 
+                    <!-- Script for QR Code Generation and Clipboard Functionality -->
+                    <script src="/js/qrcode.min.js"></script>
+                    <script src="/js/utils.js"></script>
+                    <script>
+                        showNotification('<%= showNotification%>');
+                        // QR Code generation
+                        const qrcode = new QRCode(document.getElementById("qrcode"), {
+                            text: document.getElementById("attendanceLink").value,
+                            width: 128,
+                            height: 128,
+                            colorDark: "#6200ea", // QR code color
+                            colorLight: "#ffffff", // Background color
+                            correctLevel: QRCode.CorrectLevel.H,
+                        });
 
-    <footer>
-        © 2024 <a href="https://github.com/Rai-shwith" rel="noopener" target="_blank">Ashwith Rai</a>. Licensed under
-        <a rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
-    </footer>
+                        // Copy link to clipboard
+                        document.getElementById("copyLink").addEventListener("click", function () {
+                            const linkField = document.getElementById("attendanceLink");
+                            linkField.select();
+                            document.execCommand("copy");
+                            alert("Link copied to clipboard!");
+                        });
 
-    <!-- Script for QR Code Generation and Clipboard Functionality -->
-    <script src="/js/qrcode.min.js"></script>
-    <script>
-        // QR Code generation
-        const qrcode = new QRCode(document.getElementById("qrcode"), {
-            text: document.getElementById("attendanceLink").value,
-            width: 128,
-            height: 128,
-            colorDark: "#6200ea", // QR code color
-            colorLight: "#ffffff", // Background color
-            correctLevel: QRCode.CorrectLevel.H,
-        });
-
-        // Copy link to clipboard
-        document.getElementById("copyLink").addEventListener("click", function () {
-            const linkField = document.getElementById("attendanceLink");
-            linkField.select();
-            document.execCommand("copy");
-            alert("Link copied to clipboard!");
-        });
-
-    </script>
+                    </script>
 </body>
 
 </html>

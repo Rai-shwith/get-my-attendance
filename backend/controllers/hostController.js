@@ -1,38 +1,96 @@
 const { logger } = require('../utils/logger'); // Import the logger
 const { authenticateHost } = require('../utils/auth'); // Import the authentication service
 const { getAttendanceState, setAttendanceState } = require('../states/attendanceState');
+const { getRegistrationState, setRegistrationState } = require('../states/registerState');
+const { saveStudentData } = require('../models/studentDetails');
 
 
 // Route to start attendance
 const startAttendance = (req, res) => {
+    const interval = req.cookies.interval || 5;
+    const link = 'http://localhost:3000/attendance';
+    if (getRegistrationState()) {
+        logger.warn('Failed attendance start attempt while registration is active');
+        res.render('hostAttendanceSection', { interval, link, showNotification: 'Registration is active', otherProcessRunning: true });
+        return;
+    }
     if (!getAttendanceState()) {
-        const interval = req.cookies.interval || 5;
         logger.info('Attendance process started by host');
         //TODO: Logic to start attendance 
         setAttendanceState(true);
-
         // TODO: pass the actual link of the server
-        const link = 'http://localhost:3000/attendance';
-        res.render('hostAttendanceSection', { interval, link});
-    } else {
-        logger.warn('Failed attendance start attempt while attendance is already active');
-        // res.render()
+        res.render('hostAttendanceSection', { interval, link, showNotification: '', otherProcessRunning: false });
+        return;
     }
+    logger.warn('Failed attendance start attempt while attendance is already active');
+    res.render('hostAttendanceSection', { interval, link, showNotification: 'Attendance is already active', otherProcessRunning: false });
+    return;
 };
+
+
 
 // Route to stop attendance
 const stopAttendance = (req, res) => {
-    const { password } = req.body;
-
-    if (authenticateHost(password)) {
-        logger.info('Attendance process stopped by host');
-        // Logic to stop attendance (e.g., generate reports)
-        res.status(200).json({ message: 'Attendance process stopped' });
-    } else {
-        logger.warn('Failed attendance stop attempt by unauthorized user');
-        res.status(403).json({ message: 'Unauthorized' });
+    logger.debug("stopAttendance :Entering");
+    if (getAttendanceState()){
+        setAttendanceState(false);
+        saveStudentData();
+        // TODO: render hostAttendanceReport
+        res.redirect('/host') 
+        logger.info("Stopping the Attendance Process")
+        return;
     }
+    logger.warn("Failed to Stop Attendance Process: process not started yet")
+    res.render('error',{
+        status:404,
+        message:"Attendance process is not started yet."
+        })
 };
+
+
+// Route to start Registration 
+const startRegistration = (req, res) => {
+    logger.info('Entering startRegistration function');
+    const interval = req.cookies.interval || 5;
+    const link = 'http://localhost:3000/register';
+    if (getAttendanceState()) {
+        logger.warn('Failed Register start attempt while attendance is active');
+        res.render('hostRegistrationSection', { interval, link, showNotification: 'Registration is active', otherProcessRunning: true });
+        return;
+    }
+    if (!getRegistrationState()) {
+        logger.info('Registration process started by host');
+        //TODO: Logic to start attendance 
+        setRegistrationState(true);
+
+        // TODO: pass the actual link of the server
+        res.render('hostRegistrationSection', { interval, link, showNotification: '' ,otherProcessRunning:false});
+        return;
+    }
+    logger.warn('Failed attendance start attempt while attendance is already active');
+    res.render('hostRegistrationSection', { interval, link, showNotification: 'Attendance is already active' ,otherProcessRunning:false});
+    return;
+};
+
+
+// Route to stop Registration 
+const stopRegistration = (req, res) => {
+    logger.debug("stopRegistration :Entering");
+
+    if (getRegistrationState()){
+        setRegistrationState(false);
+        saveStudentData();
+        // TODO: render hostRegistrationReport
+        res.redirect('/host') 
+        logger.info("Stopping the Registration Process")
+        return;
+    }
+    logger.warn("Failed to Stop Registration Process: process not started yet")
+    res.render('error',{
+        status:404,
+        message:"Registration process is not started yet."
+        })
+}
 
 // Route to serve the login page
 const getLoginPage = (req, res) => {
@@ -44,7 +102,7 @@ const login = (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === '1234') {
         req.session.isLoggedIn = true; // Mark host as logged in
-        // Set the default window for the attendance 
+        // TODO: Set the default window for the attendance 
         const interval = 5;
         res.cookie('interval', 5, {
             maxAge: 31104000000, // 1 year
@@ -73,4 +131,4 @@ const logout = (req, res) => {
 };
 
 
-module.exports = { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, logout };
+module.exports = { startAttendance, stopAttendance, startRegistration, stopRegistration, getLoginPage, login, getHostHomepage, logout };
