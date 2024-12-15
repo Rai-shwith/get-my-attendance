@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController');
 const { attendance, getStudentById } = require('../models/studentDetails');
-const { getAttendanceState } = require('../states/attendanceState');
+const { getAttendanceState, getRemainingAttendanceTime } = require('../states/attendanceState');
 const { logger } = require('../utils/logger');
 
 
@@ -32,15 +32,16 @@ const validateRegistration = (req,res,next) => {
     const registerID = req.session.registerID;
     if (!registerID) {
         logger.error("Student not registered!");
+        const remainingTime = getRemainingAttendanceTime();
         return res.render('attendance', {
             name: "",
             usn: "",
             attendanceStarted: true,
             color: "#f44336",
             message: "You are not registered! 📋<br> Please contact the admin. 👨‍💻",
-            showReasons: true,
+            showReasons: false,
             hideInfo: true,
-            interval: 10000 // TODO: update this 
+            interval: remainingTime
         });
     }
     next()
@@ -53,6 +54,7 @@ const checkAttendanceAlreadyGiven = (req, res, next) => {
     // Student already marked the attendance
     if (student){
         logger.warn(student.name + " already gave attendance!");
+        const remainingTime = getRemainingAttendanceTime();
         return res.render('attendance', {
             name: student.name,
             usn: student.usn,
@@ -61,7 +63,7 @@ const checkAttendanceAlreadyGiven = (req, res, next) => {
             message:  "Attendance already taken! 🙅‍♂️",
             showReasons: false,
             hideInfo: false,
-            interval: 10000 // TODO: update this 
+            interval: remainingTime
         });
     }
     next();
@@ -74,6 +76,7 @@ const verifyStudentRecords = (req, res, next) => {
     if (!student) {
         req.session.registerID = null;
         logger.error("Student details missing from the system!");
+        const remainingTime = getRemainingAttendanceTime();
         return res.render('attendance', {
             name: "",
             usn: "",
@@ -82,7 +85,7 @@ const verifyStudentRecords = (req, res, next) => {
             message: "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄",
             showReasons: false,
             hideInfo: true,
-            interval: 10000 // TODO: update this 
+            interval: remainingTime
         });
     }
     next();

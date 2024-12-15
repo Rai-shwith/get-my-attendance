@@ -88,6 +88,24 @@ attendance.addStudent = (id, student) => {
     presentStudentCache[id] = student;
 };
 
+// Function to get present students
+attendance.getPresentStudents = () => {
+    logger.debug("getPresentStudents")
+    return presentStudentCache;
+};
+
+// Function to get absent students
+attendance.getAbsentStudents = () => {
+    logger.debug("getAbsentStudents");
+    const absentStudents = {};
+    for (let id in studentCache) {
+        if (!presentStudentCache[id]) {
+            absentStudents[id] = studentCache[id];
+        }
+    }
+    return absentStudents;
+}
+
 loadStudentData()
 
 module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, currentRegistration,attendance };

@@ -1,29 +1,37 @@
 const { logger } = require('../utils/logger'); // Import the logger
 const { authenticateHost } = require('../utils/auth'); // Import the authentication service
-const { getAttendanceState, setAttendanceState } = require('../states/attendanceState');
-const { getRegistrationState, setRegistrationState } = require('../states/registerState');
+const { getAttendanceState, setAttendanceState, setAttendanceWindowInterval, getRemainingAttendanceTime} = require('../states/attendanceState');
+const { getRegistrationState, setRegistrationState, setRegistrationWindowInterval, getRemainingRegistrationTime } = require('../states/registerState');
 const { saveStudentData } = require('../models/studentDetails');
 
 
 // Route to start attendance
 const startAttendance = (req, res) => {
-    const interval = req.cookies.interval || 5*60*1000;
+    logger.debug("startAttendance :Entering");
+    const defaultInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+    let interval = parseInt(req.cookies.interval, 10); // Convert to integer
+    if (isNaN(interval) || interval <= 0) {
+        interval = defaultInterval; // Use default if invalid
+    }
+    logger.debug("Interval : ",interval);
+    setAttendanceWindowInterval(interval);
+    const remainingTime = getRemainingAttendanceTime();
     const link = 'http://localhost:3000/attendance';
     if (getRegistrationState()) {
         logger.warn('Failed attendance start attempt while registration is active');
-        res.render('hostAttendanceSection', { interval, link, showNotification: 'Registration is active', otherProcessRunning: true });
+        res.render('hostAttendanceSection', { interval:remainingTime, link, showNotification: 'Registration is active', otherProcessRunning: true });
         return;
     }
     if (!getAttendanceState()) {
-        logger.info('Attendance process started by host');
         //TODO: Logic to start attendance 
         setAttendanceState(true);
         // TODO: pass the actual link of the server
-        res.render('hostAttendanceSection', { interval, link, showNotification: '', otherProcessRunning: false });
+        res.render('hostAttendanceSection', { interval:remainingTime, link, showNotification: '', otherProcessRunning: false });
+        logger.info('Attendance process started by host');
         return;
     }
     logger.warn('Failed attendance start attempt while attendance is already active');
-    res.render('hostAttendanceSection', { interval, link, showNotification: 'Attendance is already active', otherProcessRunning: false });
+    res.render('hostAttendanceSection', { interval:remainingTime, link, showNotification: 'Attendance is already active', otherProcessRunning: false });
     return;
 };
 
@@ -34,7 +42,7 @@ const stopAttendance = (req, res) => {
     logger.debug("stopAttendance :Entering");
     if (getAttendanceState()){
         setAttendanceState(false);
-        
+
         // TODO: render hostAttendanceReport
         res.redirect('/host') 
         logger.info("Stopping the Attendance Process")
@@ -51,11 +59,17 @@ const stopAttendance = (req, res) => {
 // Route to start Registration 
 const startRegistration = (req, res) => {
     logger.info('Entering startRegistration function');
-    const interval = req.cookies.interval || 5;
+    const defaultInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+    let interval = parseInt(req.cookies.interval, 10); // Convert to integer
+    if (isNaN(interval) || interval <= 0) {
+        interval = defaultInterval; // Use default if invalid
+    }
+    setRegistrationWindowInterval(interval);
+    const remainingTime = getRemainingRegistrationTime();
     const link = 'http://localhost:3000/register';
     if (getAttendanceState()) {
         logger.warn('Failed Register start attempt while attendance is active');
-        res.render('hostRegistrationSection', { interval, link, showNotification: 'Registration is active', otherProcessRunning: true });
+        res.render('hostRegistrationSection', { interval:remainingTime, link, showNotification: 'Registration is active', otherProcessRunning: true });
         return;
     }
     if (!getRegistrationState()) {
@@ -64,11 +78,11 @@ const startRegistration = (req, res) => {
         setRegistrationState(true);
 
         // TODO: pass the actual link of the server
-        res.render('hostRegistrationSection', { interval, link, showNotification: '' ,otherProcessRunning:false});
+        res.render('hostRegistrationSection', { interval:remainingTime, link, showNotification: '' ,otherProcessRunning:false});
         return;
     }
     logger.warn('Failed attendance start attempt while attendance is already active');
-    res.render('hostRegistrationSection', { interval, link, showNotification: 'Attendance is already active' ,otherProcessRunning:false});
+    res.render('hostRegistrationSection', { interval:remainingTime, link, showNotification: 'Attendance is already active' ,otherProcessRunning:false});
     return;
 };
 
@@ -104,7 +118,7 @@ const login = (req, res) => {
         req.session.isLoggedIn = true; // Mark host as logged in
         // TODO: Set the default window for the attendance 
         const interval = 5*60*1000;
-        res.cookie('interval', 5, {
+        res.cookie('interval', interval, {
             maxAge: 31104000000, // 1 year
             httpOnly: false,
             secure: false,

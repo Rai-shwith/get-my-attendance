@@ -60,11 +60,17 @@ app.use('/', registerRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+    // Check if headers have already been sent
+    if (res.headersSent) {
+        return next(err); // Delegate to the default error handler
+    }
+    
     // Set locals, only providing error details in development
     const status = err.status || 500;
     const message = err.message || 'Internal Server Error';
     const error = req.app.get('env') === 'development' ? err.stack : '';
     logger.error(`Error: ${message}`);
+    
     // Render the error.ejs template
     res.status(status).render('error', { status, message, error });
 });

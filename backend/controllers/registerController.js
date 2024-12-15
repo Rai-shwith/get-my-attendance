@@ -2,7 +2,7 @@
 
 const helpers = require('../utils/helpers');
 const {getStudentByUSN,currentRegistration,getStudentById,addStudent} = require('../models/studentDetails');
-const { getRegistrationState, setRegistrationState } = require('../states/registerState');
+const { getRegistrationState, setRegistrationState, getRemainingRegistrationTime } = require('../states/registerState');
 const { logger } = require('../utils/logger');
 
 
@@ -88,9 +88,8 @@ exports.getRegistrationPage = (req, res) => {
     logger.info('GET /register');
     // check if the registration is started
     if (getRegistrationState()) {
-    // TODO: Logic to get the time left for registration
-    let timer = 1000*60*5;
-    res.render('register', { timer,registerStarted: true });
+    const remainingTime = getRemainingRegistrationTime();
+    res.render('register', { timer:remainingTime,registerStarted: true });
     } else {
     logger.info('Registration not started');
     res.render('register', { timer: 0,registerStarted: false });

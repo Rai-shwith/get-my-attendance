@@ -3,7 +3,7 @@
 const { attendance, getStudentById } = require('../models/studentDetails');
 const excelService = require('../services/excelService');
 const pdfService = require('../services/pdfService');
-const { getAttendanceState } = require('../states/attendanceState');
+const { getAttendanceState, getRemainingAttendanceTime } = require('../states/attendanceState');
 const helpers = require('../utils/helpers');
 const { logger } = require('../utils/logger');
 
@@ -16,13 +16,16 @@ exports.giveAttendance = (req, res) => {
     const registerID = req.session.registerID;
     const student = getStudentById(registerID);
     attendance.addStudent(registerID, student);
+    const remainingTime = getRemainingAttendanceTime();
     res.render('attendance', {
+        name: student.name,
+        usn: student.usn,
         attendanceStarted:true,
         color:"#4caf50",
         message : "Attendance taken successfully! ✅",
         showReasons: false,
         hideInfo : false,
-        interval: 10000 //TODO: update this
+        interval: remainingTime
     });
     logger.info(`Attendance given by ${student.name}[${student.usn}]`);
 };
