@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Report</title>
+    <link rel="stylesheet" href="/css/hostAttendanceReport.css">
+</head>
+
+<body>
+    <header>
+        Attendance Report
+    </header>
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search by Name or USN..." />
+    </div>
+    <div class="container">
+        <div class="btn-container">
+            <button class="btn-sort" onclick="sortTable(event)">Sort by USN</button>
+        </div>
+        <table id="attendance-table">
+            <thead>
+                <tr>
+                    <th>USN</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% attendance.forEach(student=> { %>
+                    <tr class="<%= student.status === 'present' ? 'row-present' : 'row-absent' %>">
+                        <td>
+                            <%= student.usn %>
+                        </td>
+                        <td>
+                            <%= student.name %>
+                        </td>
+                        <td>
+                            <%= student.status.charAt(0).toUpperCase() + student.status.slice(1) %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+    </div>
+    <div class="download-btn">
+        <button class="btn-download" onclick="downloadReport('pdf')">Download PDF Report</button>
+        <button class="btn-download" onclick="downloadReport('excel')">Download Excel Report</button>
+    </div>
+    <script src="/js/hostAttendanceReport.js"></script>
+</body>
+
+</html>

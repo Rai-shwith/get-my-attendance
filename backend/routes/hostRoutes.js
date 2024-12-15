@@ -1,7 +1,7 @@
 // backend/routes/hostRoutes.js
 const express = require('express');
 const router = express.Router();
-const { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, startRegistration, stopRegistration,  } = require('../controllers/hostController');
+const { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, startRegistration, stopRegistration, getAttendanceDetails,  } = require('../controllers/hostController');
 const { logger } = require('../utils/logger');
 
 function ensureLogin(req, res, next) {
@@ -29,8 +29,13 @@ router.get('/start-registration',ensureLogin, startRegistration);
 // Route to stop registration
 router.get('/stop-registration',ensureLogin, stopRegistration);
 
+// Route to get the login Page
 router.get('/login',getLoginPage);
 
+// Route to login
 router.post('/login',login);
+
+// Route to view attendance Report
+router.get('/reports/attendance',getAttendanceDetails);
 
 module.exports = router;

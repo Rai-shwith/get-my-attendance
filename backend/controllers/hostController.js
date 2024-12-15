@@ -52,28 +52,28 @@ const stopAttendance = async (req, res) => {
         logger.info("Stopping the Attendance Process")
         setAttendanceState(false);
 
-        // Get the list of present and absent students
-        const present = attendance.getPresentStudents();
-        const absent = attendance.getAbsentStudents();
+        // // Get the list of present and absent students
+        // const present = attendance.getPresentStudents();
+        // const absent = attendance.getAbsentStudents();
 
-        // Length of present and absent details
-        const presentCount = Object.keys(present).length;
-        const absentCount = Object.keys(absent).length;
+        // // Length of present and absent details
+        // const presentCount = Object.keys(present).length;
+        // const absentCount = Object.keys(absent).length;
 
-        // Combine the present and absent students
-        const combinedData = helpers.combineData(present, absent);
+        // // Combine the present and absent students
+        // const combinedData = helpers.combineData(present, absent);
 
-        // Generate pdf
-        const outputPdfPath = await generatePDF(combinedData,presentCount,absentCount);
-        updateOutputPdfPath(outputPdfPath);
+        // // Generate pdf
+        // const outputPdfPath = await generatePDF(combinedData,presentCount,absentCount);
+        // updateOutputPdfPath(outputPdfPath);
 
-        // Generate Excel
-        const outputExcelPath = await generateExcel(combinedData,presentCount,absentCount);
-        updateOutputExcelPath(outputExcelPath);
-        
+        // // Generate Excel
+        // const outputExcelPath = await generateExcel(combinedData,presentCount,absentCount);
+        // updateOutputExcelPath(outputExcelPath);
+
 
         // TODO: render hostAttendanceReport
-        res.redirect('/host')
+        res.redirect("/host/reports/attendance")
         logger.info("Stopping the Attendance Process")
         return;
     }
@@ -170,5 +170,37 @@ const logout = (req, res) => {
     });
 };
 
+// Route to view Attendance Details
+const getAttendanceDetails = (req, res) => {
+    const attendance = [
+        { name: "John Doe", usn: "1MS23EC001", status: "present" },
+        { name: "Jane Smith", usn: "1MS23EC002", status: "absent" },
+        { name: "Alice Johnson", usn: "1MS23EC003", status: "present" },
+        { name: "Bob Brown", usn: "1MS23EC004", status: "absent" },
+        { name: "Charlie Davis", usn: "1MS23EC005", status: "present" },
+        { name: "Diana Wilson", usn: "1MS23EC006", status: "present" },
+        { name: "Ethan Taylor", usn: "1MS23EC007", status: "absent" },
+        { name: "Fiona Anderson", usn: "1MS23EC008", status: "present" },
+        { name: "George Harris", usn: "1MS23EC009", status: "absent" },
+        { name: "Hannah Clark", usn: "1MS23EC010", status: "present" },
+        { name: "Ian Lewis", usn: "1MS23EC011", status: "present" },
+        { name: "Julia Walker", usn: "1MS23EC012", status: "absent" },
+        { name: "Kevin Young", usn: "1MS23EC013", status: "present" },
+        { name: "Laura King", usn: "1MS23EC014", status: "absent" },
+        { name: "Michael Scott", usn: "1MS23EC015", status: "present" },
+        { name: "Natalie Hall", usn: "1MS23EC016", status: "present" },
+        { name: "Oscar Wright", usn: "1MS23EC017", status: "absent" },
+        { name: "Paula Lopez", usn: "1MS23EC018", status: "present" },
+        { name: "Quincy Hill", usn: "1MS23EC019", status: "absent" },
+        { name: "Rachel Green", usn: "1MS23EC020", status: "present" },
+        { name: "Samuel Adams", usn: "1MS23EC021", status: "present" },
+        { name: "Tina Baker", usn: "1MS23EC022", status: "absent" },
+        { name: "Victor Moore", usn: "1MS23EC023", status: "present" },
+        { name: "Wendy Perez", usn: "1MS23EC024", status: "absent" },
+        { name: "Xavier Thompson", usn: "1MS23EC025", status: "present" }
+    ];
+    
+        res.render('hostAttendanceReport',{attendance})
+}
 
-module.exports = { startAttendance, stopAttendance, startRegistration, stopRegistration, getLoginPage, login, getHostHomepage, logout };
+module.exports = { startAttendance, stopAttendance, startRegistration, stopRegistration, getLoginPage, login, getHostHomepage, logout,getAttendanceDetails };
