@@ -1,23 +1,13 @@
 const XLSX = require("xlsx");
-const fs = require("fs");
+const path = require("path");
 const { filePaths } = require("../config/env");
-
-const generateExcel = (present, absent) => {
+const generateExcel = (combinedData, presentCount, absentCount) => {
     // uncomment mainSortBy based on the requirement
     const mainSortBy = "";
     // const mainSortBy = "status";
     return new Promise((resolve, reject) => {
         try {
-            const absentCount = Object.keys(absent).length;
-            const presentCount = Object.keys(present).length;
-            const totalCount = absentCount + presentCount;
-
-            // Combine and prepare data with status
-            const combinedData = [
-                ...Object.entries(absent).map(([_, value]) => ({ ...value, status: "Absent" })),
-                ...Object.entries(present).map(([_, value]) => ({ ...value, status: "Present" })),
-            ];
-
+            const totalCount = absentCount + presentCount
             // Sort data
             if (mainSortBy === "status") {
                 combinedData.sort((a, b) => {
@@ -45,8 +35,7 @@ const generateExcel = (present, absent) => {
             const outputFilePath = filePaths.excelPath;
             const formattedDate = new Intl.DateTimeFormat("en-US", options).format(date).replace(":", "-");
             const fileName = `${formattedDate}.xlsx`;
-            const filePath = path.join(outputFilePath, fileName);
-
+            const filePath = outputFilePath + '/' + fileName;
             // Prepare data for the sheet
             const sheetData = [
                 ["Total Students", totalCount],

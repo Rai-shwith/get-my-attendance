@@ -2,7 +2,6 @@
 
 const dotenv = require('dotenv');
 dotenv.config(); // Load environment variables from .env file
-
 module.exports = {
     // Server configuration
     server: {
@@ -29,7 +28,7 @@ module.exports = {
     filePaths: {
         studentDetailsPath: process.env.STUDENT_DETAILS_PATH, // Path to student details file
         pdfPath: process.env.PDF_REPORT_PATH , // Path to PDF reports
-        excelPath: process.env.EXCEL_REPORT_PATH , // Path to Excel reports
+        excelPath: process.env.EXCEL_REPORT_PATH // Path to Excel reports
     },
 
     // Other settings (can be added)

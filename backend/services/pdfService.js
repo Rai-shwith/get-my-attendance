@@ -2,17 +2,11 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const { filePaths } = require('../config/env');
 
-const generatePDF = (present, absent) => {
+const generatePDF = (combinedData, presentCount,absentCount) => {
     const mainSortBy = 'status';
     return new Promise((resolve, reject) => {
-        const absentCount = Object.keys(absent).length;
-        const presentCount = Object.keys(present).length;
         const totalCount = absentCount + presentCount
         // Combine and prepare data with status
-        const combinedData = [
-            ...Object.entries(absent).map(([_, value]) => ({ ...value, status: 'Absent' })),
-            ...Object.entries(present).map(([_, value]) => ({ ...value, status: 'Present' })),
-        ];
 
         if (mainSortBy == 'status') {
             // Sort data
@@ -43,8 +37,7 @@ const generatePDF = (present, absent) => {
         const outputFilePath = filePaths.pdfPath;
         const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
 
-        const filePath = outputFilePath + String(formattedDate).replace(':', '-') + '.pdf';
-
+        const filePath = outputFilePath+'/' + String(formattedDate).replace(':', '-') + '.pdf';
         // automatically set the page height
         const docHeight = combinedData.length * 25 + 300;
 

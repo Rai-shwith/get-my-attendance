@@ -2,7 +2,11 @@ const { logger } = require('../utils/logger'); // Import the logger
 const { authenticateHost } = require('../utils/auth'); // Import the authentication service
 const { getAttendanceState, setAttendanceState, setAttendanceWindowInterval, getRemainingAttendanceTime } = require('../states/attendanceState');
 const { getRegistrationState, setRegistrationState, setRegistrationWindowInterval, getRemainingRegistrationTime } = require('../states/registerState');
-const { saveStudentData } = require('../models/studentDetails');
+const { saveStudentData, attendance } = require('../models/studentDetails');
+const helpers = require('../utils/helpers');
+const generatePDF = require('../services/pdfService');
+const { updateOutputPdfPath, updateOutputExcelPath } = require('../states/general');
+const generateExcel = require('../services/excelService');
 
 
 // Route to start attendance
@@ -42,11 +46,31 @@ const startAttendance = (req, res) => {
 
 
 // Route to stop attendance
-const stopAttendance = (req, res) => {
+const stopAttendance = async (req, res) => {
     logger.debug("stopAttendance :Entering");
     if (getAttendanceState()) {
         logger.info("Stopping the Attendance Process")
         setAttendanceState(false);
+
+        // Get the list of present and absent students
+        const present = attendance.getPresentStudents();
+        const absent = attendance.getAbsentStudents();
+
+        // Length of present and absent details
+        const presentCount = Object.keys(present).length;
+        const absentCount = Object.keys(absent).length;
+
+        // Combine the present and absent students
+        const combinedData = helpers.combineData(present, absent);
+
+        // Generate pdf
+        const outputPdfPath = await generatePDF(combinedData,presentCount,absentCount);
+        updateOutputPdfPath(outputPdfPath);
+
+        // Generate Excel
+        const outputExcelPath = await generateExcel(combinedData,presentCount,absentCount);
+        updateOutputExcelPath(outputExcelPath);
+        
 
         // TODO: render hostAttendanceReport
         res.redirect('/host')
