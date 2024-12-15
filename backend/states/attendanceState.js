@@ -13,6 +13,7 @@ const getAttendanceState = () => isAttendanceStarted;
 
 // Set the attendance state
 const setAttendanceState = (state) => {
+    logger.debug("Attendance State  : "+state);
     if (state){
         // Set the start time of attendance
         attendanceStartTime = new Date();
@@ -25,6 +26,7 @@ const setAttendanceState = (state) => {
 
 // Function to set the attendance window interval
 const setAttendanceWindowInterval = (interval) => {
+    logger.debug("Attendance Window Interval : "+interval);
     attendanceWindowInterval = interval;
 };
 
@@ -39,6 +41,7 @@ const getRemainingAttendanceTime = () => {
 // Function to automatically stop the attendance after the interval
 const autoStopAttendance = () => {
     setTimeout(() => {
+        logger.debug("Attendance Stopped due to time up");
         setAttendanceState(false);
         // TODO: generate the results and notify host
     }, attendanceWindowInterval);

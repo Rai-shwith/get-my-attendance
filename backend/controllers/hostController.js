@@ -20,11 +20,11 @@ const startAttendance = (req, res) => {
 
     if (!getAttendanceState()) {
         //TODO: Logic to start attendance 
-        setAttendanceState(true);
         if (isNaN(interval) || interval <= 0) {
             interval = defaultInterval; // Use default if invalid
         }
         setAttendanceWindowInterval(interval);
+        setAttendanceState(true);
         const remainingTime = getRemainingAttendanceTime();
         logger.debug("Remaining Time:" + remainingTime);
         // TODO: pass the actual link of the server
@@ -45,6 +45,7 @@ const startAttendance = (req, res) => {
 const stopAttendance = (req, res) => {
     logger.debug("stopAttendance :Entering");
     if (getAttendanceState()) {
+        logger.info("Stopping the Attendance Process")
         setAttendanceState(false);
 
         // TODO: render hostAttendanceReport
@@ -77,8 +78,8 @@ const startRegistration = (req, res) => {
     if (!getRegistrationState()) {
         logger.info('Registration process started by host');
         //TODO: Logic to start attendance 
-        setRegistrationState(true);
         setRegistrationWindowInterval(interval);
+        setRegistrationState(true);
         const remainingTime = getRemainingRegistrationTime();
         // TODO: pass the actual link of the server
         res.render('hostRegistrationSection', { interval: remainingTime, link, showNotification: '', otherProcessRunning: false });
@@ -96,6 +97,7 @@ const stopRegistration = (req, res) => {
     logger.debug("stopRegistration :Entering");
 
     if (getRegistrationState()) {
+        logger.debug("Stopping the Registration Process")
         setRegistrationState(false);
         saveStudentData();
         // TODO: render hostRegistrationReport

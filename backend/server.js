@@ -11,6 +11,8 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const deleteCookieRoutes = require('./routes/deleteCookieRoutes');
 const {auth} = require('./config/env');
 const { logger } = require('./utils/logger');
+const { getAttendanceState } = require('./states/attendanceState');
+const { getRegistrationState } = require('./states/registerState');
 const FileStore = require('session-file-store')(session);
 
 
@@ -46,8 +48,22 @@ app.set('views', path.join(__dirname, 'views'));
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 
+
+// Dynamically serve attendance and registration pages based on state
 app.get('/', (req, res) => {
-    res.render('index');
+    logger.info('GET /');
+    logger.debug(`Attendance State: ${getAttendanceState()}, Registration State: ${getRegistrationState()}`);
+    // if attendance is active
+    if(getAttendanceState()){
+        logger.info("redirecting to /attendance");
+        return res.redirect('/attendance');
+    }
+    if(getRegistrationState()){
+        logger.info("redirecting to /register");
+        return res.redirect('/register');
+    }
+    logger.info("No active process found");
+    return res.render('error', {status: 404, message: 'No active process found'});
 });
 
 // Use the route handlers
