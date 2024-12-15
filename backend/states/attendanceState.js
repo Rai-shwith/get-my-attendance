@@ -1,5 +1,7 @@
 // backend/states/attendanceState.js
 
+const { logger } = require("../utils/logger");
+
 let isAttendanceStarted = false; // Default state
  
 let attendanceStartTime = null ; // Default state
@@ -14,6 +16,7 @@ const setAttendanceState = (state) => {
     if (state){
         // Set the start time of attendance
         attendanceStartTime = new Date();
+        logger.debug("Attendance start time"+attendanceStartTime.toString());
         autoStopAttendance();
     }
     isAttendanceStarted = state;
