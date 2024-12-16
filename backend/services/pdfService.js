@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
+const { getFormattedDate } = require('../utils/helpers');
 
-const generatePDF = (combinedData, presentCount, absentCount) => {
+const generatePDF = (combinedData, presentCount, absentCount, timestamp) => {
     const mainSortBy = 'status';
 
     return new Promise((resolve, reject) => {
@@ -17,17 +18,8 @@ const generatePDF = (combinedData, presentCount, absentCount) => {
         } else {
             combinedData.sort((a, b) => a.usn.localeCompare(b.usn)); // Sort by USN
         }
-
-        const date = new Date();
-        const options = {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        };
-        const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+        
+        const formattedDate = getFormattedDate(timestamp);
 
         // Automatically set the page height
         const docHeight = combinedData.length * 25 + 300;

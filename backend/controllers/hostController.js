@@ -1,12 +1,12 @@
 const { logger } = require('../utils/logger'); // Import the logger
-const { authenticateHost } = require('../utils/auth'); // Import the authentication service
 const { getAttendanceState, setAttendanceState, setAttendanceWindowInterval, getRemainingAttendanceTime } = require('../states/attendanceState');
 const { getRegistrationState, setRegistrationState, setRegistrationWindowInterval, getRemainingRegistrationTime } = require('../states/registerState');
-const { saveStudentData, attendance } = require('../models/studentDetails');
+const { saveStudentData, attendance, getAllStudents } = require('../models/studentDetails');
 const helpers = require('../utils/helpers');
 const generatePDF = require('../services/pdfService');
-const { updateOutputPdfPath, updateOutputExcelPath } = require('../states/general');
 const generateExcel = require('../services/excelService');
+const { addAttendanceEntry, getAttendanceReport, getAttendanceHistorySummary } = require('../models/attendanceDetails');
+const { getBaseURL } = require('../states/general');
 
 
 // Route to start attendance
@@ -15,7 +15,7 @@ const startAttendance = (req, res) => {
     const defaultInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
     let interval = parseInt(req.session.interval, 10); // Convert to integer
     logger.debug("Session Interval : " + interval);
-    const link = 'http://localhost:3000/attendance';
+    const link = getBaseURL()+'/attendance';
     if (getRegistrationState()) {
         logger.warn('Failed attendance start attempt while registration is active');
         res.render('hostAttendanceSection', { interval: 0, link, showNotification: 'Registration is active', otherProcessRunning: true });
@@ -31,7 +31,6 @@ const startAttendance = (req, res) => {
         setAttendanceState(true);
         const remainingTime = getRemainingAttendanceTime();
         logger.debug("Remaining Time:" + remainingTime);
-        // TODO: pass the actual link of the server
         res.render('hostAttendanceSection', { interval: remainingTime, link, showNotification: '', otherProcessRunning: false });
         logger.info('Attendance process started by host');
         return;
@@ -52,28 +51,24 @@ const stopAttendance = async (req, res) => {
         logger.info("Stopping the Attendance Process")
         setAttendanceState(false);
 
-        // // Get the list of present and absent students
-        // const present = attendance.getPresentStudents();
-        // const absent = attendance.getAbsentStudents();
+        // Get the list of present and absent students
+        const present = attendance.getPresentStudents();
+        const absent = attendance.getAbsentStudents();
 
-        // // Length of present and absent details
-        // const presentCount = Object.keys(present).length;
-        // const absentCount = Object.keys(absent).length;
+        // Length of present and absent details
+        const presentCount = Object.keys(present).length;
+        const absentCount = Object.keys(absent).length;
 
-        // // Combine the present and absent students
-        // const combinedData = helpers.combineData(present, absent);
+        // Combine the present and absent students
+        const combinedData = helpers.combineData(present, absent);
 
-        // // Generate pdf
-        // const outputPdfPath = await generatePDF(combinedData,presentCount,absentCount);
-        // updateOutputPdfPath(outputPdfPath);
+        const timestamp = new Date().getTime();
 
-        // // Generate Excel
-        // const outputExcelPath = await generateExcel(combinedData,presentCount,absentCount);
-        // updateOutputExcelPath(outputExcelPath);
+        // Save the attendance details
+        addAttendanceEntry(timestamp, combinedData);
 
 
-        // TODO: render hostAttendanceReport
-        res.redirect("/host/reports/attendance")
+        res.redirect("/host/reports/attendance?timestamp=" + timestamp)
         logger.info("Stopping the Attendance Process")
         return;
     }
@@ -93,7 +88,7 @@ const startRegistration = (req, res) => {
     if (isNaN(interval) || interval <= 0) {
         interval = defaultInterval; // Use default if invalid
     }
-    const link = 'http://localhost:3000/register';
+    const link = getBaseURL()+'/register';
     if (getAttendanceState()) {
         logger.warn('Failed Register start attempt while attendance is active');
         res.render('hostRegistrationSection', { interval: 0, link, showNotification: 'Registration is active', otherProcessRunning: true });
@@ -151,13 +146,57 @@ const login = (req, res) => {
         req.session.interval = interval;
         res.redirect('/host');
     } else {
-        res.render('error', { status:401,message: "Invalid credentials!" });
+        res.render('error', { status: 401, message: "Invalid credentials!" });
     }
 };
 
 // Route to serve the webpage
 const getHostHomepage = (req, res) => {
     res.render('hostHomepage');
+}
+
+// Route to download the pdf report
+const downloadPdf = async (req, res) => {
+    logger.debug("downloadPdf : Entering");
+    const { timestamp } = req.body;
+    if (!timestamp) {
+        res.render('error', { status: 404, message: "Timestamp is required to download" });
+    }
+    const attendanceReport = getAttendanceReport(timestamp);
+    const { presentCount, absentCount } = helpers.getCounts(attendanceReport);
+    const pdfBuffer = await generatePDF(attendanceReport, presentCount, absentCount, timestamp);
+    const formattedDate = helpers.getFormattedDate(timestamp);
+    // Set headers
+    res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${formattedDate}.pdf"`,
+    });
+
+    // Send the buffer
+    res.send(pdfBuffer);
+    logger.info("PDF sent");
+}
+
+// Route to download the Excel report
+const downloadExcel = async (req, res) => {
+    logger.debug("downloadExcel : Entering");
+    const { timestamp } = req.body;
+    if (!timestamp) {
+        res.render('error', { status: 404, message: "Timestamp is required to download" });
+    }
+    const attendanceReport = getAttendanceReport(timestamp);
+    const { presentCount, absentCount } = helpers.getCounts(attendanceReport);
+    const excelBuffer = await generateExcel(attendanceReport, presentCount, absentCount, timestamp);
+    const formattedDate = helpers.getFormattedDate(timestamp);
+    // Set headers
+    res.set({
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${formattedDate}.xlsx"`,
+    });
+
+    // Send the buffer
+    res.send(excelBuffer);
+    logger.info("Excel sent");
 }
 
 // Route to logout 
@@ -170,37 +209,42 @@ const logout = (req, res) => {
     });
 };
 
+// Route to preview the history
+const getHistory = (req, res) => {
+    logger.info("Sending the History Summary")
+    const sessions = getAttendanceHistorySummary();
+    res.render('hostAttendanceHistory', { sessions });    
+};
+
+
 // Route to view Attendance Details
 const getAttendanceDetails = (req, res) => {
-    const attendance = [
-        { name: "John Doe", usn: "1MS23EC001", status: "present" },
-        { name: "Jane Smith", usn: "1MS23EC002", status: "absent" },
-        { name: "Alice Johnson", usn: "1MS23EC003", status: "present" },
-        { name: "Bob Brown", usn: "1MS23EC004", status: "absent" },
-        { name: "Charlie Davis", usn: "1MS23EC005", status: "present" },
-        { name: "Diana Wilson", usn: "1MS23EC006", status: "present" },
-        { name: "Ethan Taylor", usn: "1MS23EC007", status: "absent" },
-        { name: "Fiona Anderson", usn: "1MS23EC008", status: "present" },
-        { name: "George Harris", usn: "1MS23EC009", status: "absent" },
-        { name: "Hannah Clark", usn: "1MS23EC010", status: "present" },
-        { name: "Ian Lewis", usn: "1MS23EC011", status: "present" },
-        { name: "Julia Walker", usn: "1MS23EC012", status: "absent" },
-        { name: "Kevin Young", usn: "1MS23EC013", status: "present" },
-        { name: "Laura King", usn: "1MS23EC014", status: "absent" },
-        { name: "Michael Scott", usn: "1MS23EC015", status: "present" },
-        { name: "Natalie Hall", usn: "1MS23EC016", status: "present" },
-        { name: "Oscar Wright", usn: "1MS23EC017", status: "absent" },
-        { name: "Paula Lopez", usn: "1MS23EC018", status: "present" },
-        { name: "Quincy Hill", usn: "1MS23EC019", status: "absent" },
-        { name: "Rachel Green", usn: "1MS23EC020", status: "present" },
-        { name: "Samuel Adams", usn: "1MS23EC021", status: "present" },
-        { name: "Tina Baker", usn: "1MS23EC022", status: "absent" },
-        { name: "Victor Moore", usn: "1MS23EC023", status: "present" },
-        { name: "Wendy Perez", usn: "1MS23EC024", status: "absent" },
-        { name: "Xavier Thompson", usn: "1MS23EC025", status: "present" }
-    ];
-    
-        res.render('hostAttendanceReport',{attendance})
+    const timestamp = parseInt(req.query.timestamp);
+    const attendance = getAttendanceReport(timestamp);
+
+    if (!attendance){
+        const [status,message]= [404,"No Attendance Report Found!"];
+        return res.status(status).render('error', { status, message});
+    }
+
+    // Sort the students based on status and then USN
+      attendance.sort((a, b) => {
+        if (a.status === b.status) {
+            return a.usn.localeCompare(b.usn);
+        }
+        return a.status === "Absent" ? -1 : 1;
+    });
+    const {absentCount, presentCount} = helpers.getCounts(attendance);
+    logger.debug(`timestamp: ${timestamp} - presentCount: ${presentCount} - absentCount: ${absentCount}`);
+    res.render('hostAttendanceReport', { attendance,timestamp,presentCount,absentCount})
 }
 
-module.exports = { startAttendance, stopAttendance, startRegistration, stopRegistration, getLoginPage, login, getHostHomepage, logout,getAttendanceDetails };
+// Route to view EnrolledStudent
+const getEnrolledStudents = (req, res) => {
+    const enrolledStudents = getAllStudents();
+    enrolledStudents.sort((a, b) => {
+            return a.usn.localeCompare(b.usn);
+    });
+    res.render('hostViewEnrolled',{enrolledStudents});
+};
+module.exports = { startAttendance, stopAttendance, startRegistration, stopRegistration, getLoginPage, login, getHostHomepage, logout, getAttendanceDetails, getEnrolledStudents, getHistory, downloadExcel, downloadPdf };

@@ -1,7 +1,59 @@
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
 
-function downloadReport(type) {
-    // Logic to handle report download
-    alert(`Downloading ${type.toUpperCase()} report...`);
+async function downloadReport(type) {
+    const timestamp = getQueryParam('timestamp');
+    if (!timestamp){
+        return alert("Don't directly visit /reports/attendance");
+    }
+    const [extension,applicationType] = (type=='pdf')?[type,'application/pdf']:['xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    try {
+        const response = await fetch('/host/download-'+type, {
+            method: 'POST',
+            headers: {
+              'Accept': applicationType, 
+              'Content-Type': 'application/json', 
+            },
+            body: JSON.stringify({
+              timestamp, // Ensure the body is a JSON string.
+            }),
+          });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch the PDF file');
+        }
+
+        // Extract the filename from the Content-Disposition header
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'download.'+extension; // Fallback filename
+
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename="(.+?)"/);
+            if (match && match[1]) {
+                filename = match[1];
+            }
+        }
+
+        // Convert response to blob
+        const blob = await response.blob();
+
+        // Create a temporary download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename; // Use the extracted filename
+        document.body.appendChild(link);
+
+        // Trigger the download
+        link.click();
+
+        // Clean up the link
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    } catch (error) {
+        console.error('Error downloading the file:', error);
+    }
 }
 
 function sortTable(event) {
@@ -48,10 +100,10 @@ function saveAttendanceData(attendanceData) {
 function populateAttendanceTable() {
     // Fetch attendance data from local storage
     const attendance = JSON.parse(localStorage.getItem('attendance')) || [];
-    
+
     // Get the table body element
     const tableBody = document.querySelector('#attendance-table tbody');
-    
+
     // Clear existing rows in the table body
     tableBody.innerHTML = '';
 

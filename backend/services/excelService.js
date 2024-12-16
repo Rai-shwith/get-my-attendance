@@ -1,6 +1,7 @@
 const XLSX = require("xlsx");
+const { getFormattedDate } = require("../utils/helpers");
 
-const generateExcel = (combinedData, presentCount, absentCount) => {
+const generateExcel = (combinedData, presentCount, absentCount,timestamp) => {
     // Uncomment `mainSortBy` based on the requirement
     const mainSortBy = "";
     // const mainSortBy = "status";
@@ -21,21 +22,11 @@ const generateExcel = (combinedData, presentCount, absentCount) => {
                 combinedData.sort((a, b) => a.usn.localeCompare(b.usn));
             }
 
-            const date = new Date();
-
-            // Formatting Date
-            const options = {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-            };
-            const formattedDate = new Intl.DateTimeFormat("en-US", options).format(date).replace(":", "-");
+            const formattedDate = getFormattedDate(timestamp);
 
             // Prepare data for the sheet
             const sheetData = [
+                ["Date",formattedDate],
                 ["Total Students", totalCount],
                 ["Absent", absentCount],
                 ["Present", presentCount],

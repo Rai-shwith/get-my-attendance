@@ -1,5 +1,3 @@
-// backend/auth.js
-
 const express = require('express');
 const session = require('express-session'); 
 const path = require('path');
@@ -9,12 +7,17 @@ const cookieParser = require('cookie-parser');
 const registerRoutes = require('./routes/registerRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const deleteCookieRoutes = require('./routes/deleteCookieRoutes');
-const {auth} = require('./config/env');
+const {auth, server} = require('./config/env');
 const { logger } = require('./utils/logger');
 const { getAttendanceState } = require('./states/attendanceState');
 const { getRegistrationState } = require('./states/registerState');
+const { getDomain, getBaseURL } = require('./states/general');
 const FileStore = require('session-file-store')(session);
 
+
+const PORT = server.port;
+// Get the Domain (Ip address)
+const DOMAIN = server.domain || getDomain();
 
 const app = express();
 
@@ -48,22 +51,10 @@ app.set('views', path.join(__dirname, 'views'));
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 
-
-// Dynamically serve attendance and registration pages based on state
+// Redirect to /host
 app.get('/', (req, res) => {
     logger.info('GET /');
-    logger.debug(`Attendance State: ${getAttendanceState()}, Registration State: ${getRegistrationState()}`);
-    // if attendance is active
-    if(getAttendanceState()){
-        logger.info("redirecting to /attendance");
-        return res.redirect('/attendance');
-    }
-    if(getRegistrationState()){
-        logger.info("redirecting to /register");
-        return res.redirect('/register');
-    }
-    logger.info("No active process found");
-    return res.render('error', {status: 404, message: 'No active process found'});
+    res.redirect('/host');
 });
 
 // Use the route handlers
@@ -88,11 +79,10 @@ app.use((err, req, res, next) => {
     logger.error(`Error: ${message}`);
     
     // Render the error.ejs template
-    res.status(status).render('error', { status, message, error });
+    res.status(status).render('error', { status, message});
 });
 
-// Start the auth
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+
+app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`Server running on `+getBaseURL());
 });

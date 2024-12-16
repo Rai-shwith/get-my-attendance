@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance History</title>
+    <link rel="stylesheet" href="/css/hostAttendanceHistory.css">
+</head>
+<body>
+    <a href="/host" class="home-icon"> <img src="/images/svg/home.svg" alt="" srcset=""></a>
+    <header>
+        <h1>Attendance History</h1>
+    </header>
+    <div class="container">
+        <% if (sessions.length > 0) { %>
+            <div class="cards-grid">
+                <% sessions.forEach(session => { %>
+                    <div class="card" onclick="location.href='/host/reports/attendance?timestamp=<%= session.timestamp %>'">
+                        <h2><%= new Date(session.timestamp).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></h2>
+                        <p><strong>Present:</strong> <%= session.presentCount %></p>
+                        <p><strong>Absent:</strong> <%= session.absentCount %></p>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="no-data">
+                <p>No attendance history found.</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

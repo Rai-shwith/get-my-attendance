@@ -1,5 +1,4 @@
 // backend/config/env.js
-
 const dotenv = require('dotenv');
 dotenv.config(); // Load environment variables from .env file
 module.exports = {
@@ -7,6 +6,7 @@ module.exports = {
     server: {
         port: process.env.PORT || 3000, // Default to 3000 if not set in .env
         secretKey: process.env.SERVER_SECRET_KEY || 3000, // 
+        domain: process.env.DOMAIN 
     },
 
     // Database configuration (Example)
@@ -27,8 +27,7 @@ module.exports = {
     // File paths for reports (just an example)
     filePaths: {
         studentDetailsPath: process.env.STUDENT_DETAILS_PATH, // Path to student details file
-        pdfPath: process.env.PDF_REPORT_PATH , // Path to PDF reports
-        excelPath: process.env.EXCEL_REPORT_PATH // Path to Excel reports
+        attendanceDetailsPath: process.env.ATTENDANCE_DETAILS_PATH // Path to attendance details history
     },
 
     // Other settings (can be added)

@@ -45,6 +45,10 @@ input[type="text"] {
     text-align: center;
 }
 
+a{
+    text-decoration: none;
+}
+
 .button {
     padding: 0.75rem 1.5rem;
     background-color: #6200ea;

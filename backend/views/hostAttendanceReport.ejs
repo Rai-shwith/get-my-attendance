@@ -9,14 +9,37 @@
 </head>
 
 <body>
+    <a href="/host" class="home-icon"> <img src="/images/svg/home.svg" alt="" srcset=""></a>
     <header>
         Attendance Report
     </header>
+
     <div class="search-container">
-        <input type="text" id="searchBar" placeholder="Search by Name or USN..." />
+        <div class="card">
+            <h3>
+                <%= new Date(timestamp).toLocaleDateString('en-US', { weekday: 'long' , year: 'numeric' , month: 'long'
+                    , day: 'numeric' }) %>
+            </h3>
+            <p><strong>Present:</strong>
+                <%= presentCount %>
+            </p>
+            <p><strong>Absent:</strong>
+                <%= absentCount %>
+            </p>
+        </div>
+        <div class="search-bar-container">
+            <input type="text" id="searchBar" placeholder="Name or USN..." />
+            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
     </div>
+
     <div class="container">
         <div class="btn-container">
+            <button class="btn-sort" ><a href="/host">Home</a></button>
             <button class="btn-sort" onclick="sortTable(event)">Sort by USN</button>
         </div>
         <table id="attendance-table">
@@ -29,7 +52,7 @@
             </thead>
             <tbody>
                 <% attendance.forEach(student=> { %>
-                    <tr class="<%= student.status === 'present' ? 'row-present' : 'row-absent' %>">
+                    <tr class="<%= student.status === 'Present' ? 'row-present' : 'row-absent' %>">
                         <td>
                             <%= student.usn %>
                         </td>

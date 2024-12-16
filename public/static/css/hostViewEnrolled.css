@@ -13,10 +13,6 @@ header {
     font-size: 1.2rem;
 }
 
-a{
-    text-decoration: none;
-    color: white;
-}
 .home-icon{
     position:absolute;
     z-index: 999;
@@ -25,35 +21,6 @@ a{
 .container {
     padding: 1rem;
 }
-
-.btn-container {
-    display: flex;
-    justify-content: space-between;
-    margin: 1rem 0;
-}
-
-.download-btn {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin: 1rem 0;
-}
-
-button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background-color: #6200ea;
-    color: white;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #3700b3;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -76,36 +43,26 @@ th {
     font-size: 1rem;
 }
 
-
-.row-present {
-    background-color: #d4edda; /* Light green */
+tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
 
-.row-absent {
-    background-color: #f8d7da; /* Light red */
+tr:nth-child(odd) {
+    background-color: #ffffff;
 }
 
-
+tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease;
+}
 
 /* Container for card and search bar */
 .search-container {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    justify-content: center;
     margin: 1rem;
     padding: 1rem;
     gap: 1rem;
-}
-
-/* Card styling */
-.card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    text-align: left;
-    flex: 1; /* Allow the card to grow */
-    max-width: 400px;
 }
 
 /* Search bar container */
@@ -153,10 +110,5 @@ th {
     button {
         font-size: 0.9rem;
         padding: 0.6rem 1.2rem;
-    }
-    .search-container{
-        flex-direction: column-reverse;
-        align-items: center;
-        justify-content: center;
     }
 }

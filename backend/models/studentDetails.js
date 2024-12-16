@@ -18,6 +18,12 @@ const loadStudentData = () => {
     }
 };
 
+// Get All Registered Students
+const getAllStudents = () => {
+    loadStudentData();
+    return Object.values(studentCache);
+};
+
 // Save data back to the file system on-demand
 const saveStudentData = () => {
     try {
@@ -108,4 +114,4 @@ attendance.getAbsentStudents = () => {
 
 loadStudentData()
 
-module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, currentRegistration,attendance };
+module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, getAllStudents, currentRegistration,attendance };

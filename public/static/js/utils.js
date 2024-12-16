@@ -25,7 +25,7 @@ function startTimer(timeString) {
     function updateTimer() {
         if (totalMilliseconds <= 0) {
             clearInterval(timerInterval); // Stop the timer when it reaches 0
-            // TODO: handle the time's up event by navigating to the results page
+            
             timerDisplay.innerHTML = "Time's up!";
         } else {
             totalMilliseconds -= 1000; // Decrease the time by 1 second (1000ms)

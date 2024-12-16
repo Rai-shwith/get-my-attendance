@@ -1,7 +1,7 @@
 // backend/routes/hostRoutes.js
 const express = require('express');
 const router = express.Router();
-const { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, startRegistration, stopRegistration, getAttendanceDetails,  } = require('../controllers/hostController');
+const { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, startRegistration, stopRegistration, getAttendanceDetails, downloadPdf, downloadExcel, getHistory, getEnrolledStudents,  } = require('../controllers/hostController');
 const { logger } = require('../utils/logger');
 
 function ensureLogin(req, res, next) {
@@ -14,28 +14,42 @@ function ensureLogin(req, res, next) {
     }
 }
 
-// Route to serve the host homepage
-router.get('/',ensureLogin,getHostHomepage);
-
-// Route to start attendance
-router.get('/start-attendance',ensureLogin, startAttendance);
-
-// Route to stop attendance
-router.get('/stop-attendance',ensureLogin, stopAttendance);
-
-// Route to start registration
-router.get('/start-registration',ensureLogin, startRegistration);
-
-// Route to stop registration
-router.get('/stop-registration',ensureLogin, stopRegistration);
-
 // Route to get the login Page
 router.get('/login',getLoginPage);
 
 // Route to login
 router.post('/login',login);
 
+router.use(ensureLogin);
+
+// Route to serve the host homepage
+router.get('/',getHostHomepage);
+
+// Route to start attendance
+router.get('/start-attendance', startAttendance);
+
+// Route to stop attendance
+router.get('/stop-attendance', stopAttendance);
+
+// Route to start registration
+router.get('/start-registration', startRegistration);
+
+// Route to stop registration
+router.get('/stop-registration', stopRegistration);
+
+// Route to view enrolled students
+router.get('/enrolled-students',getEnrolledStudents );
+
 // Route to view attendance Report
 router.get('/reports/attendance',getAttendanceDetails);
+
+// Route to preview the history
+router.get('/reports/history',getHistory);
+
+// Route to download pdf
+router.post('/download-pdf',downloadPdf);
+
+// Route to download excel
+router.post('/download-excel',downloadExcel);
 
 module.exports = router;
