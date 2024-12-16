@@ -80,5 +80,3 @@ function populateAttendanceTable() {
     });
 }
 
-// Call the function to populate the table
-populateAttendanceTable();
