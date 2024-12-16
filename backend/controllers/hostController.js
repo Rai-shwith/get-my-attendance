@@ -151,7 +151,7 @@ const login = (req, res) => {
         req.session.interval = interval;
         res.redirect('/host');
     } else {
-        res.render('error', { message: "Invalid credentials!" });
+        res.render('error', { status:401,message: "Invalid credentials!" });
     }
 };
 
