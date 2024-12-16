@@ -1,13 +1,14 @@
 const XLSX = require("xlsx");
-const path = require("path");
-const { filePaths } = require("../config/env");
+
 const generateExcel = (combinedData, presentCount, absentCount) => {
-    // uncomment mainSortBy based on the requirement
+    // Uncomment `mainSortBy` based on the requirement
     const mainSortBy = "";
     // const mainSortBy = "status";
+
     return new Promise((resolve, reject) => {
         try {
-            const totalCount = absentCount + presentCount
+            const totalCount = absentCount + presentCount;
+
             // Sort data
             if (mainSortBy === "status") {
                 combinedData.sort((a, b) => {
@@ -31,11 +32,8 @@ const generateExcel = (combinedData, presentCount, absentCount) => {
                 minute: "2-digit",
                 hour12: true,
             };
-
-            const outputFilePath = filePaths.excelPath;
             const formattedDate = new Intl.DateTimeFormat("en-US", options).format(date).replace(":", "-");
-            const fileName = `${formattedDate}.xlsx`;
-            const filePath = outputFilePath + '/' + fileName;
+
             // Prepare data for the sheet
             const sheetData = [
                 ["Total Students", totalCount],
@@ -56,13 +54,12 @@ const generateExcel = (combinedData, presentCount, absentCount) => {
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Attendance");
 
-            // Write the Excel file
-            XLSX.writeFile(workbook, filePath);
+            // Write the Excel file to a buffer
+            const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
 
-            console.log(`Excel file successfully written to ${filePath}`);
-            resolve(filePath);
+            resolve(buffer); // Resolve with the Excel buffer
         } catch (err) {
-            console.error("Error writing Excel file:", err);
+            console.error("Error generating Excel file:", err);
             reject(err);
         }
     });
