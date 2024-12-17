@@ -10,8 +10,8 @@
 
 <body>
     <!-- Home Icon -->
-    <a href="/host" class="home-icon">
-        <img src="/images/svg/home.svg" alt="Home">
+    <a href="/host" class="goback-icon">
+        <img src="/images/svg/back.svg" alt="Go back icon">
     </a>
 
     <!-- Header -->
@@ -42,16 +42,22 @@
                 </tr>
             </thead>
             <tbody>
-                <% Object.entries(enrolledStudents).forEach(([id, student]) => { %>
+                <% Object.entries(enrolledStudents).forEach(([id, student])=> { %>
                     <tr data-id="<%= id %>" data-name="<%= student.name %>" data-usn="<%= student.usn %>">
-                        <td class="usn"><%= student.usn %></td>
-                        <td class="name"><%= student.name %></td>
+                        <td class="usn">
+                            <%= student.usn %>
+                        </td>
+                        <td class="name">
+                            <%= student.name %>
+                        </td>
                         <td>
-                            <button class="edit-btn">✏️</button>
-                            <button class="delete-btn">🗑️</button>
+                            <div class="btn-grp">
+                                <button class="edit-btn"><img src="/images/svg/pen.svg" alt="" srcset=""></button>
+                                <button class="delete-btn"><img src="/images/svg/delete.svg" alt="" srcset=""></button>
+                            </div>
                         </td>
                     </tr>
-                <% }) %>
+                    <% }) %>
             </tbody>
         </table>
     </div>
