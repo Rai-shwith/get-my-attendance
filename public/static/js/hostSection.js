@@ -10,10 +10,14 @@ const qrcode = new QRCode(document.getElementById("qrcode"), {
 });
 
 // Copy link to clipboard
-document.getElementById("copyLink").addEventListener("click", function () {
+document.getElementById("copyLink").addEventListener("click", async function () {
     const linkField = document.getElementById("attendanceLink");
-    linkField.select();
-    document.execCommand("copy");
-    alert("Link copied to clipboard!");
+    try {
+        await navigator.clipboard.writeText(linkField.value);
+        alert("Link copied to clipboard!");
+    } catch (err) {
+        console.error("Failed to copy: ", err);
+    }
 });
+
 

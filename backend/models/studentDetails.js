@@ -18,14 +18,24 @@ const loadStudentData = () => {
     }
 };
 
-// Get All Registered Students
+// Get All Registered Students values only
 const getAllStudents = () => {
     loadStudentData();
     return Object.values(studentCache);
 };
 
+// Get All Registered Students with ID
+const getAllStudentsWithId = () => {
+    loadStudentData();
+    return studentCache;
+};
+
 // Save data back to the file system on-demand
-const saveStudentData = () => {
+const saveStudentData = (newStudentDataBulk = null) => {
+    if(newStudentDataBulk){
+        logger.info("Updating the Entire Student Info");
+        studentCache = newStudentDataBulk;
+    }
     try {
         fs.writeFileSync(filePaths.studentDetailsPath, JSON.stringify(studentCache, null, 2), 'utf8');
         logger.debug('Student Data Saved .')
@@ -76,7 +86,14 @@ const currentRegistration = {};
 currentRegistration.addStudent = (id, student) => {
     logger.debug(`currentRegistration.addStudent :${id} -> ${student.name}[${student.usn}]`)
     currentRegistrationCache[id] = student;
+    // Save permanently
+    addStudent(id,saveStudentData)
 };
+
+// Function to get Current Registered Students
+currentRegistration.getCurrentRegisteredStudents = () => {
+    return Object.values(currentRegistrationCache);
+}
 
 // Object to store operations on attendance
 const attendance = {};
@@ -114,4 +131,4 @@ attendance.getAbsentStudents = () => {
 
 loadStudentData()
 
-module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, getAllStudents, currentRegistration,attendance };
+module.exports = { loadStudentData, saveStudentData, addStudent, getStudentById, getStudentByName, getStudentByUSN, getAllStudents,getAllStudentsWithId, currentRegistration,attendance };

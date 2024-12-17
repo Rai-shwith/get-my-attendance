@@ -73,6 +73,22 @@ button[type="submit"]:hover {
     background-color: #3700b3;
 }
 
+/* Initially hide the error message */
+.hidden {
+    display: none;
+}
+
+/* Style for the error message */
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+
 /* Responsive design */
 @media (max-width: 600px) {
     .login-box {

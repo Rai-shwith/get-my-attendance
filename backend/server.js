@@ -22,8 +22,10 @@ const DOMAIN = server.domain || getDomain();
 const app = express();
 
 // Middleware setup
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Middleware to parse form data (application/x-www-form-urlencoded)
+app.use(express.urlencoded({ extended: true }));
 
 // Cookie Parser middleware
 app.use(cookieParser(auth.secretKey));

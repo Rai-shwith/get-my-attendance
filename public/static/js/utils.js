@@ -23,10 +23,12 @@ function startTimer(timeString) {
 
     // Function to update the time and display it
     function updateTimer() {
-        if (totalMilliseconds <= 0) {
+        if (totalMilliseconds <1000) {
             clearInterval(timerInterval); // Stop the timer when it reaches 0
             
             timerDisplay.innerHTML = "Time's up!";
+            // Show the popup modal when the timer ends
+            showEndProcessPopup();
         } else {
             totalMilliseconds -= 1000; // Decrease the time by 1 second (1000ms)
 
@@ -44,3 +46,9 @@ function startTimer(timeString) {
     // Initial call to display the starting time
     updateTimer();
 }
+
+// Function to show the popup modal
+const showEndProcessPopup = () => {
+    const popupModal = document.getElementById("popupModal");
+    popupModal.style.display = "flex"; // Unhide the modal
+};

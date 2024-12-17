@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Enrolled Students</title>
+    <link rel="stylesheet" href="/css/hostEditRegistered.css">
+</head>
+
+<body>
+    <!-- Home Icon -->
+    <a href="/host" class="home-icon">
+        <img src="/images/svg/home.svg" alt="Home">
+    </a>
+
+    <!-- Header -->
+    <header>
+        Edit Enrolled Students
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-bar-container">
+            <input type="text" id="searchBar" placeholder="Search by Name or USN..." />
+            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="container">
+        <table id="student-table">
+            <thead>
+                <tr>
+                    <th>USN</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% Object.entries(enrolledStudents).forEach(([id, student]) => { %>
+                    <tr data-id="<%= id %>" data-name="<%= student.name %>" data-usn="<%= student.usn %>">
+                        <td class="usn"><%= student.usn %></td>
+                        <td class="name"><%= student.name %></td>
+                        <td>
+                            <button class="edit-btn">✏️</button>
+                            <button class="delete-btn">🗑️</button>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Popup for Editing -->
+    <div id="edit-popup" class="popup hidden">
+        <div class="popup-content">
+            <h3>Edit Student Details</h3>
+            <label for="edit-name">Name:</label>
+            <input type="text" id="edit-name" placeholder="Name">
+
+            <label for="edit-usn">USN:</label>
+            <input type="text" id="edit-usn" placeholder="USN">
+
+            <div class="popup-buttons">
+                <button id="save-btn">Save</button>
+                <button id="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirm-delete" class="popup hidden">
+        <div class="popup-content">
+            <p id="confirm-message"></p>
+            <div class="popup-buttons">
+                <button id="confirm-yes">Yes</button>
+                <button id="confirm-no">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Changes -->
+    <div class="submit-container">
+        <button id="submit-btn">Submit Changes</button>
+    </div>
+
+    <script src="/js/hostEditRegistered.js"></script>
+</body>
+
+</html>

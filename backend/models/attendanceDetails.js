@@ -42,6 +42,14 @@ const getAttendanceReport = (timestamp) => {
     return attendance
 };
 
+// get latest recent attendance report
+const getRecentAttendanceTimestamp = () => {
+    const timestamps = Object.keys(attendanceDetailsCache).sort((a, b) => a - b);
+    const latestTimestamp = timestamps[timestamps.length - 1];
+    return latestTimestamp;
+};
+
+
 // Get all attendance
 const getAllAttendanceReport = () => {
     loadAttendanceData();
@@ -64,4 +72,4 @@ const getAttendanceHistorySummary = () =>{
     return attendanceHistorySummary;
 };
 
-module.exports = { addAttendanceEntry, getAttendanceReport,getAllAttendanceReport,getAttendanceHistorySummary};
+module.exports = { addAttendanceEntry, getAttendanceReport,getAllAttendanceReport,getAttendanceHistorySummary,getRecentAttendanceTimestamp};

@@ -1,0 +1,237 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header {
+    background-color: #6200ea;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.2rem;
+}
+.home-icon{
+    position:absolute;
+    z-index: 999;
+    cursor: pointer;
+}
+
+/* Table */
+table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #6200ea;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    color: #6200ea;
+}
+
+.delete-btn:hover {
+    color: red;
+}
+
+/* Popup */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    width: 300px;
+}
+
+.popup-buttons {
+    margin-top: 1rem;
+}
+
+.popup-buttons button {
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #6200ea;
+    color: white;
+}
+
+.popup-buttons button:hover {
+    background-color: #3700b3;
+}
+
+/* Popup Input Section Styling */
+.popup-content h3 {
+    margin-bottom: 1rem;
+    color: #6200ea;
+    font-size: 1.5rem;
+}
+
+.popup-content label {
+    display: block;
+    font-weight: bold;
+    margin: 0.5rem 0 0.3rem;
+    color: #333;
+}
+
+.popup-content input {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.popup-content input:focus {
+    border-color: #6200ea;
+    box-shadow: 0 0 5px rgba(98, 0, 234, 0.4);
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.popup-buttons button {
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+#save-btn {
+    background-color: #6200ea;
+}
+
+#save-btn:hover {
+    background-color: #3700b3;
+}
+
+#cancel-btn {
+    background-color: #ccc;
+    color: #333;
+}
+
+#cancel-btn:hover {
+    background-color: #bbb;
+}
+
+
+.hidden {
+    display: none;
+}
+
+/* Submit Button */
+.submit-container {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+#submit-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#submit-btn:hover {
+    background-color: #3700b3;
+}
+
+
+/* Container for card and search bar */
+.search-container {
+    display: flex;
+    justify-content: center;
+    margin: 1rem;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+/* Search bar container */
+.search-bar-container {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 1; /* Allow the search bar to grow */
+    max-width: 500px;
+}
+
+/* Search input */
+#searchBar {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem; /* Add space for the icon */
+    font-size: 1rem;
+    border: 2px solid #6200ea;
+    border-radius: 100px;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Focus effect */
+#searchBar:focus {
+    border-color: #3700b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* SVG Search Icon */
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #6200ea;
+    pointer-events: none; /* Make sure the icon doesn't block input interaction */
+}
+

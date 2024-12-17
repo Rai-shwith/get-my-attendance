@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Report</title>
+    <link rel="stylesheet" href="/css/hostViewEnrolled.css">
+</head>
+
+<body>
+    <a href="/host" class="home-icon"> <img src="/images/svg/home.svg" alt="" srcset=""></a>
+    <header>
+        Registered Students
+    </header>
+
+    <div class="search-container">
+        <div class="search-bar-container">
+            <input type="text" id="searchBar" placeholder="Name or USN..." />
+            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+    </div>
+
+    <div class="container">
+        <table id="attendance-table">
+            <thead>
+                <tr>
+                    <th>USN</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% registeredStudents.forEach(student=> { %>
+                    <tr >
+                        <td>
+                            <%= student.usn %>
+                        </td>
+                        <td>
+                            <%= student.name %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+    </div>
+    <script src="/js/hostViewEnrolled.js"></script>
+</body>
+
+</html>
