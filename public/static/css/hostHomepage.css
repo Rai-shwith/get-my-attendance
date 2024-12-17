@@ -13,26 +13,13 @@ header {
     font-size: 1.2rem;
 }
 
-.logoutBtn {
-    position: absolute;
+.logout-icon{
+    position:absolute;
     right: 0.5rem;
-    top: 0.5rem;
-    background-color: #f9f9f9; 
-    color: #6200ea; 
-    padding: 10px 20px; 
-    border: none; 
-    border-radius: 5px; 
-    font-size: 16px; 
-    cursor: pointer; 
-    transition: all 0.3s ease; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    z-index: 999;
+    cursor: pointer;
 }
 
-.logoutBtn:hover {
-    background-color: #e0e0e0; 
-    color: #3700b3; 
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); 
-}
 
 .container {
     padding: 1rem;
