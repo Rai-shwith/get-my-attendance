@@ -16,7 +16,7 @@
             <div class="cards-grid">
                 <% sessions.forEach(session => { %>
                     <div class="card" onclick="location.href='/host/reports/attendance?timestamp=<%= session.timestamp %>'">
-                        <h2><%= new Date(session.timestamp).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></h2>
+                        <h2><%= new Date(parseInt(session.timestamp,10)).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></h2>
                         <p><strong>Present:</strong> <%= session.presentCount %></p>
                         <p><strong>Absent:</strong> <%= session.absentCount %></p>
                     </div>

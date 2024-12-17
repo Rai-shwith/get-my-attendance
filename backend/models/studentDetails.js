@@ -87,7 +87,7 @@ currentRegistration.addStudent = (id, student) => {
     logger.debug(`currentRegistration.addStudent :${id} -> ${student.name}[${student.usn}]`)
     currentRegistrationCache[id] = student;
     // Save permanently
-    addStudent(id,saveStudentData)
+    addStudent(id,student)
 };
 
 // Function to get Current Registered Students
