@@ -9,7 +9,7 @@ const crypto = require('crypto');
  *@param {string} name - The name of the student.
  *@param {string} usn - The USN of the student.
  *@param {string} section - The section of the student.
- *@param {string} branch - The branch of the student.
+ *@param {number} departmentId - The department ID of the student.
 * @param {number} semester - The semester of the student.
 * @param {number} year - The academic year of the student.
 * @param {string} email - The email of the student.
@@ -17,19 +17,19 @@ const crypto = require('crypto');
 * @param {number} registered_under - The ID of the teacher who registered the student.
 * @param {string} mac_address - The mac_address of the student.[OPTIONAL]
 */
-exports.registerStudent = async (name, usn, section, branch, semester, year, email, password,registered_under, mac_address = null,sessionKey) => {
+exports.registerStudent = async (name, usn, section, departmentId, semester, year, email, password,registered_under, mac_address = null,sessionKey) => {
     logger.debug(`Attempting to register student: ${name}, USN: ${usn}`);
 
-    // Find the section ID based on the provided section, branch, semester, and year
+    // Find the section ID based on the provided section, departmentId, semester, and year
     const sectionQuery = `
         SELECT id FROM sections
-        WHERE branch_name = $1
+        WHERE department_id = $1
         AND semester = $2
         AND section = $3
         AND academic_year = $4;
     `;
     
-    const sectionValues = [branch, semester, section, year];
+    const sectionValues = [departmentId, semester, section, year];
     
     try {
         // Logging the section search process
@@ -84,6 +84,7 @@ exports.registerStudent = async (name, usn, section, branch, semester, year, ema
 *   mac_address: string | null,
 *   email: string,
 *   section_id: number | null,
+*   department_id: number | null,
 *   academic_year: number | null,
 *   registered_under: string | null,
 *   created_at: string,
@@ -136,6 +137,7 @@ exports.getStudentBySessionKey = async (studentId) => {
 *   mac_address: string | null,
 *   email: string,
 *   section_id: number | null,
+*   department_id: number | null,
 *   academic_year: number | null,
 *   registered_under: string | null,
 *   created_at: string,
@@ -187,6 +189,7 @@ exports.getStudentByUSN = async (studentUSN) => {
 *   email: string, 
 *   mac_address: string | null, 
 *   section_id: number, 
+*   department_id: number | null,
 *   academic_year: number, 
 *   created_at: string, 
 *   updated_at: string 

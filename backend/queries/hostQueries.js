@@ -74,6 +74,7 @@ exports.assignTeacherToSections = async (teacherId, sections) => {
     }
 };
 
+// avoids manually link courses to sections
 /**
  * Assign courses to a teacher via sections.
  *
@@ -115,10 +116,13 @@ exports.getCoursesForTeacher = async (teacherId) => {
         SELECT 
             c.id AS course_id,
             c.name AS course_name,
+            c.title AS  course_title,
+            d.name AS department
             ts.section_id
         FROM teacher_sections ts
         JOIN section_courses sc ON ts.section_id = sc.section_id
         JOIN courses c ON sc.course_id = c.id
+        JOIN departments d ON c.department_id = d.id
         WHERE ts.teacher_id = $1;
     `;
 

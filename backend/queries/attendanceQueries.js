@@ -74,7 +74,7 @@ exports.getAttendanceSummary = async (teacherId, sectionId, courseId) => {
             COUNT(CASE WHEN a.status = 'absent' THEN 1 END) AS absent_count,
             a.section_id,
             t.name AS teacher_name,
-            s.branch_name,
+            d.name as branch_name,
             s.semester,
             s.section,
             c.course_name
@@ -87,6 +87,8 @@ exports.getAttendanceSummary = async (teacherId, sectionId, courseId) => {
             sections s ON a.section_id = s.id
         JOIN
             courses c ON a.course_id = c.id
+        JOIN 
+            departments d ON s.department_id = d.id
         WHERE
             a.teacher_id = $1
             AND a.section_id = $2
@@ -141,7 +143,7 @@ exports.getAttendanceReportByHostForSection = async (teacherId, sectionId, cours
             a.status AS attendance_status,
             a.date AS attendance_date,
             t.name AS teacher_name,
-            sec.branch_name,
+            d.name AS branch_name,
             sec.semester,
             sec.section,
             c.name AS course
@@ -158,6 +160,8 @@ exports.getAttendanceReportByHostForSection = async (teacherId, sectionId, cours
             sections sec ON a.section_id = sec.id
         JOIN
             courses c ON a.course_id = c.id
+        JOIN 
+            department d ON sec.department_id = d.id
         WHERE
             a.teacher_id = $1
             AND a.section_id = $2
@@ -232,7 +236,7 @@ exports.getRecentAttendanceReport = async (teacherId, sectionId, courseId) => {
             COUNT(CASE WHEN a.status = 'absent' THEN 1 END) AS absent_count,
             a.section_id,
             t.name AS teacher_name,
-            s.branch_name,
+            d.name AS branch_name,
             s.semester,
             s.section,
             a.id AS attendance_id,
@@ -246,6 +250,8 @@ exports.getRecentAttendanceReport = async (teacherId, sectionId, courseId) => {
         JOIN
             sections s ON a.section_id = s.id
         JOIN
+            departments d ON s.department_id = d.id
+        JOIN
             students st ON a.student_id = st.id
         JOIN
             courses c ON a.course_id = c.id
@@ -254,7 +260,7 @@ exports.getRecentAttendanceReport = async (teacherId, sectionId, courseId) => {
             AND a.section_id = $2
             AND a.course_id = $3
         GROUP BY
-            a.date, a.section_id, t.name, s.branch_name, s.semester, s.section, a.id, st.name, a.status
+            a.date, a.section_id, t.name, d.branch_name, s.semester, s.section, a.id, st.name, a.status
         ORDER BY
             a.date DESC
         LIMIT 1;
