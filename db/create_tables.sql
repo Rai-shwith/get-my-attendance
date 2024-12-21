@@ -72,7 +72,8 @@ CREATE TABLE students (
     registered_under INT REFERENCES teachers(id) ON DELETE RESTRICT, -- Prevent deletion of teacher if students are registered by them set the values before deleting the teacher
     session_key TEXT UNIQUE,           -- Session key for the student so that they can login in only one device at a time
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW() ,
+    logged_on TIMESTAMP DEFAULT NOW(),-- Use while logging
 );
 
 -- Create Teacher-Sections table (Many-to-Many relationship)
@@ -90,11 +91,12 @@ CREATE TABLE attendance (
     teacher_id INT REFERENCES teachers(id) ON DELETE SET NULL,  -- Reference teacher and set NULL on delete
     section_id INT REFERENCES sections(id) ON DELETE SET NULL,  -- Reference section and set NULL on delete
     course_id INT REFERENCES courses(id) ON DELETE SET NULL,
-    date TIMESTAMP NOT NULL,
+    date TIMESTAMP NOT NULL, -- Date and time of when the attendance was started.
     status attendance_status DEFAULT 'absent', -- ENUM 'present' or 'absent'
     is_manual BOOLEAN DEFAULT FALSE,           -- True if marked manually
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
+    CONSTRAINT unique_id_date UNIQUE (id, date) -- Unique combination of id and date
 );
 
 -- Create Section-Courses table
