@@ -58,6 +58,8 @@ CREATE TABLE students (
     email VARCHAR(255) UNIQUE NOT NULL,     -- Email is unique and not NULL
     section_id INT REFERENCES sections(id) ON DELETE SET NULL,  -- Reference section with flexibility
     academic_year INT,          -- Track academic year for the student
+    registered_under INT REFERENCES teachers(id) ON DELETE RESTRICT, -- Prevent deletion of teacher if students are registered by them set the values before deleting the teacher
+    session_key TEXT UNIQUE,           -- Session key for the student so that they can login in only one device at a time
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -76,6 +78,7 @@ CREATE TABLE attendance (
     student_id INT REFERENCES students(id) ON DELETE SET NULL,  -- Reference student and set NULL on delete
     teacher_id INT REFERENCES teachers(id) ON DELETE SET NULL,  -- Reference teacher and set NULL on delete
     section_id INT REFERENCES sections(id) ON DELETE SET NULL,  -- Reference section and set NULL on delete
+    course_id INT REFERENCES courses(id) ON DELETE SET NULL,
     date TIMESTAMP NOT NULL,
     status attendance_status DEFAULT 'absent', -- ENUM 'present' or 'absent'
     is_manual BOOLEAN DEFAULT FALSE,           -- True if marked manually
