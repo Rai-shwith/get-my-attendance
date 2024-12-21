@@ -41,6 +41,7 @@
         <div class="btn-container">
             <button class="btn-sort" ><a href="/host">Home</a></button>
             <button class="btn-sort" onclick="sortTable(event)">Sort by USN</button>
+            <button class="btn-sort" id="edit-attendance">Edit Attendance</button>
         </div>
         <table id="attendance-table">
             <thead>
@@ -52,20 +53,21 @@
             </thead>
             <tbody>
                 <% attendance.forEach(student=> { %>
-                    <tr class="<%= student.status === 'Present' ? 'row-present' : 'row-absent' %>">
+                    <tr class="<%= student.status === 'Present' ? 'row-present' : 'row-absent' %> ">
                         <td>
                             <%= student.usn %>
                         </td>
                         <td>
                             <%= student.name %>
                         </td>
-                        <td>
+                        <td class="status-cell" data-status="<%= student.status %>">
                             <%= student.status.charAt(0).toUpperCase() + student.status.slice(1) %>
                         </td>
                     </tr>
                     <% }) %>
             </tbody>
         </table>
+        <button id="submit-changes" style="display: none;">Submit Changes</button>
     </div>
     <div class="download-btn">
         <button class="btn-download" onclick="downloadReport('pdf')">Download PDF Report</button>

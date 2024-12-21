@@ -86,6 +86,21 @@ th {
 }
 
 
+table td.editable {
+    background-color: #fffdfa;
+    cursor: text;
+}
+
+table td.editable:focus {
+    outline: 2px solid #007bff;
+    background-color: #ffffe0;
+}
+
+/* edit styling for status */
+.editable-status {
+    cursor: pointer;
+    box-shadow: -5px -6px 3px 0px rgba(0, 0, 0, 0.1);
+}
 
 /* Container for card and search bar */
 .search-container {
