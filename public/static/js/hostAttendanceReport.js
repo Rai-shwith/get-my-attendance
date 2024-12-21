@@ -104,15 +104,14 @@ document.getElementById('edit-attendance').addEventListener('click', () => {
     // Toggle status between Present and Absent
     statusCells.forEach(cell => {
         cell.addEventListener('click', () => {
-            const [currentStatus] = cell.getAttribute('data-status');
+            const currentStatus = cell.getAttribute('data-status');
             const newStatus = currentStatus === 'Present' ? 'Absent' : 'Present';
             const statusStyle = newStatus === 'Present' ? 'row-present' : 'row-absent';
 
             // Update cell content and dataset
             cell.textContent = newStatus;
             cell.setAttribute('data-status', newStatus);
-            console.log("Status set to"+newStatus);
-            console.log(cell.parentElement);
+            console.log("Status set to "+newStatus);
             // Update row class
             cell.parentElement.classList.remove('row-present', 'row-absent');
             cell.parentElement.classList.add(statusStyle);
