@@ -6,13 +6,14 @@ const pool = require('../data/db');
  * @param {string} name - The name of the teacher.
  * @param {string} email - The email address of the teacher.
  * @param {string} password - The plain text password of the teacher.
+ * @param {number} departmentId - The id of the department.
  * @returns {Promise<object>} The newly created teacher's details.
  * @throws {Error} If the teacher could not be registered.
  */
-exports.registerTeacher = async (name, email, password) => {
+exports.registerTeacher = async (name, email, password,departmentId) => {
     const query = `
-        INSERT INTO teachers (name, email, password, created_at, updated_at)
-        VALUES ($1, $2, $3, NOW(), NOW())
+        INSERT INTO teachers (name, email, password, department_id, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, NOW(), NOW())
         RETURNING id, name, email, created_at, updated_at;
     `;
 
@@ -20,7 +21,7 @@ exports.registerTeacher = async (name, email, password) => {
         // Hash the password before storing it
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const values = [name, email, hashedPassword];
+        const values = [name, email, hashedPassword, departmentId];
         const result = await pool.query(query, values);
 
         const newTeacher = result.rows[0];
@@ -101,37 +102,6 @@ exports.assignTeacherToCourses = async (teacherId, courseIds) => {
 };
 
 
-
-/**
- * Assign courses to sections.
- *
- * @param {Array<{sectionId: number, courseId: number}>} sectionCourses - Array of section-course pairs.
- * @returns {Promise<string>} Success message.
- */
-exports.assignCoursesToSections = async (sectionCourses) => {
-    const query = `
-        INSERT INTO section_courses (section_id, course_id)
-        VALUES ($1, $2)
-        ON CONFLICT DO NOTHING;
-    `;
-
-    try {
-        const client = await pool.connect();
-        await client.query('BEGIN');
-
-        for (const { sectionId, courseId } of sectionCourses) {
-            await client.query(query, [sectionId, courseId]);
-        }
-
-        await client.query('COMMIT');
-        client.release();
-
-        return 'Courses assigned to sections successfully.';
-    } catch (error) {
-        logger.error(`Error assigning courses to sections: ${error.message}`);
-        throw new Error('Failed to assign courses to sections.');
-    }
-};
 
 
 /**

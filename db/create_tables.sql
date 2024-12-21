@@ -44,7 +44,7 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,  -- Name of the course (e.g., "MAE11")
     department_id INT REFERENCES departments(id) ON DELETE CASCADE,  -- Added department_id
-    description TEXT     -- Description of the course
+    title TEXT     -- Description of the course
 );
 
 -- Create Teachers table

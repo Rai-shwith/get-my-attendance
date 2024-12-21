@@ -68,3 +68,69 @@ exports.addCourse = async (name, description = null) => {
         throw new Error('Failed to add course. Please try again later.');
     }
 };
+
+
+
+/**
+ * Add a course to a section.
+ *
+ * @param {number} sectionId - The ID of the section.
+ * @param {number} courseId - The ID of the course.
+ * @returns {Object} - Returns an object containing success or error details.
+ */
+exports.addSectionCourse = async (sectionId, courseId) => {
+    try {
+        // Validate inputs
+        if (!sectionId || !courseId) {
+            logger.error("Invalid input: Section ID and Course ID are required.");
+            throw new Error("Section ID and Course ID are required.");
+        }
+
+        // SQL query to insert a section-course mapping
+        const query = `
+            INSERT INTO section_courses (section_id, course_id)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING;
+        `;
+
+        // Execute the query using the pool
+        await pool.query(query, [sectionId, courseId]);
+
+        logger.info(`Successfully added course ${courseId} to section ${sectionId}.`);
+        return { success: true, message: "Course successfully added to the section." };
+    } catch (error) {
+        logger.error(`Error adding course to section: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Assign courses to sections.
+ *
+ * @param {Array<{sectionId: number, courseId: number}>} sectionCourses - Array of section-course pairs.
+ * @returns {Promise<string>} Success message.
+ */
+exports.assignCoursesToSections = async (sectionCourses) => {
+    const query = `
+        INSERT INTO section_courses (section_id, course_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING;
+    `;
+
+    try {
+        const client = await pool.connect();
+        await client.query('BEGIN');
+
+        for (const { sectionId, courseId } of sectionCourses) {
+            await client.query(query, [sectionId, courseId]);
+        }
+
+        await client.query('COMMIT');
+        client.release();
+
+        return 'Courses assigned to sections successfully.';
+    } catch (error) {
+        logger.error(`Error assigning courses to sections: ${error.message}`);
+        throw new Error('Failed to assign courses to sections.');
+    }
+};
