@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Portal</title>
-    <link rel="stylesheet" href="/css/hostHomepage.css">
+    <link rel="stylesheet" href="/public/static/css/font.css">
+    <link rel="stylesheet" href="/public/static/css/utils.css">
+    <link rel="stylesheet" href="/public/static/css/hostHomepage.css">
 </head>
 
 <body>
@@ -14,13 +16,31 @@
         <img src="/images/svg/logout.svg" alt="Log out">
     </a>
     <header>
-        Attendance Portal
+        Registration and Attendance
     </header>
 
+    <!-- From Uiverse.io by JkHuger  -->
+    <label for="theme" class="theme">
+        <span class="theme__toggle-wrap">
+            <input id="theme" class="theme__toggle" type="checkbox" role="switch" name="theme" value="dark">
+            <span class="theme__fill"></span>
+            <span class="theme__icon">
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+                <span class="theme__icon-part"></span>
+            </span>
+        </span>
+    </label>
 
     <!-- Home page section -->
     <section id="homePage" class="">
-        <div class="container">
+        <div class="container hidden">
             <!-- Attendance Card -->
             <div class="card">
                 <h2>Attendance</h2>
@@ -37,7 +57,17 @@
                 <a href="/host/edit/students" class="button">Edit Registered Students</a>
             </div>
         </div>
+        <div class="container">
+           <div class="card">
+            <div class="info">
+                <div class="big-text">Start Registration</div>
+                <div class="small-text">starts a 5 minute timer for students to register,needed only once</div>
+            </div>
+            <img src="" alt="">
+           </div>
+        </div>
     </section>
+    <script src="/public/static/js/helper.js"></script>
 </body>
 
 </html>

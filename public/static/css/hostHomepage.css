@@ -1,6 +1,5 @@
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
     background-color: #f9f9f9;
     color: #333;
 }
@@ -10,7 +9,8 @@ header {
     color: white;
     padding: 1rem;
     text-align: center;
-    font-size: 1.2rem;
+    font-size:36px;
+    font-weight: bold;
 }
 
 .logout-icon{
@@ -68,4 +68,12 @@ footer a:hover {
 
 .button:hover {
     background-color: #3700b3;
+}
+
+.hidden{
+    display: none;
+}
+ 
+.big-text{
+    font-size: 2rem;
 }
