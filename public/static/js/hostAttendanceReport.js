@@ -92,43 +92,74 @@ document.getElementById("searchBar").addEventListener("input", function () {
     });
 });
 
-// Function to save attendance data to local storage
-function saveAttendanceData(attendanceData) {
-    localStorage.setItem('attendance', JSON.stringify(attendanceData));
-}
+document.getElementById('edit-attendance').addEventListener('click', () => {
+    console.log("Edit attendance clicked");
+    const statusCells = document.querySelectorAll('.status-cell');
+    const submitButton = document.getElementById('submit-changes');
+    let isEdited = false;
 
-function populateAttendanceTable() {
-    // Fetch attendance data from local storage
-    const attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+    // Update the style of status cells
+    statusCells.forEach(cells => cells.classList.add('editable-status'));
 
-    // Get the table body element
-    const tableBody = document.querySelector('#attendance-table tbody');
+    // Toggle status between Present and Absent
+    statusCells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            const [currentStatus] = cell.getAttribute('data-status');
+            const newStatus = currentStatus === 'Present' ? 'Absent' : 'Present';
+            const statusStyle = newStatus === 'Present' ? 'row-present' : 'row-absent';
 
-    // Clear existing rows in the table body
-    tableBody.innerHTML = '';
+            // Update cell content and dataset
+            cell.textContent = newStatus;
+            cell.setAttribute('data-status', newStatus);
+            console.log("Status set to"+newStatus);
+            console.log(cell.parentElement);
+            // Update row class
+            cell.parentElement.classList.remove('row-present', 'row-absent');
+            cell.parentElement.classList.add(statusStyle);
 
-    // Loop through the attendance array and create rows
-    attendance.forEach(student => {
-        const row = document.createElement('tr');
-        row.className = student.status === 'present' ? 'row-present' : 'row-absent';
-
-        // Create and append the USN cell
-        const usnCell = document.createElement('td');
-        usnCell.textContent = student.usn;
-        row.appendChild(usnCell);
-
-        // Create and append the Name cell
-        const nameCell = document.createElement('td');
-        nameCell.textContent = student.name;
-        row.appendChild(nameCell);
-
-        // Create and append the Status cell
-        const statusCell = document.createElement('td');
-        statusCell.textContent = student.status.charAt(0).toUpperCase() + student.status.slice(1);
-        row.appendChild(statusCell);
-
-        // Append the row to the table body
-        tableBody.appendChild(row);
+            // Show submit button after the first change
+            if (!isEdited) {
+                submitButton.style.display = 'block';
+                isEdited = true;
+            }
+        });
     });
-}
+
+    // Collect changes and submit
+    submitButton.addEventListener('click', () => {
+        const rows = document.querySelectorAll('#attendance-table tbody tr');
+        const changes = [];
+
+        rows.forEach(row => {
+            const studentName = row.cells[0].innerText;
+            const usn = row.cells[1].innerText;
+            const attendanceStatus = row.cells[2].getAttribute('data-status');
+
+            changes.push({
+                name: studentName,
+                usn: usn,
+                status: attendanceStatus
+            });
+        });
+
+        // Send data to the backend
+        fetch('/attendance/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ attendance: changes })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || 'Changes submitted successfully!');
+                submitButton.style.display = 'none'; // Hide the button after submission
+                isEdited = false;
+            })
+            .catch(error => {
+                console.error('Error submitting changes:', error);
+                alert('Failed to submit changes: Implementation pending.');
+            });
+    });
+});
 
