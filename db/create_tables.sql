@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS departments CASCADE;
 DROP INDEX IF EXISTS idx_usn;
 DROP INDEX IF EXISTS idx_email;
 DROP INDEX IF EXISTS idx_attendance_date;
-DROP INDEX IF EXISTS idx_department_name;  -- Drop department name index if it exists
+DROP INDEX IF EXISTS idx_department_name;  
 
 -- Create ENUM type for attendance status
 DO $$ 
@@ -68,12 +68,13 @@ CREATE TABLE students (
     email VARCHAR(255) UNIQUE NOT NULL,     -- Email is unique and not NULL
     section_id INT REFERENCES sections(id) ON DELETE SET NULL,  -- Reference section with flexibility
     department_id INT REFERENCES departments(id) ON DELETE CASCADE,  -- Added department_id
-    academic_year INT,          -- Track academic year for the student
+    enrollment_year INT,          -- Track academic year for the student
     registered_under INT REFERENCES teachers(id) ON DELETE RESTRICT, -- Prevent deletion of teacher if students are registered by them set the values before deleting the teacher
     session_key TEXT UNIQUE,           -- Session key for the student so that they can login in only one device at a time
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW() ,
     logged_on TIMESTAMP DEFAULT NOW(),-- Use while logging
+    logged_under INT REFERENCES teachers(id) ON DELETE RESTRICT -- Reference teacher under whom the student is logged in
 );
 
 -- Create Teacher-Sections table (Many-to-Many relationship)
@@ -84,19 +85,24 @@ CREATE TABLE teacher_sections (
     PRIMARY KEY (teacher_id, section_id)
 );
 
+CREATE TABLE class_sessions (
+    id SERIAL PRIMARY KEY,
+    course_id INT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    section_id INT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
+    teacher_id INT NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+    session_date TIMESTAMP NOT NULL, -- Date and time of when the attendance was started.
+    UNIQUE (course_id, section_id, teacher_id, session_date)
+);
+
 -- Create Attendance table
 CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
     student_id INT REFERENCES students(id) ON DELETE SET NULL,  -- Reference student and set NULL on delete
-    teacher_id INT REFERENCES teachers(id) ON DELETE SET NULL,  -- Reference teacher and set NULL on delete
-    section_id INT REFERENCES sections(id) ON DELETE SET NULL,  -- Reference section and set NULL on delete
-    course_id INT REFERENCES courses(id) ON DELETE SET NULL,
-    date TIMESTAMP NOT NULL, -- Date and time of when the attendance was started.
+    class_session_id INT REFERENCES class_sessions(id) ON DELETE CASCADE,
     status attendance_status DEFAULT 'absent', -- ENUM 'present' or 'absent'
     is_manual BOOLEAN DEFAULT FALSE,           -- True if marked manually
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
-    CONSTRAINT unique_id_date UNIQUE (id, date) -- Unique combination of id and date
 );
 
 -- Create Section-Courses table
@@ -104,6 +110,16 @@ CREATE TABLE section_courses (
     section_id INT NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
     course_id INT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
     PRIMARY KEY (section_id, course_id)
+);
+
+-- Create teacher_section_course table
+CREATE TABLE teacher_section_course (
+    id SERIAL PRIMARY KEY,
+    teacher_id INT REFERENCES teachers(id) ON DELETE CASCADE,  -- The teacher teaching the course
+    section_id INT REFERENCES sections(id) ON DELETE CASCADE,  -- The section being taught
+    course_id INT REFERENCES courses(id) ON DELETE CASCADE,    -- The course being taught
+    academic_year INT NOT NULL,                                -- Academic year for the assignment
+    UNIQUE (teacher_id, section_id, course_id, academic_year)  -- Prevent duplicate assignments
 );
 
 -- Create Backlogs table
@@ -119,5 +135,6 @@ CREATE TABLE backlogs (
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_usn ON students(usn);
 CREATE INDEX IF NOT EXISTS idx_email ON teachers(email);
-CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date);
 CREATE INDEX IF NOT EXISTS idx_department_name ON departments(name);
+CREATE INDEX IF NOT EXISTS idx_class_session_composite ON class_sessions(course_id, section_id, teacher_id, session_date);
+CREATE INDEX IF NOT EXISTS  idx_attendance_class_session ON attendance(class_session_id);
