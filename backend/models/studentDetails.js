@@ -111,6 +111,12 @@ attendance.addStudent = (id, student) => {
     presentStudentCache[id] = student;
 };
 
+// Function to clear the present StudentCache
+attendance.clearPresentStudents = () => {
+    logger.debug("clearPresentStudents")
+    presentStudentCache = {};
+};
+
 // Function to get present students
 attendance.getPresentStudents = () => {
     logger.debug("getPresentStudents")

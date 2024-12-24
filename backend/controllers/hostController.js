@@ -65,6 +65,8 @@ const stopAttendance = async (req, res) => {
         addAttendanceEntry(timestamp, combinedData);
 
         res.redirect("/host/reports/attendance?timestamp=" + timestamp)
+        // Clearing the present Student Cache
+        attendance.clearPresentStudents();
         logger.info("Stopping the Attendance Process")
         return;
     }

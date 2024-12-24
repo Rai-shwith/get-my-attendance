@@ -1,55 +1,55 @@
 body {
     margin: 0;
     background-color: var(--background-color);
-}
-
-header {
+  }
+  
+  header {
     color: var(--header-text-color);
     text-align: left;
     padding: 1rem;
     font-size: 2.5rem;
     font-weight: bold;
-}
-
-.logout-icon {
+  }
+  
+  .logout-icon {
     position: absolute;
     right: 0.5rem;
     z-index: 999;
     cursor: pointer;
-}
-
-
-.container {
+  }
+  
+  
+  .container {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
-}
-
-.register-card {
+  }
+  
+  .register-card {
     background-color: #944CFF;
-}
-
-.attendance-card {
+  }
+  
+  .attendance-card {
     background-color: #6571FF;
-}
-
-.info {
+  }
+  
+  .info {
     display: flex;
     flex-direction: column;
-}
-
-.info>.big-text {
+  }
+  
+  .info>.big-text {
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 1rem;
-}
-
-.info>.small-text {
+  }
+  
+  .info>.small-text {
     font-size: small;
-}
-
-.image-container {
+  }
+  
+  .image-container {
     width: 90px;
     height: 90px;
     overflow: hidden;
@@ -57,16 +57,16 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.image-container img {
+  }
+  
+  .image-container img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     /* Maintains aspect ratio without overflowing */
-}
-
-.card {
+  }
+  
+  .card {
     display: flex;
     max-width:40rem ;
     color: var(--black-and-white);
@@ -74,20 +74,27 @@ header {
     padding: 1rem;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.card:hover{
+  }
+  
+  .card:hover{
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-}
-
-
-.hidden {
+  }
+  
+  
+  .hidden {
     display: none;
-}
-
-@media (min-width: 700px) {
+  }
+  
+  @media (min-width: 700px) {
     .container{
         flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
     }
-}
+    .card{
+      flex-grow: 1;
+      width: 40vw; 
+    }
+  }

@@ -11,13 +11,13 @@ const {auth, server} = require('./config/env');
 const { logger } = require('./utils/logger');
 const { getAttendanceState } = require('./states/attendanceState');
 const { getRegistrationState } = require('./states/registerState');
-const { getDomain, getBaseURL } = require('./states/general');
+const { getDomain, getBaseURL, getDomainName } = require('./states/general');
 const FileStore = require('session-file-store')(session);
 
 
 const PORT = server.port;
 // Get the Domain (Ip address)
-const DOMAIN = server.domain || getDomain();
+const DOMAIN = getDomainName() || getDomain();
 
 const app = express();
 
