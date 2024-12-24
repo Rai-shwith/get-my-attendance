@@ -83,8 +83,8 @@ document.getElementById("searchBar").addEventListener("input", function () {
     rows.forEach((row) => {
         const name = row.children[0].textContent.toLowerCase();
         const usn = row.children[1].textContent.toLowerCase();
-
-        if (name.includes(query) || usn.includes(query)) {
+        const status = row.children[2].textContent.toLowerCase();
+        if (name.includes(query) || usn.includes(query)|| status.includes(query)) {
             row.style.display = "";
         } else {
             row.style.display = "none";
