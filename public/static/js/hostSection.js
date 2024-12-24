@@ -48,9 +48,4 @@ socket.on("notification", (data) => {
 
   // Append the notification to the container
   container.appendChild(notification);
-
-  // Remove notification after 3 seconds
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
 });

@@ -7,6 +7,7 @@ const generatePDF = require('../services/pdfService');
 const generateExcel = require('../services/excelService');
 const { addAttendanceEntry, getAttendanceReport, getAttendanceHistorySummary, getRecentAttendanceTimestamp } = require('../models/attendanceDetails');
 const { getBaseURL } = require('../states/general');
+const { sendMessage } = require('../utils/socketHelper');
 
 
 // Route to start attendance
