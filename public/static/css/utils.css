@@ -3,11 +3,13 @@
   --background-color: #FFFFFF;
   --gradient-text-color: linear-gradient(to right, #404EF6, #934CFE);
   --black-and-white: #FFFFFF;
+  --black-at-light: #131313;
   --header-text-color: #000000;
   --header-font-size:2.5rem;
   --select-text-color: #FFFFFF;
   --card-background: #F5F5F5;
   --card-text-color: #000000;
+  /* --button-background: linear-gradient(to right, #404EF6, #934CFE); */
   --button-background: linear-gradient(to right, #404EF6, #934CFE);
   --button-text-color: #FFFFFF;
   --search-bar-color: #DDDDDD;
@@ -16,6 +18,7 @@
 .dark-theme {
   --background-color: #131313;
   --black-and-white: #131313;
+  --black-at-light: #FFFFFF;
   --header-text-color: #8B8B8B;
   --select-text-color: #000000;
   --card-background: #232323;

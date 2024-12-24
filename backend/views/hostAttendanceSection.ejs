@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Take Attendance</title>
+    <link rel="stylesheet" href="/css/font.css">
+    <link rel="stylesheet" href="/css/utils.css">
     <link rel="stylesheet" href="/css/hostSection.css">
 </head>
 
@@ -12,54 +14,73 @@
     <header>
         Attendance Portal - Take Attendance
     </header>
-
-<!-- Pop up Model -->
-<!-- Hidden Modal Section -->
-<div id="popupModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-        <h2>Attendance Process Ended</h2>
-        <p>You can view the report by clicking the button below.</p>
-        <a href="/host/reports/attendance?recent=true" id="viewReportButton">View Report</a>
+    <div class="toggle-theme"><label for="theme" class="theme">
+            <span class="theme__toggle-wrap">
+                <input id="theme" class="theme__toggle" type="checkbox" role="switch" name="theme" value="dark">
+                <span class="theme__fill"></span>
+                <span class="theme__icon">
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                    <span class="theme__icon-part"></span>
+                </span>
+            </span>
+        </label></div>
+    <!-- Pop up Model -->
+    <!-- Hidden Modal Section -->
+    <div id="popupModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>Attendance Process Ended</h2>
+            <p>You can view the report by clicking the button below.</p>
+            <a href="/host/reports/attendance?recent=true" id="viewReportButton">View Report</a>
+        </div>
     </div>
-</div>
 
-        <% if (otherProcessRunning) { %>
-            <div class="container">
-                <h1>Another process is already in progress. Please complete or stop the current process before starting
-                    a new one.</h1>
-            </div>
-            <% } else { %>
-                <!-- timer  -->
-                <div class="container">Time remaining : <span id="timer" style="color: red;">
-                        <%= interval %>
-                    </span></div>
+    <% if (otherProcessRunning) { %>
+        <div class="container">
+            <h1>Another process is already in progress. Please complete or stop the current process before starting
+                a new one.</h1>
+        </div>
+        <% } else { %>
+            <!-- timer  -->
+            <div class="container ">Time remaining : <span id="timer" style="color: red;">
+                    <%= interval %>
+                </span></div>
 
-                <section id="attendanceSection" class="container">
-                    <!-- Notification -->
-                    <div id="attendanceNotification"></div>
-                    <h1>Share Attendance Link</h1>
+            <section id="attendanceSection" class="container">
+                <!-- Notification -->
+                <div id="attendanceNotification"></div>
+                <h1>Share Attendance Link</h1>
 
-                    <!-- Attendance Link Section -->
-                    <div class="attendance-link-container">
-                        <input type="text" id="attendanceLink" value="<%= link%>" readonly>
-                        <button id="copyLink" class="button">Copy Link</button>
+                <!-- Attendance Link Section -->
+                <div class="attendance-link-container">
+                    <div id="copyLink" data-link="<%= link%>">
+                        <%= link%>
                     </div>
+                    <button id="copyLinkBtn" class="button">Copy Link</button>
+                </div>
 
-                    <!-- QR Code Section -->
-                    <div id="qrcode-container">
-                        <div id="qrcode"></div>
-                    </div>
-                    <a href="/host/stop-attendance">
-                        <div class="button stop-button">Stop Attendance</div>
-                    </a>
-                </section>
-                <% } %>
+                <!-- QR Code Section -->
+                <div id="qrcode-container">
+                    <div id="qrcode"></div>
+                </div>
+                <a href="/host/stop-attendance">
+                    <div class="button stop-button">Stop Attendance</div>
+                </a>
+            </section>
+            <% } %>
 
-                    <!-- Script for QR Code Generation and Clipboard Functionality -->
-                    <script src="/js/qrcode.min.js"></script>
-                    <script src="/js/utils.js"></script>
-                    <script src="/js/hostSection.js"></script>
-                    <script>showNotification('<%= showNotification%>');</script>
+                <script src="/js/helper.js"></script>
+                <!-- Script for QR Code Generation and Clipboard Functionality -->
+                <script src="/js/qrcode.min.js"></script>
+                <script src="/js/utils.js"></script>
+                <script src="/js/hostSection.js"></script>
+                <script>showNotification('<%= showNotification%>');</script>
 </body>
 
 </html>

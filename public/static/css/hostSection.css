@@ -1,24 +1,22 @@
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: var(--background-color);
 }
 
 header {
-    background-color: #6200ea;
-    color: #fff;
+    color: var(--header-text-color);
+    text-align: left;
     padding: 1rem;
-    text-align: center;
-    font-size: 1.5rem;
+    font-size: 2.5rem;
+    font-weight: bold;
 }
 
 .container {
     max-width: 800px;
     margin: 2rem auto;
     padding: 1rem;
-    background-color: #fff;
+    color: var(--black-at-light);
+    background-color: var(--card-background);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -35,23 +33,30 @@ h1 {
     gap: 1rem;
     margin-bottom: 2rem;
 }
-
-input[type="text"] {
+.attendance-link-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#attendanceLink {
+    background-color: var(--search-bar-color);
+    color: var(--black-at-light);
     padding: 0.5rem;
     font-size: 1rem;
-    border: 1px solid #ddd;
+    border: 1px solid var(--search-bar-color);
     border-radius: 4px;
-    width: 60%;
     text-align: center;
+    font-family: monospace;
 }
 
-a{
+a {
     text-decoration: none;
 }
 
 .button {
     padding: 0.75rem 1.5rem;
-    background-color: #6200ea;
+    background-image: var(--button-background);
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -85,12 +90,13 @@ footer {
     color: #888;
 }
 
-.stop-button{
+.stop-button {
     width: fit-content;
     margin: 1rem auto;
 }
- /* Notification Styles */
- #attendanceNotification {
+
+/* Notification Styles */
+#attendanceNotification {
     visibility: hidden;
     margin: 0 auto;
     background-color: #ea5757;
@@ -100,11 +106,6 @@ footer {
     width: fit-content;
 }
 
-@media (max-width: 600px) {
-    .container{
-        width: 90%;
-    }
-}
 
 /* Modal Overlay */
 .modal-overlay {
@@ -161,14 +162,75 @@ footer {
     background-color: #3700b3;
 }
 
+
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    z-index: 1000;
+  }
+  
+.success{
+    background-color: #4caf50;
+}
+
+.error{
+    background-color: #db6b63;
+}
+  .notification {
+    color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: slide-in 0.3s ease, slide-out 0.4s ease 3.3s forwards;
+  }
+  
+  @keyframes slide-in {
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    90%{
+        opacity: 1;
+        transform: translateX(-10%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes slide-out {
+    0% {
+      transform: translateX(0);
+    }
+    60%{
+        opacity: 1;
+        transform: translateX(-10%);
+    }
+    100% {
+        opacity: 0;
+      transform: translateX(100%);
+    }
+  }
+
 /* Fade-In Animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: 90%;
     }
 }
