@@ -1,71 +1,100 @@
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
+  margin: 0;
+  background-color: var(--background-color);
 }
 
 header {
-    background-color: #6200ea;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-    font-size: 1.2rem;
+  color: var(--header-text-color);
+  text-align: left;
+  padding: 1rem;
+  font-size: 2.5rem;
+  font-weight: bold;
 }
 
-.logout-icon{
-    position:absolute;
-    right: 0.5rem;
-    z-index: 999;
-    cursor: pointer;
+.logout-icon {
+  position: absolute;
+  right: 0.5rem;
+  z-index: 999;
+  cursor: pointer;
 }
 
 
 .container {
-    padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.register-card {
+  background-color: #944CFF;
+}
+
+.attendance-card {
+  background-color: #6571FF;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}
+
+.info>.big-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.info>.small-text {
+  font-size: small;
+}
+
+.image-container {
+  width: 90px;
+  height: 90px;
+  overflow: hidden;
+  /* Ensures no content overflows */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Maintains aspect ratio without overflowing */
 }
 
 .card {
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 1rem 0;
-    padding: 1rem;
-    text-align: center;
+  display: flex;
+  max-width:40rem ;
+  color: var(--black-and-white);
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.card h2 {
-    margin: 0.5rem 0;
-    color: #6200ea;
+.card:hover{
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
-.button {
-    display: inline-block;
-    background-color: #6200ea;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    margin-top: 1rem;
-    font-size: 1rem;
+
+.hidden {
+  display: none;
 }
 
-footer {
-    text-align: center;
-    padding: 1rem;
-    background-color: #eee;
-    margin-top: 1rem;
-}
-
-footer a {
-    color: #6200ea;
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
-
-.button:hover {
-    background-color: #3700b3;
+@media (min-width: 700px) {
+  .container{
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+  }
+  .card{
+    flex-grow: 1;
+    width: 40vw; 
+  }
 }
