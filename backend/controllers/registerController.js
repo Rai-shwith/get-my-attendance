@@ -4,6 +4,7 @@ const helpers = require('../utils/helpers');
 const {getStudentByUSN,currentRegistration,getStudentById,addStudent} = require('../models/studentDetails');
 const { getRegistrationState, setRegistrationState, getRemainingRegistrationTime } = require('../states/registerState');
 const { logger } = require('../utils/logger');
+const { sendMessage } = require('../utils/socketHelper');
 
 
 // TODO: Break this into middlewares as attendanceRoutes.js
@@ -99,15 +100,19 @@ exports.getRegistrationPage = (req, res) => {
 //  Router to register Student
 exports.registerStudent = (req, res) => {
     const registerID = req.session.registerID;
-    const { name, usn } = req.body;
+    let { name, usn } = req.body;
+    name = name.replaceAll('\n','').trim();
+    usn = usn.replaceAll('\n','').trim();
     logger.info(`POST /register ${name} : ${usn}`);
     try {
         handleRegistration(registerID, name, usn, req)
+        sendMessage("notification",JSON.stringify({type:'success',message:`${name} [${usn}] registered Successfully`}));
         return res.status(200).json({ message: "Registration Successful" });
     } catch (error) {
         logger.error(error.message)
         if (error.code === 409) {
-            return res.status(error.code).json({ message: error.message });
+        sendMessage("notification",JSON.stringify({type:'error',message:`Error found`}) );
+        return res.status(error.code).json({ message: error.message });
         }
     }
     res.status(500).json({ message: "Something Went Wrong Please Contact the Admin" });
