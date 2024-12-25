@@ -42,7 +42,7 @@ CREATE TABLE sections (
 -- Create Courses table
 CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,  -- Name of the course (e.g., "MAE11")
+    code TEXT UNIQUE NOT NULL,  -- Name of the course (e.g., "MAE11")
     department_id INT REFERENCES departments(id) ON DELETE CASCADE,  -- Added department_id
     title TEXT     -- Description of the course
 );
