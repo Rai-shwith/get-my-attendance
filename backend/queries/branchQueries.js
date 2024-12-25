@@ -1,4 +1,4 @@
-const pool = require('../data/db');
+const { pool } = require('../config/db');
 const { logger } = require('../utils/logger');
 
 /**
@@ -9,7 +9,7 @@ const { logger } = require('../utils/logger');
 exports.getDepartmentIdByName = async (departmentName) => {
     try {
         // Query to get the department id based on the department name
-        const result = await pool.query('SELECT id FROM departments WHERE name = $1', [departmentName]);
+        const result = await pool.query('SELECT id FROM departments WHERE name = $1', [departmentName.toLowerCase()]);
 
         // If department is found, return the department id
         if (result.rows.length > 0) {

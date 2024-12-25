@@ -1,5 +1,33 @@
-const pool = require('../data/db');
+const { pool } = require('../config/db');
 const { logger } = require('../utils/logger');
+
+/**
+ * Add a new department to the database.
+ * 
+ * @param {string} departmentName - The name of the department (e.g., "Electronics and Communication").
+ */
+exports.addDepartment = async (departmentName) => {
+    const query = `
+        INSERT INTO departments (name)
+        VALUES ($1)
+        RETURNING *;
+    `;
+    const values = [departmentName];
+
+    try {
+        logger.debug('Attempting to add a new Department to the database.');
+        const result = await pool.query(query, values);
+        logger.info(`Department added successfully: ${JSON.stringify(result.rows[0])}`);
+        return result.rows[0];
+    } catch (error) {
+        if (error.code === '23505') { // Unique constraint violation
+            logger.error('Department already exists for the given branch, semester, and year.');
+            throw new Error('Department already exists for the given branch, semester, and year.');
+        }
+        logger.error(`Error adding Department: ${error.message}`);
+        throw new Error('Failed to add Department. Please try again later.');
+    }
+};
 
 
 /**
@@ -43,17 +71,17 @@ exports.addSection = async (departmentId, semester, section, academicYear) => {
  * @param {string} title - The title of the course (e.g., "Mechanical Engineering Basics").
  * @returns {Promise<object>} - Returns the newly created course or an error message.
  */
-exports.addCourse = async (name, title, departmentId) => {
-    if (!name || !title || !departmentId) {
-        logger.error('Course name, departmentId and title are required.');
-        throw new Error('Course name, departmentId and title are required.');
+exports.addCourse = async (code, title, departmentId) => {
+    if (!code || !title || !departmentId) {
+        logger.error('Course code, departmentId and title are required.');
+        throw new Error('Course code, departmentId and title are required.');
     }
     const query = `
-        INSERT INTO courses (name, title, department_id)
+        INSERT INTO courses (code, title, department_id)
         VALUES ($1, $2, $3)
         RETURNING *;
     `;
-    const values = [name, title, departmentId];
+    const values = [code, title, departmentId];
 
     try {
         logger.debug('Attempting to add a new course to the database.');
@@ -61,9 +89,9 @@ exports.addCourse = async (name, title, departmentId) => {
         logger.info(`Course added successfully: ${JSON.stringify(result.rows[0])}`);
         return result.rows[0];
     } catch (error) {
-        if (error.code === '23505') { // Unique constraint violation (if added for course name)
-            logger.error('Course already exists with the given name.');
-            throw new Error('Course already exists with the given name.');
+        if (error.code === '23505') { // Unique constraint violation (if added for course code)
+            logger.error('Course already exists with the given code.');
+            throw new Error('Course already exists with the given code.');
         }
         logger.error(`Error adding course: ${error.message}`);
         throw new Error('Failed to add course. Please try again later.');
