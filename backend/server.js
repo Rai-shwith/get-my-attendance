@@ -50,30 +50,19 @@ app.use(session({
 }));
 
 // Static files (e.g., images, styles)
-app.use(express.static(path.join(__dirname, '../public/static')));
-
-// Set 'views' directory for any views being rendered
-app.set('views', path.join(__dirname, 'views'));
-
-// Set EJS as the view engine
-app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Redirect to /host
-app.get('/', (req, res) => {
-    logger.info('GET /');
-    res.redirect('/host');
+app.get('*', (req, res) => {
+    logger.info('Sending React App');
+    const reactPath = path.join(__dirname, '../frontend/dist/index.html');
+    res.sendFile(reactPath);
 });
-
-// Use the route handlers
-app.use('/host', hostRoutes);
-app.use('/', attendanceRoutes);
-app.use('/', registerRoutes);
-// app.use('/', deleteCookieRoutes);
-
 
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+    // TODO: Implement proper error handling for react
     // Check if headers have already been sent
     if (res.headersSent) {
         return next(err); // Delegate to the default error handler
