@@ -14,8 +14,8 @@ const LandingPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold mb-4">Welcome to Our App</h1>
-      <p className="text-lg mb-6">Are you a student or a teacher?</p>
+      <h1 className="text-4xl font-bold mb-4 text-white">Welcome to Our App</h1>
+      <p className="text-lg mb-6 text-white">Are you a student or a teacher?</p>
       <div className="flex space-x-4">
         <button
           onClick={() => handleRoleSelection("student")}
