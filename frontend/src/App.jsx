@@ -1,4 +1,3 @@
-import ThemeToggle from './components/ThemeToggle';
 import NotFound from './pages/common/NotFound.jsx';
 import HostLandingPage from './pages/host/HostLandingPage.jsx';
 import StudentLandingPage from './pages/student/StudentLandingPage.jsx';
