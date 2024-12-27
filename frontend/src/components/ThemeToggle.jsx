@@ -1,25 +1,14 @@
-import { useState, useEffect } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 
 const ThemeToggle = () => {
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
-
-  useEffect(() => {
-    document.documentElement.classList.remove("light", "dark");
-    document.documentElement.classList.add(theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
-
+  const {theme,toggleTheme} = useTheme();
   return (
     <div className="fixed top-5 right-5 flex items-center">
       <input
         type="checkbox"
         className="hidden"
         id="toggle"
-        checked={theme === "light"}
+        checked={theme.theme === "dark"}
         onChange={toggleTheme}
       />
       <label
@@ -27,9 +16,7 @@ const ThemeToggle = () => {
         className={`flex items-center cursor-pointer w-16 h-8 rounded-full transition-colors duration-300 ease-in-out bg-gradient-to-r from-gray-500 dark:from-gray-800 dark:to-purple-600 to-purple-800`}
       >
         <span
-          className={`absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
-            theme === "light" ? "transform translate-x-8" : ""
-          }`}
+          className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out transform dark:translate-x-0 translate-x-8"
         />
       </label>
     </div>

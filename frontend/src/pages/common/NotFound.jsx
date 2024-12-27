@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const NotFound = () => {
+  const {theme} = useTheme();
   return (
     <div className="flex items-center justify-center min-h-screen ">
       <div className="text-center text-white">

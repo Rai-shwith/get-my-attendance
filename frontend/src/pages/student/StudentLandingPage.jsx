@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const StudentLandingPage = () => {
   return (
