@@ -8,6 +8,7 @@ const generateExcel = require('../services/excelService');
 const { addAttendanceEntry, getAttendanceReport, getAttendanceHistorySummary, getRecentAttendanceTimestamp } = require('../models/attendanceDetails');
 const { getBaseURL } = require('../states/general');
 const { sendMessage } = require('../utils/socketHelper');
+const { generateAccessToken, generateRefreshToken } = require('../utils/auth');
 
 
 // Route to start attendance
@@ -142,10 +143,16 @@ const login = (req, res) => {
     if (username === 'admin' && password === '1234') {
         logger.info("Logging Successful")
         req.session.isLoggedIn = true; // Mark host as logged in
-        // TODO: Set the default window for the attendance 
+        // TODO: Set the default window for the attendance
+        const role = 'teacher' ;
+        // TODO: Database ID
+        const id = 1;
+        // TODO: Store refresh token in the database
+        const accessToken = generateAccessToken({ username, role });
+        const refreshToken = generateRefreshToken({username, role});
         const interval = 5 * 60 * 1000;
         req.session.interval = interval;
-        res.redirect('/host');
+        res.json({ accessToken, refreshToken });
     } else {
         logger.error("Logging Failed")
         // Send the error message back if credentials are invalid

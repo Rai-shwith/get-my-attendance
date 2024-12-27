@@ -22,6 +22,10 @@ module.exports = {
         password: process.env.AUTH_PASSWORD || 'your-password',
         secretKey: process.env.AUTH_SECRET_KEY || 'your-secret-key',
         sessionTimeout: process.env.SESSION_TIMEOUT || 3600, // 1 hour session default
+        jwtKey: process.env.JWT_SECRET_KEY, // JWT secret key
+        jwtExpiration: process.env.JWT_EXPIRATION, // JWT expiration time
+        refreshToken: process.env.REFRESH_TOKEN_SECRET, // Refresh token secret
+        refreshTokenExpiration: process.env.REFRESH_TOKEN_EXPIRATION, // Refresh token expiration
     },
 
     // File paths for reports (just an example)
