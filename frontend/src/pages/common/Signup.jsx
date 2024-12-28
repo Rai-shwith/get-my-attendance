@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Container from "../../components/container";
 import { useForm } from "react-hook-form";
 import { useLoading } from "../../contexts/LoadingContext";
+import { useErrorMessage } from "../../contexts/ErrorMessageContext";
 
 const Signup = () => {
   // To handle the placeholder of date input
@@ -13,6 +14,9 @@ const Signup = () => {
     watch,
     formState: { errors },
   } = useForm();
+
+
+  const {setErrorMessage} = useErrorMessage();
 
   const delay = async (delay) => {
     return new Promise((resolve) => {
@@ -27,6 +31,7 @@ const Signup = () => {
     await delay(2);
     console.log(data);
     setLoading(false);
+
   };
 
   const handleDateChange = (event) => {
@@ -65,7 +70,7 @@ const Signup = () => {
             </div>
             <select
               className="p-3 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white text-gray-700"
-              onChange={handleRoleChange}
+              onClick={handleRoleChange}
             >
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>

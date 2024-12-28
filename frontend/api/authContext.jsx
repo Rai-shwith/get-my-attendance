@@ -1,12 +1,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { login, logout } from './authApi';
 import api from './axiosInstance';
+import { useLoading } from '../src/contexts/LoadingContext';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const {loading, setLoading} = useLoading();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, handleLogin, handleLogout }}>
+    <AuthContext.Provider value={{handleLogin, handleLogout }}>
       {children}
     </AuthContext.Provider>
   );
