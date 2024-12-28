@@ -1,3 +1,4 @@
+// \backend\models\attendanceDetails.js
 const fs = require('fs');
 const { filePaths } = require('../config/env');
 const { logger } = require('../utils/logger');
