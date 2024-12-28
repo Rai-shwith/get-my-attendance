@@ -63,7 +63,7 @@ CREATE TABLE students (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     usn TEXT UNIQUE NOT NULL,   -- USN is unique and not NULL
-    password TEXT NOT NULL,     -- Store hashed password
+    date_of_birth DATE NOT NULL,  -- Date of birth of the student
     mac_address TEXT UNIQUE,        -- MAC address of the student's device (optional initially)
     email VARCHAR(255) UNIQUE NOT NULL,     -- Email is unique and not NULL
     section_id INT REFERENCES sections(id) ON DELETE SET NULL,  -- Reference section with flexibility
