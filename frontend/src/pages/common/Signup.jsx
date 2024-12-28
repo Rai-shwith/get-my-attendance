@@ -51,15 +51,14 @@ const Signup = () => {
 
   const [departmentSelected, setDepartmentSelected] = useState(false);
   const handleDepartmentChange = (event) => {
-    if (event.target.value === "") return;
     console.log("Department changed", event.target.value);
     setDepartmentSelected(true);
   };
   // Watch the password field
   const password = watch("password", "");
 
-  // Departments
-  const departments = getDepartments();
+  // Departments 
+    const departments = getDepartments();
   return (
     <div>
       <Container>
@@ -69,7 +68,7 @@ const Signup = () => {
         >
           <div className="relative">
             <div
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-full ${
+              className={`pointer-events-none absolute top-1/2 rounded-md -translate-y-1/2 text-slate-400 bg-white w-full ${
                 role ? "hidden" : ""
               }`}
             >
@@ -87,51 +86,35 @@ const Signup = () => {
           <input
             type="text"
             placeholder="Name"
-            {...register("name", { required: "Name is required" })}
+            {...register("name", { required: true })}
             className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.name && (
-            <p className="text-rose-500">{errors.name.message}</p>
-          )}
           <input
             type="email"
             placeholder="Email"
-            {...register("email", { required: "Email is required" })}
+            {...register("email", { required: true })}
             className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.email && (
-            <p className="text-rose-500">{errors.email.message}</p>
-          )}
 
-          <div className="relative">
+
+<div className="relative">
             <div
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-full ${
+              className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-full ${
                 departmentSelected ? "hidden" : ""
               }`}
             >
               <div className="translate-x-2">Department</div>
             </div>
-            <select 
+            <select
               className="p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white text-gray-700"
               onClick={handleDepartmentChange}
-              {...register("department", { required: "Department is required" })}
             >
-              <option value=""></option>
               {/* TODO: fetch the info form db */}
-              {departments.map((dept, index) => {
-                return (
-                  <option key={index} value={dept.toLowerCase()}>
-                    {toTitleCase(dept)}
-                  </option>
-                );
+              {departments.map((dept,index) => {
+                return <option key={index} value={dept.toLowerCase()}>{toTitleCase(dept)}</option>
               })}
             </select>
           </div>
-            {errors.department && (
-                  <p className="text-rose-500">
-                    {errors.department.message}
-                  </p>
-                )}
 
           {teacher ? (
             <div className="flex flex-col space-y-4 items-stretch">
@@ -140,7 +123,7 @@ const Signup = () => {
                   type="password"
                   placeholder="Password"
                   {...register("password", {
-                    required: "Password is required",
+                    required: true,
                     minLength: {
                       value: 5,
                       message: "Password must be longer than 5 characters!",
@@ -148,7 +131,7 @@ const Signup = () => {
                   })}
                   className="p-2 border w-full bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                {errors.password  && (
+                {errors.password && (
                   <p className="text-rose-500">{errors.password.message}</p>
                 )}
               </div>
@@ -175,17 +158,12 @@ const Signup = () => {
               <input
                 type="text"
                 placeholder="USN"
-                {...register("usn", { required: "USN is required" })}
+                {...register("usn", { required: true })}
                 className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {errors.usn && (
-                  <p className="text-rose-500">
-                    {errors.usn.message}
-                  </p>
-                )}
               <div className="relative">
                 <div
-                  className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-4/5 ${
+                  className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-4/5 ${
                     dateFocus ? "hidden" : ""
                   }`}
                 >
@@ -193,32 +171,25 @@ const Signup = () => {
                 </div>
                 <input
                   type="date"
-                  {...register("dateOfBirth", { required: "Date is required" })} // Register the date input
+                  {...register("dateOfBirth", { required: true })} // Register the date input
                   onChange={handleDateChange}
                   className="p-2 border bg-white border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-                {errors.dateOfBirth && (
-                  <p className="text-rose-500">
-                    {errors.dateOfBirth.message}
-                  </p>
-                )}
               <input
                 type="number"
                 placeholder="Enrollment Year"
-                {...register("enrollmentYear", {
-                  required: "Enrollment Year is required",
-                  min: { value: 1962, message: "Invalid Year" },
-                  max: {
-                    value: new Date().getFullYear(),
-                    message: "Invalid Year",
-                  },
-                })}
+                {...register("enrollmentYear", 
+                  { required: "Enrollment Year is required",min: {value: 1962,message:"Invalid Year"} ,max:{value : new Date().getFullYear(), message: "Invalid Year"} 
+                }
+                )}
                 className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.enrollmentYear && (
-                <p className="text-rose-500">{errors.enrollmentYear.message}</p>
-              )}
+                  <p className="text-rose-500">
+                    {errors.enrollmentYear.message}
+                  </p>
+                )}
             </>
           )}
           <button
@@ -232,5 +203,4 @@ const Signup = () => {
     </div>
   );
 };
-
 export default Signup;

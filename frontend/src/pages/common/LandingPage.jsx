@@ -18,7 +18,7 @@ const LandingPage = () => {
         <div className="flex flex-col items-center justify-center h-screen">
           {/* <SignOutIcon /> */}
             <DisplayLogo />
-            <h1 className="text-4xl font-bold mb-4 text-white text-center">Welcome to Raily</h1>
+            <h1 className="text-4xl font-bold mb-4 text-white text-center">Welcome to App</h1>
             <p className="text-lg mb-6 text-white">Please sign up or log in to continue</p>
             <div className="flex space-x-4">
                 <button
