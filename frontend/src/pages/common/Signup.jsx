@@ -5,6 +5,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useErrorMessage } from "../../contexts/ErrorMessageContext";
 import { getDepartments } from "../../helpers/getDepartments";
 import { toTitleCase } from "../../helpers/toTitleCase";
+import { signup } from "../../../api/authApi";
 const Signup = () => {
   // To handle the placeholder of date input
   const [dateFocus, setDateFocus] = useState(false);
@@ -29,7 +30,7 @@ const Signup = () => {
   const onsubmit = async (data) => {
     setLoading(true);
     await delay(2);
-    console.log(data);
+    await signup(data);
     setLoading(false);
   };
 
@@ -75,6 +76,7 @@ const Signup = () => {
               <div className="translate-x-2">Role</div>
             </div>
             <select
+              {...register("role",{required:true})}
               className="p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white text-gray-700"
               onClick={handleRoleChange}
             >
@@ -108,6 +110,7 @@ const Signup = () => {
             <select
               className="p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white text-gray-700"
               onClick={handleDepartmentChange}
+              {...register("department",{required:true})}
             >
               {/* TODO: fetch the info form db */}
               {departments.map((dept,index) => {
@@ -171,11 +174,19 @@ const Signup = () => {
                 </div>
                 <input
                   type="date"
-                  {...register("dateOfBirth", { required: true })} // Register the date input
+                  {...register("dateOfBirth", { required: true,
+                    validate: (date) =>{
+                      const today = new Date();
+                      const dob = new Date(date);
+                      if(dob > today){
+                        return "Date of birth cannot be in the future"
+                        } 
+                    }
+                   })} // Register the date input
                   onChange={handleDateChange}
-                  className="p-2 border bg-white border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`p-2 border ${errors.dateOfBirth?"bg-rose-300":"bg-white"} border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
-              </div>
+              </div> 
               <input
                 type="number"
                 placeholder="Enrollment Year"
