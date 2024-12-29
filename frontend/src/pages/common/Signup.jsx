@@ -6,6 +6,7 @@ import { useErrorMessage } from "../../contexts/ErrorMessageContext";
 import { getDepartments } from "../../helpers/getDepartments";
 import { toTitleCase } from "../../helpers/toTitleCase";
 import { signup } from "../../../api/authApi";
+import Button from "../../components/Button";
 const Signup = () => {
   // To handle the placeholder of date input
   const [dateFocus, setDateFocus] = useState(false);
@@ -203,12 +204,12 @@ const Signup = () => {
                 )} */}
             </>
           )}
-          <button
+          <Button
             type="submit"
-            className="p-2 px-8 self-center bg-blue-500  text-white rounded-md hover:bg-blue-600 transition duration-200"
+            extraClasses="self-center"
           >
             Signup
-          </button>
+          </Button>
         </form>
       </Container>
     </div>

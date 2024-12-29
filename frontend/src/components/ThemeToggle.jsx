@@ -3,7 +3,7 @@ import { useTheme } from "../contexts/ThemeContext";
 const ThemeToggle = () => {
   const {theme,toggleTheme} = useTheme();
   return (
-    <div className="absolute top-14 md:top-5 right-5 flex items-center">
+    <div className="absolute z-10 top-5 right-5 flex items-center">
       <input
         type="checkbox"
         className="hidden"

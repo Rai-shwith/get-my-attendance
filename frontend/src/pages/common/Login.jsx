@@ -5,6 +5,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { useErrorMessage } from "../../contexts/ErrorMessageContext";
 import { getDepartments } from "../../helpers/getDepartments";
 import { toTitleCase } from "../../helpers/toTitleCase";
+import Button from "../../components/Button";
 const Login = () => {
   // To handle the placeholder of date input
   const [dateFocus, setDateFocus] = useState(false);
@@ -123,12 +124,12 @@ const Login = () => {
               </div>
             </>
           )}
-          <button
+          <Button
             type="submit"
-            className="p-2 w-fit px-8 self-center bg-blue-500  text-white rounded-md hover:bg-blue-600 transition duration-200"
+            extraClasses="self-center"
           >
             Login
-          </button>
+          </Button>
         </form>
       </Container>
     </div>
