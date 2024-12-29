@@ -6,7 +6,7 @@ class AppError extends Error {
     // Get error details from the errorCodes object using the provided errorCode
     const error = errorCodes[errorCode] || errorCodes[50001];  // Default to InternalServerError if code not found
 
-    super(message);
+    super(error.message);
     this.name = error.name;
     this.statusCode = error.statusCode;
     this.errorCode = errorCode;

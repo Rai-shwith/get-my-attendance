@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const AppError = require('../utils/AppError');
 const { logger } = require('../utils/logger');
 
 /**
@@ -17,12 +18,12 @@ exports.getDepartmentIdByName = async (departmentName) => {
         } else {
             // Department not found
             logger.warn(`Department with name "${departmentName}" not found.`);
-            return null; // Or throw an error depending on how you want to handle this
+            throw new AppError(40402);
         }
     } catch (error) {
         // Log the error and throw it for further handling
         logger.error(`Error retrieving department ID for ${departmentName}: ${error.message}`);
-        throw new Error('Error retrieving department ID');
+        throw new AppError(50002);
     }
 };
 

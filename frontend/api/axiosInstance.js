@@ -5,6 +5,7 @@ const api = axios.create({
   baseURL: 'http://localhost', 
   withCredentials: true, // For sending cookies (refresh tokens)
 });
+
 // Request interceptor to attach access token
 api.interceptors.request.use(
   (config) => {

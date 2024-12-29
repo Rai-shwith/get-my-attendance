@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
+    "bcrypt": "^5.1.1",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "cookie-signature": "^1.2.2",

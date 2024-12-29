@@ -1,4 +1,9 @@
-const pool = require('../data/db');
+
+const { pool } = require('../config/db');
+const AppError = require('../utils/AppError');
+const { hashPassword } = require('../utils/helpers');
+const { logger } = require('../utils/logger');
+const { getDepartmentIdByName } = require('./branchQueries');
 
 /**
  * Register host or teacher
@@ -6,11 +11,14 @@ const pool = require('../data/db');
  * @param {string} name - The name of the teacher.
  * @param {string} email - The email address of the teacher.
  * @param {string} password - The plain text password of the teacher.
- * @param {number} departmentId - The id of the department.
+ * @param {number} department - The department name.
  * @returns {Promise<object>} The newly created teacher's details.
  * @throws {Error} If the teacher could not be registered.
  */
-exports.registerTeacher = async (name, email, password,departmentId) => {
+exports.registerTeacher = async (name, email, password,department) => {
+
+    const departmentId = await getDepartmentIdByName(department);
+
     const query = `
         INSERT INTO teachers (name, email, password, department_id, created_at, updated_at)
         VALUES ($1, $2, $3, $4, NOW(), NOW())
@@ -19,7 +27,7 @@ exports.registerTeacher = async (name, email, password,departmentId) => {
 
     try {
         // Hash the password before storing it
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await hashPassword(password);
 
         const values = [name, email, hashedPassword, departmentId];
         const result = await pool.query(query, values);
@@ -33,12 +41,17 @@ exports.registerTeacher = async (name, email, password,departmentId) => {
 
         return newTeacher;
     } catch (error) {
-        // Log error
-        logger.error(
-            `Error registering teacher with email: ${email}. Error: ${error.message}`
-        );
-        throw new Error('Error registering the teacher. Please try again.');
-    }
+        
+        if (error.code === '23505') {
+            // Handle unique constraint violation
+            logger.error(`Unique constraint violation: ${error.message}`);
+            throw new AppError(40901);
+        } else {
+            // Handle other errors
+            logger.error(`Error registering teacher: ${error.message}`);
+            throw new AppError(50002);
+        }  
+      }
 };
 
 /**

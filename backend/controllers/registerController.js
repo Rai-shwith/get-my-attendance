@@ -5,6 +5,9 @@ const {getStudentByUSN,currentRegistration,getStudentById,addStudent} = require(
 const { getRegistrationState, setRegistrationState, getRemainingRegistrationTime } = require('../states/registerState');
 const { logger } = require('../utils/logger');
 const { sendMessage } = require('../utils/socketHelper');
+const { error } = require('winston');
+const AppError = require('../utils/AppError');
+const { registerTeacher } = require('../queries/hostQueries');
 
 
 // TODO: Break this into middlewares as attendanceRoutes.js
@@ -116,4 +119,72 @@ exports.registerStudent = (req, res) => {
         }
     }
     res.status(500).json({ message: "Something Went Wrong Please Contact the Admin" });
+};
+
+
+const handleTeacherRegistration = async ({name, email, password, department}) => {
+    if (! (name && email && password && department)) {
+        throw new AppError(40001);
+    }
+    if (!email.includes('@') || password.length < 5) {
+        throw new AppError(40002);
+      }
+      try {
+        return await registerTeacher(name,email,password,department);
+      } catch (error) {
+        logger.debug("While registering teacher"+error);
+        throw error;
+      }
+}
+
+const handleStudentRegistration = async ({name,usn, email, dateOfBirth, enrollmentYear, registeredUnder, department}) => {
+    if (! (name && usn && email && dateOfBirth && enrollmentYear && registeredUnder  && department)) {
+        throw new AppError(40001);
+    }
+    if (!email.includes('@') ||(new Date(dateOfBirth) > new Date())) {
+        throw new AppError(40002);
+      }
+      try {
+        
+      } catch (error) {
+        
+      }
+}
+
+
+//  Router to register (signup) both teacher or student
+exports.register = async (req, res, next) => {
+    logger.debug("Entering register , Credentials "+req.body);
+    const credentials = req.body
+
+    if (!credentials) {
+        return next(new AppError(40001));
+    }
+
+    if (credentials.role == 'student'){
+        // TODO: Not yet implemented
+        logger.debug("Trying to register student");
+        return next(new AppError(50101));
+        try {
+            await handleStudentRegistration(credentials)
+        }catch (error) {
+            logger.error("While registering student : "+error);
+            return next(error);
+        }
+    } else if (credentials.role == 'teacher') {
+        logger.debug("Trying to register teacher");
+        try {
+            const result = await handleTeacherRegistration(credentials)
+            return res.status(200).json({
+                success: true,
+                message: "Teacher registered successfully",
+                data: result
+            })
+        } catch (error) {
+            logger.error("While registering teacher "+error);
+            return next(error);
+        }
+    } else {
+        return next(new AppError(40004));
+    }
 };

@@ -9,20 +9,21 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const {loading, setLoading} = useLoading();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const profile = await api.get('/profile'); // API to get current user
-        setUser(profile);
-      } catch (error) {
-        console.error('User fetch failed:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const profile = await api.get('/profile'); // API to get current user
+  //       setUser(profile);
+  //     } catch (error) {
+  //       console.error('User fetch failed:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchUser();
-  }, []);
+  //   fetchUser();
+  // }, []);
 
   const handleLogin = async (username, password) => {
     const data = await login(username, password);

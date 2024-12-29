@@ -8,13 +8,11 @@ if (server.domain){
     DOMAIN = server.domain;
 }
 
-exports.getDomainName = () => {
-    return DOMAIN;
-}
-exports.getDomain = () => {
-    return IpAddress;
+const getDomainName = () => {
+    return DOMAIN || IpAddress;
 }
 
+
 exports.getBaseURL = () => {
-    return `http://${IpAddress}${server.port==80?"":":"+server.port}`;
+    return `http://${getDomainName()}${server.port==80?"":":"+server.port}`;
 }

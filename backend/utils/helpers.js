@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { logger } = require('./logger');
 const os = require('os');
+const bcrypt = require('bcrypt');
 
 exports.generateID = () => {
     return crypto.randomBytes(16).toString('hex');
@@ -74,3 +75,18 @@ exports.getLocalIP = () => {
     }
     return localIP;
 };
+
+
+// Function to hash the password using bcrypt
+exports.hashPassword = async (password) => {
+  logger.debug("Hashing the password");
+  const salt = await bcrypt.genSalt(10); 
+  const hashedPassword = await bcrypt.hash(password, salt);
+  return hashedPassword;
+}
+
+// Function to verify the password during login
+exports.verifyPassword = async (enteredPassword, storedHashedPassword) => {
+  const isMatch = await bcrypt.compare(enteredPassword, storedHashedPassword);
+  return isMatch; // Returns true if passwords match, false otherwise
+}

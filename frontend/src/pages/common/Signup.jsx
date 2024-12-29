@@ -17,7 +17,6 @@ const Signup = () => {
     formState: { errors },
   } = useForm();
 
-  const { setErrorMessage } = useErrorMessage();
 
   const delay = async (delay) => {
     return new Promise((resolve) => {
@@ -29,7 +28,6 @@ const Signup = () => {
 
   const onsubmit = async (data) => {
     setLoading(true);
-    await delay(2);
     await signup(data);
     setLoading(false);
   };
@@ -69,7 +67,7 @@ const Signup = () => {
         >
           <div className="relative">
             <div
-              className={`pointer-events-none absolute top-1/2 rounded-md -translate-y-1/2 text-slate-400 bg-white w-full ${
+              className={`pointer-events-none absolute top-1/2 rounded-md -translate-y-1/2 text-slate-400 ${errors.role?"bg-rose-300":"bg-white"} w-full ${
                 role ? "hidden" : ""
               }`}
             >
@@ -77,9 +75,10 @@ const Signup = () => {
             </div>
             <select
               {...register("role",{required:true})}
-              className="p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white text-gray-700"
+              className={`p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ${errors.role?"bg-rose-300":"bg-white"} text-gray-700`}
               onClick={handleRoleChange}
             >
+              <option value=""></option>
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
             </select>
@@ -89,29 +88,30 @@ const Signup = () => {
             type="text"
             placeholder="Name"
             {...register("name", { required: true })}
-            className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`p-2 border ${errors.name?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           <input
             type="email"
             placeholder="Email"
             {...register("email", { required: true })}
-            className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`p-2 border ${errors.email?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
 
 
 <div className="relative">
             <div
-              className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-full ${
+              className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 ${errors.department?"bg-rose-300":"bg-white"} w-full ${
                 departmentSelected ? "hidden" : ""
               }`}
             >
               <div className="translate-x-2">Department</div>
             </div>
             <select
-              className="p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 bg-white text-gray-700"
+              className={`p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ${errors.department?"bg-rose-300":"bg-white"} text-gray-700`}
               onClick={handleDepartmentChange}
               {...register("department",{required:true})}
             >
+              <option value=""></option>
               {/* TODO: fetch the info form db */}
               {departments.map((dept,index) => {
                 return <option key={index} value={dept.toLowerCase()}>{toTitleCase(dept)}</option>
@@ -132,7 +132,7 @@ const Signup = () => {
                       message: "Password must be longer than 5 characters!",
                     },
                   })}
-                  className="p-2 border w-full bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`p-2 border w-full ${errors.password?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
                 {errors.password && (
                   <p className="text-rose-500">{errors.password.message}</p>
@@ -142,7 +142,7 @@ const Signup = () => {
                 <input
                   type="password"
                   placeholder="Confirm Password"
-                  className="p-2 border w-full bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`p-2 border w-full ${errors.confirmPassword?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   {...register("confirmPassword", {
                     required: "Confirm Password is required",
                     validate: (value) =>
@@ -162,11 +162,11 @@ const Signup = () => {
                 type="text"
                 placeholder="USN"
                 {...register("usn", { required: true })}
-                className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`p-2 border ${errors.usn?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
               <div className="relative">
                 <div
-                  className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 bg-white w-4/5 ${
+                  className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 ${errors.dateOfBirth?"bg-rose-300":"bg-white"} w-4/5 ${
                     dateFocus ? "hidden" : ""
                   }`}
                 >
@@ -194,13 +194,13 @@ const Signup = () => {
                   { required: "Enrollment Year is required",min: {value: 1962,message:"Invalid Year"} ,max:{value : new Date().getFullYear(), message: "Invalid Year"} 
                 }
                 )}
-                className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`p-2 border ${errors.enrollmentYear?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
-              {errors.enrollmentYear && (
+              {/* {errors.enrollmentYear && (
                   <p className="text-rose-500">
                     {errors.enrollmentYear.message}
                   </p>
-                )}
+                )} */}
             </>
           )}
           <button

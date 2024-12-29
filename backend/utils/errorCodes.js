@@ -14,6 +14,11 @@ const errorCodes = {
         message: 'Password is too weak. Please use a stronger password.',
         statusCode: 400,
     },
+    40004: {
+      name: 'InvalidRoleError',
+      message: 'Invalid role provided. Only "Teacher" or "student" are allowed.',
+      statusCode: 400
+    },
     40101: {
         name: 'UnauthorizedError',
         message: 'Unauthorized access.',
@@ -41,7 +46,7 @@ const errorCodes = {
     },
     50002: {
       name: 'DatabaseError',
-      message: 'Database error. Please try again later.',
+      message: 'An error occurred while interacting with the database.',
       statusCode: 500,
     },
     50101: {
@@ -52,5 +57,5 @@ const errorCodes = {
     // Add more error codes as needed
   };
   
-  module.exports = errorCodes;
+  module.exports = {errorCodes};
   

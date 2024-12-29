@@ -1,6 +1,8 @@
 const pool = require('../data/db');
+const AppError = require('../utils/AppError');
 const { logger } = require('../utils/logger');
 const crypto = require('crypto');
+const { getDepartmentIdByName } = require('./branchQueries');
 
 /**
  * Register a new student.
@@ -8,54 +10,54 @@ const crypto = require('crypto');
  * @param {string} sessionKey - Unique key to store in JWT tokens
  *@param {string} name - The name of the student.
  *@param {string} usn - The USN of the student.
- *@param {string} section - The section of the student.
- *@param {number} departmentId - The department ID of the student.
-* @param {number} semester - The semester of the student.
-* @param {number} year - The academic year of the student.
+ *@param {number} department - The department ID of the student.
+* @param {number} enrolledYear - The enrolled year of the student.
 * @param {string} email - The email of the student.
-* @param {string} password - The password of the student.
+* @param {string} dateOfBirth - The dateOfBirth of the student.
 * @param {number} registered_under - The ID of the teacher who registered the student.
 * @param {string} mac_address - The mac_address of the student.[OPTIONAL]
 */
-exports.registerStudent = async (name, usn, section, departmentId, semester, year, email, password,registered_under, mac_address = null,sessionKey) => {
+exports.registerStudent = async (name, usn, section, department, semester, enrolledYear, email, dateOfBirth,registered_under, mac_address = null,sessionKey) => {
+    // TODO: This is incomplete and needs to be implemented. First Think how are you going to authenticate the student and also registered under section
     logger.debug(`Attempting to register student: ${name}, USN: ${usn}`);
 
-    // Find the section ID based on the provided section, departmentId, semester, and year
-    const sectionQuery = `
-        SELECT id FROM sections
-        WHERE department_id = $1
-        AND semester = $2
-        AND section = $3
-        AND academic_year = $4;
-    `;
+    const departmentId = await getDepartmentIdByName(department)
+    // // Find the section ID based on the provided section, department, semester, and enrolledYear
+    // const sectionQuery = `
+    //     SELECT id FROM sections
+    //     WHERE department_id = $1
+    //     AND semester = $2
+    //     AND section = $3
+    //     AND academic_year = $4;
+    // `;
     
-    const sectionValues = [departmentId, semester, section, year];
+    // const sectionValues = [department, semester, section, enrolledYear];
     
     try {
         // Logging the section search process
         logger.debug(`Searching for section with values: ${sectionValues}`);
 
-        const sectionResult = await pool.query(sectionQuery, sectionValues);
+        // const sectionResult = await pool.query(sectionQuery, sectionValues);
         
-        if (sectionResult.rows.length === 0) {
-            logger.warn(`No section found with branch: ${branch}, semester: ${semester}, section: ${section}, year: ${year}`);
-            throw new Error('Section not found.');
-        }
+        // if (sectionResult.rows.length === 0) {
+        //     logger.warn(`No section found with branch: ${branch}, semester: ${semester}, section: ${section}, year: ${enrolledYear}`);
+        //     throw new Error('Section not found.');
+        // }
 
-        const sectionId = sectionResult.rows[0].id;
-        logger.info(`Section found with ID: ${sectionId}`);
+        // const sectionId = sectionResult.rows[0].id;
+        // logger.info(`Section found with ID: ${sectionId}`);
 
-        // Generate a new session key
-        const sessionKey = crypto.randomBytes(16).toString('hex');
+        // // Generate a new session key
+        // const sessionKey = crypto.randomBytes(16).toString('hex');
 
         // Insert the new student into the "students" table
         const query = `
-            INSERT INTO students (name, usn, password, mac_address, email, section_id, academic_year, registered_under, session_key)
+            INSERT INTO students (name, usn, dateOfBirth, mac_address, email, section_id, enrolledYear, registered_under, session_key)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING session_key, name, usn, email, section_id, academic_year, created_at;
+            RETURNING session_key, name, usn, email, section_id, enrolledYear, created_at;
         `;
         
-        const values = [name, usn, password, mac_address, email, sectionId, year, registered_under,sessionKey];
+        const values = [name, usn, dateOfBirth, mac_address, email, sectionId, enrolledYear, registered_under,sessionKey];
         
         logger.debug(`Inserting new student with data: ${values}`);
         
@@ -66,9 +68,10 @@ exports.registerStudent = async (name, usn, section, departmentId, semester, yea
         
         return newStudent;
     } catch (error) {
+        // TODO: check if the error occurs due to re registration
         // Log the error with stack trace and detail
         logger.error(`Error registering student: ${error.message}`, { stack: error.stack });
-        throw error;
+        throw new AppError(50001);
     }
 };
 
