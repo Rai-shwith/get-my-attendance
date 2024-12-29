@@ -1,11 +1,9 @@
 import NotFound from './pages/common/NotFound.jsx';
-import HostLandingPage from './pages/host/HostLandingPage.jsx';
-import StudentLandingPage from './pages/student/StudentLandingPage.jsx';
 import LandingPage from './pages/common/LandingPage.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './pages/common/Signup.jsx';
 import Login from './pages/common/Login.jsx';
-import HostHome from './pages/host/HostHome.jsx';
+import HostHome from './pages/host/hostHome.jsx';
 
 function App() {
   return (
@@ -16,9 +14,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/hostLanding" element={<HostLandingPage />} />
         <Route path='/host/' element={<HostHome />}/>
-        <Route path="/studentLanding" element={<StudentLandingPage />} />
         <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 */}
       </Routes>
     </Router>

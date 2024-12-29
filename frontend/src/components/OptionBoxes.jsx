@@ -2,13 +2,13 @@ import React from 'react'
 
 const OptionBoxes = ({title,description,image,toggleColor=false}) => {
   return (
-    <div className={'flex justify-between p-5 w-full rounded-lg' + (toggleColor?' bg-green-500':' bg-purple-500')}>
+    <div className={'flex justify-between p-5 w-full rounded-lg cursor-pointer' + (toggleColor?' bg-green-500':' bg-purple-500')}>
         <div className="flex flex-col text-white space-y-3 pr-4 w-full">
-            <h3 className="text-lg font-bold text-left text-wrap leading-5">{title}</h3>
-            <p className='text-xs text-left text-wrap'>{description}</p>
+            <h3 className="text-lg md:text-2xl font-bold text-left text-wrap leading-5">{title}</h3>
+            <p className='text-xs md:text-sm text-left text-wrap'>{description}</p>
         </div>
         <div className="w-16">
-            <img src={image} />
+            <img className='w-full h-auto object-fill' src={image} />
         </div>
     </div>
   )
