@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Container from "../../components/container";
 import { useForm } from "react-hook-form";
 import { useLoading } from "../../contexts/LoadingContext";
-import { useErrorMessage } from "../../contexts/ErrorMessageContext";
 import { getDepartments } from "../../helpers/getDepartments";
 import { toTitleCase } from "../../helpers/toTitleCase";
 import Button from "../../components/Button";
@@ -17,7 +16,6 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const { setErrorMessage } = useErrorMessage();
 
   const delay = async (delay) => {
     return new Promise((resolve) => {
@@ -49,7 +47,7 @@ const Login = () => {
     //  Show password field only if 'Teacher' is selected
     setTeacher(selectedRole === "teacher");
   };
-  
+
   return (
     <div>
       <Container>
@@ -76,11 +74,11 @@ const Login = () => {
           {teacher ? (
             <div className="flex flex-col space-y-4 items-stretch">
               <input
-            type="email"
-            placeholder="Email"
-            {...register("email", { required: true })}
-            className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+                type="email"
+                placeholder="Email"
+                {...register("email", { required: true })}
+                className="p-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
               <div>
                 <input
                   type="password"
@@ -124,10 +122,7 @@ const Login = () => {
               </div>
             </>
           )}
-          <Button
-            type="submit"
-            extraClasses="self-center"
-          >
+          <Button type="submit" extraClasses="self-center">
             Login
           </Button>
         </form>

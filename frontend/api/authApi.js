@@ -1,5 +1,6 @@
 import { useDebugValue } from 'react';
 import axios from 'axios';
+import { useMessage } from '../src/contexts/MessageContext';
 
 // Create a axios instance for login and signup
 const api = axios.create({
@@ -26,14 +27,18 @@ export const signup = async (userData) => {
     if (result.status === 200) {
       console.log('User registered successfully');
       console.log(result.data);
-      return result.data;
+      return {success: true, message: result.data.data.name + ' registered successfully'};
     } else {
-      console.error('Error registering user :', result.name);
       console.error(result);
+      return { 'success': false, 'message': 'Error registering user' };
     }
   } catch (error) {
-    let errorDetails = error.response?.data?.error;
-    console.error(errorDetails?.name,errorDetails?.message);
+    console.error(error);
+    const mainError = error.response?.data?.error;
+    if (!mainError) return { 'success': false, 'message': 'Error registering user' };
+    console.error(mainError);
+    return { 'success': false, 'message': mainError.message };
+
   }
 
 };

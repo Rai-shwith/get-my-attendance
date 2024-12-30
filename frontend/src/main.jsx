@@ -7,11 +7,11 @@ import { AuthProvider } from "../api/authContext.jsx";
 import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import Background from "./components/Background.jsx";
 import { LoadingProvider } from "./contexts/LoadingContext.jsx";
-import { ErrorMessageProvider } from "./contexts/ErrorMessageContext.jsx";
+import { MessageProvider } from "./contexts/MessageContext.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <LoadingProvider>
-      <ErrorMessageProvider>
+      <MessageProvider>
         <ThemeProvider>
           <Background>
             <ThemeToggle />
@@ -20,7 +20,7 @@ createRoot(document.getElementById("root")).render(
             </AuthProvider>
           </Background>
         </ThemeProvider>
-      </ErrorMessageProvider>
+      </MessageProvider>
     </LoadingProvider>
   </StrictMode>
 );

@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import Container from "../../components/container";
 import { useForm } from "react-hook-form";
 import { useLoading } from "../../contexts/LoadingContext";
-import { useErrorMessage } from "../../contexts/ErrorMessageContext";
 import { getDepartments } from "../../helpers/getDepartments";
 import { toTitleCase } from "../../helpers/toTitleCase";
 import { signup } from "../../../api/authApi";
 import Button from "../../components/Button";
+import { useMessage } from "../../contexts/MessageContext";
 const Signup = () => {
   // To handle the placeholder of date input
   const [dateFocus, setDateFocus] = useState(false);
@@ -17,7 +17,9 @@ const Signup = () => {
     watch,
     formState: { errors },
   } = useForm();
+  const { message, setMessage, isError, setIsError } = useMessage();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const delay = async (delay) => {
     return new Promise((resolve) => {
@@ -28,9 +30,18 @@ const Signup = () => {
   };
 
   const onsubmit = async (data) => {
+    setIsSubmitting(true);
     setLoading(true);
-    await signup(data);
+    const result = await signup(data);
+    if (result.success) {
+      setIsError(false);
+      setMessage(result.message);
+    }else {
+      setIsError(true);
+      setMessage(result.message);
+    }
     setLoading(false);
+    setIsSubmitting(false);
   };
 
   const handleDateChange = (event) => {
@@ -57,8 +68,8 @@ const Signup = () => {
   // Watch the password field
   const password = watch("password", "");
 
-  // Departments 
-    const departments = getDepartments();
+  // Departments
+  const departments = getDepartments();
   return (
     <div>
       <Container>
@@ -68,15 +79,17 @@ const Signup = () => {
         >
           <div className="relative">
             <div
-              className={`pointer-events-none absolute top-1/2 rounded-md -translate-y-1/2 text-slate-400 ${errors.role?"bg-rose-300":"bg-white"} w-full ${
-                role ? "hidden" : ""
-              }`}
+              className={`pointer-events-none absolute top-1/2 rounded-md -translate-y-1/2 text-slate-400 ${
+                errors.role ? "bg-rose-300" : "bg-white"
+              } w-full ${role ? "hidden" : ""}`}
             >
               <div className="translate-x-2">Role</div>
             </div>
             <select
-              {...register("role",{required:true})}
-              className={`p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ${errors.role?"bg-rose-300":"bg-white"} text-gray-700`}
+              {...register("role", { required: true })}
+              className={`p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ${
+                errors.role ? "bg-rose-300" : "bg-white"
+              } text-gray-700`}
               onClick={handleRoleChange}
             >
               <option value=""></option>
@@ -89,33 +102,42 @@ const Signup = () => {
             type="text"
             placeholder="Name"
             {...register("name", { required: true })}
-            className={`p-2 border ${errors.name?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`p-2 border ${
+              errors.name ? "bg-rose-300" : "bg-white"
+            } border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
           <input
             type="email"
             placeholder="Email"
             {...register("email", { required: true })}
-            className={`p-2 border ${errors.email?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`p-2 border ${
+              errors.email ? "bg-rose-300" : "bg-white"
+            } border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
 
-
-<div className="relative">
+          <div className="relative">
             <div
-              className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 ${errors.department?"bg-rose-300":"bg-white"} w-full ${
-                departmentSelected ? "hidden" : ""
-              }`}
+              className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 ${
+                errors.department ? "bg-rose-300" : "bg-white"
+              } w-full ${departmentSelected ? "hidden" : ""}`}
             >
               <div className="translate-x-2">Department</div>
             </div>
             <select
-              className={`p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ${errors.department?"bg-rose-300":"bg-white"} text-gray-700`}
+              className={`p-2 border w-full border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ${
+                errors.department ? "bg-rose-300" : "bg-white"
+              } text-gray-700`}
               onClick={handleDepartmentChange}
-              {...register("department",{required:true})}
+              {...register("department", { required: true })}
             >
               <option value=""></option>
               {/* TODO: fetch the info form db */}
-              {departments.map((dept,index) => {
-                return <option key={index} value={dept.toLowerCase()}>{toTitleCase(dept)}</option>
+              {departments.map((dept, index) => {
+                return (
+                  <option key={index} value={dept.toLowerCase()}>
+                    {toTitleCase(dept)}
+                  </option>
+                );
               })}
             </select>
           </div>
@@ -133,7 +155,9 @@ const Signup = () => {
                       message: "Password must be longer than 5 characters!",
                     },
                   })}
-                  className={`p-2 border w-full ${errors.password?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`p-2 border w-full ${
+                    errors.password ? "bg-rose-300" : "bg-white"
+                  } border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
                 {errors.password && (
                   <p className="text-rose-500">{errors.password.message}</p>
@@ -143,7 +167,9 @@ const Signup = () => {
                 <input
                   type="password"
                   placeholder="Confirm Password"
-                  className={`p-2 border w-full ${errors.confirmPassword?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`p-2 border w-full ${
+                    errors.confirmPassword ? "bg-rose-300" : "bg-white"
+                  } border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   {...register("confirmPassword", {
                     required: "Confirm Password is required",
                     validate: (value) =>
@@ -163,39 +189,50 @@ const Signup = () => {
                 type="text"
                 placeholder="USN"
                 {...register("usn", { required: true })}
-                className={`p-2 border ${errors.usn?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`p-2 border ${
+                  errors.usn ? "bg-rose-300" : "bg-white"
+                } border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
               <div className="relative">
                 <div
-                  className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 ${errors.dateOfBirth?"bg-rose-300":"bg-white"} w-4/5 ${
-                    dateFocus ? "hidden" : ""
-                  }`}
+                  className={`pointer-events-none rounded-md absolute top-1/2 -translate-y-1/2 text-slate-400 ${
+                    errors.dateOfBirth ? "bg-rose-300" : "bg-white"
+                  } w-4/5 ${dateFocus ? "hidden" : ""}`}
                 >
                   <div className="translate-x-2">Date Of Birth</div>
                 </div>
                 <input
                   type="date"
-                  {...register("dateOfBirth", { required: true,
-                    validate: (date) =>{
+                  {...register("dateOfBirth", {
+                    required: true,
+                    validate: (date) => {
                       const today = new Date();
                       const dob = new Date(date);
-                      if(dob > today){
-                        return "Date of birth cannot be in the future"
-                        } 
-                    }
-                   })} // Register the date input
+                      if (dob > today) {
+                        return "Date of birth cannot be in the future";
+                      }
+                    },
+                  })} // Register the date input
                   onChange={handleDateChange}
-                  className={`p-2 border ${errors.dateOfBirth?"bg-rose-300":"bg-white"} border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`p-2 border ${
+                    errors.dateOfBirth ? "bg-rose-300" : "bg-white"
+                  } border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 />
-              </div> 
+              </div>
               <input
                 type="number"
                 placeholder="Enrollment Year"
-                {...register("enrollmentYear", 
-                  { required: "Enrollment Year is required",min: {value: 1962,message:"Invalid Year"} ,max:{value : new Date().getFullYear(), message: "Invalid Year"} 
-                }
-                )}
-                className={`p-2 border ${errors.enrollmentYear?"bg-rose-300":"bg-white"} border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                {...register("enrollmentYear", {
+                  required: "Enrollment Year is required",
+                  min: { value: 1962, message: "Invalid Year" },
+                  max: {
+                    value: new Date().getFullYear(),
+                    message: "Invalid Year",
+                  },
+                })}
+                className={`p-2 border ${
+                  errors.enrollmentYear ? "bg-rose-300" : "bg-white"
+                } border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
               {/* {errors.enrollmentYear && (
                   <p className="text-rose-500">
@@ -207,6 +244,7 @@ const Signup = () => {
           <Button
             type="submit"
             extraClasses="self-center"
+            disabled={isSubmitting}
           >
             Signup
           </Button>

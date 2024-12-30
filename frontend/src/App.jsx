@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './pages/common/Signup.jsx';
 import Login from './pages/common/Login.jsx';
 import HostHome from './pages/host/hostHome.jsx';
+import { useMessage } from './contexts/MessageContext.jsx';
 
 function App() {
   return (
