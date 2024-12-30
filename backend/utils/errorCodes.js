@@ -21,7 +21,7 @@ const errorCodes = {
     },
     40101: {
         name: 'UnauthorizedError',
-        message: 'Unauthorized access.',
+        message: 'Invalid Credentials.',
         statusCode: 401,
     },
     40401: {

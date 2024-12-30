@@ -88,5 +88,6 @@ exports.hashPassword = async (password) => {
 // Function to verify the password during login
 exports.verifyPassword = async (enteredPassword, storedHashedPassword) => {
   const isMatch = await bcrypt.compare(enteredPassword, storedHashedPassword);
+  logger.debug("Password Match :"+ isMatch)
   return isMatch; // Returns true if passwords match, false otherwise
 }

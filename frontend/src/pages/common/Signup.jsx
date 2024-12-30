@@ -18,7 +18,7 @@ const Signup = () => {
     watch,
     formState: { errors },
   } = useForm();
-  const { message, setMessage, isError, setIsError } = useMessage();
+  const { setMessage, setIsError } = useMessage();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 

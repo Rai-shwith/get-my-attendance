@@ -1,9 +1,9 @@
 
 const { pool } = require('../config/db');
 const AppError = require('../utils/AppError');
-const { hashPassword } = require('../utils/helpers');
+const { hashPassword, verifyPassword } = require('../utils/helpers');
 const { logger } = require('../utils/logger');
-const { getDepartmentIdByName } = require('./branchQueries');
+const { getDepartmentIdByName, getDepartmentNameById } = require('./branchQueries');
 
 /**
  * Register host or teacher
@@ -15,7 +15,7 @@ const { getDepartmentIdByName } = require('./branchQueries');
  * @returns {Promise<object>} The newly created teacher's details.
  * @throws {Error} If the teacher could not be registered.
  */
-exports.registerTeacher = async (name, email, password,department) => {
+exports.registerTeacher = async (name, email, password, department) => {
 
     const departmentId = await getDepartmentIdByName(department);
 
@@ -41,7 +41,7 @@ exports.registerTeacher = async (name, email, password,department) => {
 
         return newTeacher;
     } catch (error) {
-        
+
         if (error.code === '23505') {
             // Handle unique constraint violation
             logger.error(`Unique constraint violation: ${error.message}`);
@@ -50,8 +50,61 @@ exports.registerTeacher = async (name, email, password,department) => {
             // Handle other errors
             logger.error(`Error registering teacher: ${error.message}`);
             throw new AppError(50002);
-        }  
-      }
+        }
+    }
+};
+
+
+
+
+/**
+ * Login host or teacher
+ * 
+ * @param {string} email - The email address of the teacher.
+ * @param {string} password - The plain text password of the teacher.
+ * @returns {Promise<object>} The newly created teacher's details.
+ * @throws {Error} If the teacher credentials are invalid.
+ */
+exports.loginTeacher = async (email, password) => {
+    logger.debug("Entered Credentials : " + email + " " + password);
+
+    const query = `
+        SELECT id, name, email, department_id, password FROM  teachers WHERE email = $1;
+    `;
+
+    try {
+
+        const values = [email];
+        const result = await pool.query(query, values);
+
+        const teacher = result.rows[0];
+        logger.debug("Login Teacher details"+JSON.stringify(teacher));
+        if (!teacher) {
+            throw new AppError(40101);
+        }
+
+        const passwordMatch = await verifyPassword(password,teacher.password);
+        if (!passwordMatch) {
+            throw new AppError(40101);
+        }
+
+        const department = await getDepartmentNameById(teacher.department_id)
+
+        teacher.department = department
+
+        // Log success
+        logger.info(
+            `Teacher found: ${teacher.name} (ID: ${teacher.id}, Email: ${teacher.email})`
+        );
+
+        return teacher;
+    } catch (error) {
+        if (!(error instanceof AppError)) {
+            logger.error(`Error logging in teacher: ${error.message}`);
+            throw new AppError(50002); // Throw a generic error for non-AppError cases
+        }
+        throw error; // Rethrow the AppError
+    }
 };
 
 /**

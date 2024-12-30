@@ -4,6 +4,7 @@ const path = require('path');
 const hostRoutes = require('./routes/hostRoutes');
 const cookieParser = require('cookie-parser');
 const registerRoutes = require('./routes/registerRoutes');
+const loginRoutes = require('./routes/loginRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const { auth, server } = require('./config/env');
 const { logger } = require('./utils/logger');
@@ -59,7 +60,13 @@ app.use(session({
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Register Route
-app.use('/',registerRoutes)
+app.use('/', registerRoutes)
+
+// Login Route
+app.use('/', loginRoutes)
+
+// Register Route
+app.use('/',loginRoutes)
 
 // Redirect to /host
 app.get('*', (req, res) => {

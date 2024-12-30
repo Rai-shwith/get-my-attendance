@@ -10,10 +10,44 @@ const api = axios.create({
 });
 
 // TODO: Implement correct API calls
-export const login = async (username, password) => {
-  const response = await api.post('/login', { username, password });
-  localStorage.setItem('accessToken', response.data.accessToken);
-  return response.data;
+export const login = async (userData) => {
+  console.log(userData);
+  try {
+    // Change the API endpoint from '/register' to '/login'
+    const result = await api.post('/login', userData);
+    
+    if (result.status === 200) {
+      console.log('User  logged in successfully');
+      console.log(result.data);
+      
+      // Update the Login function to reflect successful login
+      Login({
+        name: result.data.data.name,
+        role: result.data.role,
+        email: result.data.data.email,
+        department: result.data.data.department
+      });
+      
+      return {
+        success: true,
+        message: result.data.data.name + ' logged in successfully',
+        role: result.data.role
+      };
+    } else {
+      console.error(result);
+      return { success: false, message: 'Error logging in user' };
+    }
+  } catch (error) {
+    console.error(error);
+    const mainError = error.response?.data?.error;
+    
+    if (!mainError) {
+      return { success: false, message: 'Error logging in user' };
+    }
+    
+    console.error(mainError);
+    return { success: false, message: mainError.message };
+  }
 };
 
 export const logout = async () => {
