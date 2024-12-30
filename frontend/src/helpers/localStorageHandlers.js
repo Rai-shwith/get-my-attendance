@@ -15,3 +15,6 @@ export const Logout = () => {
     localStorage.removeItem('user');
 }
 
+export const getUser = () => {
+    return JSON.parse(localStorage.getItem('user'));
+}
