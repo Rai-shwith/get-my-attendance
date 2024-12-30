@@ -178,7 +178,8 @@ exports.register = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: "Teacher registered successfully",
-                data: result
+                data: result,
+                role: "host"
             })
         } catch (error) {
             logger.error("While registering teacher "+error);

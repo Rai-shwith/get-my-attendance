@@ -7,6 +7,7 @@ import { toTitleCase } from "../../helpers/toTitleCase";
 import { signup } from "../../../api/authApi";
 import Button from "../../components/Button";
 import { useMessage } from "../../contexts/MessageContext";
+import { useNavigate } from "react-router-dom";
 const Signup = () => {
   // To handle the placeholder of date input
   const [dateFocus, setDateFocus] = useState(false);
@@ -21,6 +22,8 @@ const Signup = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const navigate = useNavigate();
+
   const delay = async (delay) => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -29,18 +32,23 @@ const Signup = () => {
     });
   };
 
+  
+
   const onsubmit = async (data) => {
     setIsSubmitting(true);
     setLoading(true);
     const result = await signup(data);
+    setLoading(false);
     if (result.success) {
       setIsError(false);
       setMessage(result.message);
-    }else {
+      await delay(2);
+      setMessage('');
+      navigate("/"+result.role);
+    } else {
       setIsError(true);
       setMessage(result.message);
     }
-    setLoading(false);
     setIsSubmitting(false);
   };
 

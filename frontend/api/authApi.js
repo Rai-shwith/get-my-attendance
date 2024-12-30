@@ -27,7 +27,7 @@ export const signup = async (userData) => {
     if (result.status === 200) {
       console.log('User registered successfully');
       console.log(result.data);
-      return {success: true, message: result.data.data.name + ' registered successfully'};
+      return {success: true, message: result.data.data.name + ' registered successfully', role:result.data.role};
     } else {
       console.error(result);
       return { 'success': false, 'message': 'Error registering user' };
