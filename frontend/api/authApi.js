@@ -1,6 +1,7 @@
 import { useDebugValue } from 'react';
 import axios from 'axios';
 import { useMessage } from '../src/contexts/MessageContext';
+import { Login } from '../src/helpers/localStorageHandlers';
 
 // Create a axios instance for login and signup
 const api = axios.create({
@@ -27,7 +28,13 @@ export const signup = async (userData) => {
     if (result.status === 200) {
       console.log('User registered successfully');
       console.log(result.data);
-      return {success: true, message: result.data.data.name + ' registered successfully', role:result.data.role};
+      Login({
+        name: result.data.data.name,
+        role: result.data.role,
+        email: result.data.data.email,
+        department: userData.department
+      })
+      return {success: true, message: result.data.data.name + ' registered successfully', role: result.data.role};
     } else {
       console.error(result);
       return { 'success': false, 'message': 'Error registering user' };

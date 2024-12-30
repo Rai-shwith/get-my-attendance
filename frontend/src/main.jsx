@@ -15,9 +15,9 @@ createRoot(document.getElementById("root")).render(
         <ThemeProvider>
           <Background>
             <ThemeToggle />
-            <AuthProvider>
+            {/* <AuthProvider> */}
               <App />
-            </AuthProvider>
+            {/* </AuthProvider> */}
           </Background>
         </ThemeProvider>
       </MessageProvider>

@@ -1,10 +1,9 @@
 import NotFound from './pages/common/NotFound.jsx';
 import LandingPage from './pages/common/LandingPage.jsx';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Signup from './pages/common/Signup.jsx';
 import Login from './pages/common/Login.jsx';
 import HostHome from './pages/host/hostHome.jsx';
-import { useMessage } from './contexts/MessageContext.jsx';
 
 function App() {
   return (
