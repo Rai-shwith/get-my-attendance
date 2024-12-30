@@ -10,7 +10,6 @@ const { logger } = require('./utils/logger');
 const {getBaseURL } = require('./states/general');
 const FileStore = require('session-file-store')(session);
 const cors = require('cors');
-
 const http = require("http");
 const { initSocket } = require('./utils/socketHelper');
 const AppError = require('./utils/AppError');

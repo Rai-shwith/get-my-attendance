@@ -1,4 +1,3 @@
-// Example: src/components/Background.jsx
 import { useTheme } from "../contexts/ThemeContext";
 
 const Background = ({ children }) => {
