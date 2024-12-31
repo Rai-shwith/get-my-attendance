@@ -24,6 +24,11 @@ const errorCodes = {
         message: 'Invalid Credentials.',
         statusCode: 401,
     },
+    40301: {
+      name: 'ForbiddenError',
+      message: 'You do not have permission to access this resource.',
+      statusCode: 403
+    },
     40401: {
       name: 'EndpointNotFoundError',
       message: 'Cannot find the endpoint',
