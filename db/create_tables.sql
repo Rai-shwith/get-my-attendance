@@ -132,9 +132,25 @@ CREATE TABLE backlogs (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TYPE user_type_enum AS ENUM ('teacher', 'student');
+
+CREATE TABLE refresh_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL, -- Foreign key to either teachers or students
+  user_type user_type_enum NOT NULL, -- To differentiate user type using ENUM
+  token TEXT NOT NULL, -- The refresh token
+  expires_at TIMESTAMP NOT NULL, -- Expiration time of the token
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When the token was created
+  revoked BOOLEAN DEFAULT FALSE, -- Whether the token is revoked
+  UNIQUE (user_id, user_type, token) -- Ensure uniqueness
+);
+
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_usn ON students(usn);
 CREATE INDEX IF NOT EXISTS idx_email ON teachers(email);
 CREATE INDEX IF NOT EXISTS idx_department_name ON departments(name);
 CREATE INDEX IF NOT EXISTS idx_class_session_composite ON class_sessions(course_id, section_id, teacher_id, session_date);
 CREATE INDEX IF NOT EXISTS  idx_attendance_class_session ON attendance(class_session_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_token_user_text ON refresh_tokens(user_id, user_type, token);
