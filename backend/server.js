@@ -5,7 +5,9 @@ const hostRoutes = require('./routes/hostRoutes');
 const cookieParser = require('cookie-parser');
 const registerRoutes = require('./routes/registerRoutes');
 const loginRoutes = require('./routes/loginRoutes');
+const logoutRoutes = require('./routes/logoutRoutes')
 const profileRoutes = require('./routes/profileRoutes');
+const refreshTokenRoutes = require('./routes/refreshTokenRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const { auth, server } = require('./config/env');
 const { logger } = require('./utils/logger');
@@ -67,10 +69,13 @@ app.use('/', registerRoutes)
 app.use('/', loginRoutes)
 
 // Logout Route
-app.use('/',profileRoutes)
+app.use('/',logoutRoutes)
 
 // Profile Route
 app.use('/', profileRoutes)
+
+//  Route refresh token
+app.use('/', refreshTokenRoutes)
 
 // Redirect to /host
 app.get('*', (req, res) => {
