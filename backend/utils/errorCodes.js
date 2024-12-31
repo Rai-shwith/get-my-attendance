@@ -19,10 +19,20 @@ const errorCodes = {
       message: 'Invalid role provided. Only "Teacher" or "student" are allowed.',
       statusCode: 400
     },
+    40005: {
+      name: 'MissingTokenError',
+      message: 'Refresh token is missing. Please provide a valid token.',
+      statusCode: 400
+    },
     40101: {
         name: 'UnauthorizedError',
         message: 'Invalid Credentials.',
         statusCode: 401,
+    },
+    40102: {
+      name: 'InvalidTokenError',
+      message: 'The refresh token is invalid or does not match our records.',
+      statusCode: 401
     },
     40301: {
       name: 'ForbiddenError',
