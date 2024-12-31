@@ -8,7 +8,7 @@ import { logger } from "../utils/logger";
  * @param {string} hashedToken - The hashed refresh hashedToken.
  * @returns {Promise<object>} - Returns the refresh token entry or an error message.
  */
-exports.getDetailsFromRefreshToken = async (hashedToken) => {
+exports.getDetailsFromHashedRefreshToken = async (hashedToken) => {
     logger.debug("Attempting to get the refresh token entry for the given token.");
     if (!hashedToken) {
         logger.info("No token provided");

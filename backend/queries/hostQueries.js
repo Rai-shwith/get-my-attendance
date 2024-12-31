@@ -1,7 +1,7 @@
 
 const { pool } = require('../config/db');
 const AppError = require('../utils/AppError');
-const { hashPassword, verifyPassword } = require('../utils/helpers');
+const { hash, verifyHash } = require('../utils/helpers');
 const { logger } = require('../utils/logger');
 const { getDepartmentIdByName, getDepartmentNameById } = require('./branchQueries');
 
@@ -27,7 +27,7 @@ exports.registerTeacher = async (name, email, password, department) => {
 
     try {
         // Hash the password before storing it
-        const hashedPassword = await hashPassword(password);
+        const hashedPassword = await hash(password);
 
         const values = [name, email, hashedPassword, departmentId];
         const result = await pool.query(query, values);
@@ -78,12 +78,12 @@ exports.loginTeacher = async (email, password) => {
         const result = await pool.query(query, values);
 
         const teacher = result.rows[0];
-        logger.debug("Login Teacher details"+JSON.stringify(teacher));
+        logger.debug("Login Teacher details" + JSON.stringify(teacher));
         if (!teacher) {
             throw new AppError(40101);
         }
 
-        const passwordMatch = await verifyPassword(password,teacher.password);
+        const passwordMatch = await verifyHash(password, teacher.password);
         if (!passwordMatch) {
             throw new AppError(40101);
         }
