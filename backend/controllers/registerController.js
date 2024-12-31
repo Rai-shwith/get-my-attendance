@@ -10,6 +10,7 @@ const AppError = require('../utils/AppError');
 const { registerTeacher } = require('../queries/hostQueries');
 const { addRefreshToken } = require('../queries/refreshTokenQueries');
 const { generateRefreshToken, generateAccessToken } = require('../utils/auth');
+const { auth } = require('../config/env');
 
 
 // TODO: Break this into middlewares as attendanceRoutes.js
@@ -181,11 +182,11 @@ exports.register = async (req, res, next) => {
             const refreshToken = generateRefreshToken();
             const hashedRefreshToken = helpers.hash(refreshToken);
             const refreshTokenExpiryTime = new Date();
-            refreshTokenExpiryTime.setMonth(refreshTokenExpiryTime.getMonth() + 1); // Add 1 month
+            refreshTokenExpiryTime.setTime(refreshTokenExpiryTime.getTime() + auth.refreshTokenExpiration); 
             await addRefreshToken(hashedRefreshToken, result.id, "teacher",refreshTokenExpiryTime)
             res.cookie("refreshToken",refreshToken,{
                 signed:true,
-                maxAge: refreshTokenExpiryTime.getTime() - Date.now(),
+                maxAge: auth.refreshTokenExpiration,
                 httpOnly:false,
                 secure:true,
             })

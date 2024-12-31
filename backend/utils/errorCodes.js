@@ -79,6 +79,11 @@ const errorCodes = {
       message: 'Department not found',
       statusCode: 404,
     },
+    40403: {
+      name: 'TeacherNotFoundError',
+      message: 'No teacher found for the given ID.',
+      statusCode: 404
+    },
     40901: {
       name: 'UserAlreadyExistsError',
       message: 'User already exists. Please login.',

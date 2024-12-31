@@ -1,11 +1,9 @@
-// backend/routes/registerRoutes.js
-
 const express = require('express');
 const router = express.Router();
-const profile = require('../controllers/profileController');
 const { authenticateToken } = require('../middleware/authMiddleware');
+const { logout } = require('../controllers/logoutController');
 
 // Router to Register a student
-router.post('/profile', authenticateToken, profile.getProfile);
+router.post('/logout',authenticateToken, logout);
 
 module.exports = router;

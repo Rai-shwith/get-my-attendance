@@ -1,6 +1,6 @@
-import { db } from "../config/env";
-import AppError from "../utils/AppError";
-import { logger } from "../utils/logger";
+const { db } = require("../config/env");
+const AppError = require("../utils/AppError");
+const { logger } = require("../utils/logger");
 
 /**
  * Function to get the refresh token entry for the given token.
@@ -34,6 +34,7 @@ exports.getDetailsFromHashedRefreshToken = async (hashedToken) => {
         }
         return tokenDetails;
     } catch (error) {
+        if (error instanceof AppError) throw error;
         logger.error("Error occurred while getting the refresh token entry: " + JSON.stringify(error));
         throw new AppError(50002);
     }
@@ -62,6 +63,7 @@ exports.revokeRefreshToken = async (userId, userType) => {
         logger.info("Refresh token revoked successfully");
     }
     catch (error) {
+        if (error instanceof AppError) throw error;
         logger.error("Error occurred while revoking the refresh token entry: " + JSON.stringify(error));
         throw new AppError(50002);
     }
@@ -118,6 +120,7 @@ exports.addRefreshToken = async (hashedToken, userId, userType, expiresAt) => {
         logger.info("Refresh token added successfully");
         return result.rows[0];
     } catch (error) {
+        if (error instanceof AppError) throw error;
         logger.error("Error occurred while adding the refresh token entry: " + JSON.stringify(error));
         throw new AppError(50003);
     }

@@ -66,6 +66,9 @@ app.use('/', registerRoutes)
 // Login Route
 app.use('/', loginRoutes)
 
+// Logout Route
+app.use('/',profileRoutes)
+
 // Profile Route
 app.use('/', profileRoutes)
 

@@ -200,3 +200,32 @@ exports.getCoursesForTeacher = async (teacherId) => {
         throw new Error('Failed to fetch courses for the teacher.');
     }
 };
+
+/**
+ * Get the teacher information based on id 
+ * 
+ * @param {number} teacherId - The ID of the teacher.
+ * @returns {Promise<{id: number, name: string, email: string, department: string}>}
+ */
+exports.getTeacherInfo = async (teacherId) => {
+    logger.debug("Entering getTeacherInfo");
+
+    if (!teacherId){
+        logger.error("No teacher Id is provided");
+        throw new AppError(40001);
+    }
+
+    const query = `SELECT id, name, email, department FROM teachers WHERE id = $1;`;
+    try {
+        const result = await pool.query(query, [teacherId]);
+        if (result.rows.length == 0){
+            logger.error("Teacher not found");
+            throw new AppError(40403);
+        }
+        return result.rows[0];
+    } catch (error) {
+        if (error instanceof AppError) throw error;
+        logger.error(`Error fetching teacher info for teacher ${teacherId}: ${error.message}`);
+        throw new AppError(50002);
+    }
+};
