@@ -24,6 +24,26 @@ const errorCodes = {
       message: 'Refresh token is missing. Please provide a valid token.',
       statusCode: 400
     },
+    40006: {
+      name: 'MissingUserIDError',
+      message: 'User ID is missing. Please provide a valid user ID.',
+      statusCode: 400
+    },
+    40007: {
+      name: 'MissingUserRoleError',
+      message: 'User role is missing. Please provide a valid user role.',
+      statusCode: 400
+    },
+    40008: {
+      name: 'MissingExpiryTimeError',
+      message: 'Expiry time is missing. Please provide a valid expiry time.',
+      statusCode: 400
+    },
+    40009: {
+      name: 'InvalidExpiryTimeError',
+      message: 'Expiry time is invalid. It cannot be in the past.',
+      statusCode: 400
+    },
     40101: {
         name: 'UnauthorizedError',
         message: 'Invalid Credentials.',
@@ -32,6 +52,16 @@ const errorCodes = {
     40102: {
       name: 'InvalidTokenError',
       message: 'The refresh token is invalid or does not match our records.',
+      statusCode: 401
+    },
+    40103: {
+      name: 'TokenExpiredError',
+      message: 'The refresh token has expired. Please log in again.',
+      statusCode: 401
+    },
+    40104: {
+      name: 'TokenRevokedError',
+      message: 'The refresh token has been revoked. Please log in again.',
       statusCode: 401
     },
     40301: {

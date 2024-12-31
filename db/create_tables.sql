@@ -141,9 +141,9 @@ CREATE TABLE refresh_tokens (
   user_type user_type_enum NOT NULL, -- To differentiate user type using ENUM
   token TEXT NOT NULL, -- The refresh token
   expires_at TIMESTAMP NOT NULL, -- Expiration time of the token
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- When the token was created
+  created_at TIMESTAMP DEFAULT NOW(), -- When the token was created
   revoked BOOLEAN DEFAULT FALSE, -- Whether the token is revoked
-  UNIQUE (user_id, user_type, token) -- Ensure uniqueness
+  UNIQUE (user_id, user_type) -- Ensure uniqueness
 );
 
 
@@ -153,4 +153,5 @@ CREATE INDEX IF NOT EXISTS idx_email ON teachers(email);
 CREATE INDEX IF NOT EXISTS idx_department_name ON departments(name);
 CREATE INDEX IF NOT EXISTS idx_class_session_composite ON class_sessions(course_id, section_id, teacher_id, session_date);
 CREATE INDEX IF NOT EXISTS  idx_attendance_class_session ON attendance(class_session_id);
-CREATE INDEX IF NOT EXISTS idx_refresh_token_user_text ON refresh_tokens(user_id, user_type, token);
+CREATE INDEX IF NOT EXISTS idx_refresh_token ON refresh_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_refresh_user ON refresh_tokens(user_id, user_type);
