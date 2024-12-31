@@ -1,6 +1,10 @@
 const { loginTeacher } = require("../queries/hostQueries");
+const { addRefreshToken } = require("../queries/refreshTokenQueries");
 const AppError = require("../utils/AppError");
+const { generateRefreshToken, generateAccessToken } = require("../utils/auth");
+const { hash } = require("../utils/helpers");
 const { logger } = require("../utils/logger");
+const {auth} = require("../config/env")
 
 const handleTeacherLogin = async ({email, password}) => {
     if (! (email && password )) {
@@ -34,7 +38,7 @@ const handleStudentLogin = async ({name,usn, email, dateOfBirth, enrollmentYear,
 
 //  Router to login both teacher or student
 exports.login = async (req, res, next) => {
-    logger.debug("Entering login , Credentials "+req.body);
+    logger.debug("Entering login , Credentials "+JSON.stringify(req.body));
     const credentials = req.body
 
     if (!credentials) {
@@ -54,13 +58,34 @@ exports.login = async (req, res, next) => {
     } else if (credentials.role == 'teacher') {
         logger.debug("Trying to login teacher");
         try {
-            const result = await handleTeacherLogin(credentials)
+            const result = await handleTeacherLogin(credentials);
+            // Issuing refresh token
+            const refreshToken = generateRefreshToken();
+            const hashedRefreshToken = hash(refreshToken);
+            const refreshTokenExpiryTime = new Date();
+            refreshTokenExpiryTime.setTime(refreshTokenExpiryTime.getTime() + (auth.refreshTokenExpiration*1000)); 
+            await addRefreshToken(hashedRefreshToken, result.id, "teacher",refreshTokenExpiryTime)
+            res.cookie("refreshToken",refreshToken,{
+                signed:true,
+                maxAge: auth.refreshTokenExpiration,
+                httpOnly:false,
+                secure:true,
+            })
+            // Issuing access token
+            const accessToken = generateAccessToken({
+                id: result.id,
+                role: "teacher"
+            })
+
             return res.status(200).json({
                 success: true,
-                message: "Teacher logged in successfully",
-                data: result,
-                role: "host"
-            })
+                message: "Teacher registered successfully",
+                role: "teacher",
+                name:result.name,
+                email:result.email,
+                department:result.department,
+                accessToken
+            });
         } catch (error) {
             logger.error("While logging teacher "+error);
             return next(error);

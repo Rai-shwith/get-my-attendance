@@ -18,7 +18,6 @@ const http = require("http");
 const { initSocket } = require('./utils/socketHelper');
 const AppError = require('./utils/AppError');
 const errorHandler = require('./middleware/errorHandler');
-
 const PORT = server.port;
 // Get the Domain (Ip address)
 const DOMAIN = getBaseURL();
@@ -58,24 +57,23 @@ app.use(session({
         cleanupInterval: 86400  // Cleanup interval (every 24 hours)
     })
 }));
-
 // Static files (e.g., images, styles)
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Register Route
-app.use('/', registerRoutes)
+app.use('/', registerRoutes);
 
 // Login Route
-app.use('/', loginRoutes)
+app.use('/', loginRoutes);
 
 // Logout Route
-app.use('/',logoutRoutes)
+app.use('/',logoutRoutes);
 
 // Profile Route
-app.use('/', profileRoutes)
+app.use('/', profileRoutes);
 
 //  Route refresh token
-app.use('/', refreshTokenRoutes)
+app.use('/', refreshTokenRoutes);
 
 // Redirect to /host
 app.get('*', (req, res) => {

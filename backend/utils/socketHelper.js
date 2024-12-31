@@ -3,6 +3,7 @@ const { logger } = require("./logger");
 let io;
 
 const initSocket = (server) => {
+  logger.info("Initializing the socket.io");
   const { Server } = require("socket.io");
   io = new Server(server);
 

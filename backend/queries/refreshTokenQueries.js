@@ -1,4 +1,4 @@
-const { db } = require("../config/env");
+const { pool } = require('../config/db');
 const AppError = require("../utils/AppError");
 const { logger } = require("../utils/logger");
 
@@ -18,7 +18,7 @@ exports.getDetailsFromHashedRefreshToken = async (hashedToken) => {
         SELECT * FROM refresh_tokens WHERE token = $1;
     `;
     try {
-        const result = await db.query(query, [hashedToken]);
+        const result = await pool.query(query, [hashedToken]);
         if (result.rows.length === 0) {
             logger.info("No refresh token found");
             throw new AppError(40103);
@@ -59,7 +59,7 @@ exports.revokeRefreshToken = async (userId, userType) => {
     }
     const query = `UPDATE refresh_tokens SET revoked = true WHERE user_id = $1 AND user_type = $2;`;
     try {
-        await db.query(query, [userId, userType]);
+        await pool.query(query, [userId, userType]);
         logger.info("Refresh token revoked successfully");
     }
     catch (error) {
@@ -79,7 +79,7 @@ exports.revokeRefreshToken = async (userId, userType) => {
  * @returns {Promise<object>} - Returns the refresh token entry or an error message.
  */
 exports.addRefreshToken = async (hashedToken, userId, userType, expiresAt) => {
-    logger.debug("Attempting to add a new refresh token entry.");
+    logger.debug("Attempting to add a new refresh token entry." + userId + " " + userType);
     if (!hashedToken) {
         logger.error("Missing hashed token");
         throw new AppError(40005);
@@ -107,16 +107,20 @@ exports.addRefreshToken = async (hashedToken, userId, userType, expiresAt) => {
     // If a refresh token already exists for the user, delete it
     const deleteQuery = `DELETE FROM refresh_tokens WHERE user_id = $1 AND user_type = $2;`;
     try {
-        await db.query(deleteQuery, [userId, userType]);
-        logger.info("Existing refresh token deleted successfully");
+        const result = await pool.query(deleteQuery, [userId, userType]);
+        if (result.rowCount > 0) {
+            logger.info("Existing refresh token deleted successfully");
+        } else {
+            logger.info("No refresh token found to delete for the given user ID and user type");
+        }
     } catch (error) {
         logger.error("Error occurred while deleting existing refresh token: " + JSON.stringify(error));
         throw new AppError(50002);
     }
 
-    const query = `INSERT INTO refresh_tokens (hashed_token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4) RETURNING *;`;
+    const query = `INSERT INTO refresh_tokens (token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4) RETURNING *;`;
     try {
-        const result = await db.query(query, [hashedToken, userId, userType, expiresAt]);
+        const result = await pool.query(query, [hashedToken, userId, userType, expiresAt]);
         logger.info("Refresh token added successfully");
         return result.rows[0];
     } catch (error) {

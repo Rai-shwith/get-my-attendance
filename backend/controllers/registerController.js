@@ -199,7 +199,7 @@ exports.register = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: "Teacher registered successfully",
-                role: "host",
+                role: "teacher",
                 name:result.name,
                 email:result.email,
                 accessToken

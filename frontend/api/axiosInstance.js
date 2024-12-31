@@ -9,7 +9,7 @@ const api = axios.create({
 // Request interceptor to attach access token
 api.interceptors.request.use(
   (config) => {
-    const token = getAccessToken;
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,14 +33,15 @@ api.interceptors.response.use(
           {},
           { withCredentials: true }
         );
+        // Set the token in local storage
         setAccessToken(data.accessToken);
-
         // Retry the original request with the new token
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
+      } catch (error) {
+        console.error('Token refresh failed:', error);
         removeTokens();
+        // TODO: use navigate()
         window.location.href = '/login'; // Redirect to login
       }
     }
