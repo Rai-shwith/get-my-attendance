@@ -88,7 +88,7 @@ export const signup = async (userData) => {
 
 export const refreshJWTToken = async () => {
   try{
-  const { data } = await axios.post(
+  const { data } = await api.post(
     '/refresh-token',
     {},
     { withCredentials: true }

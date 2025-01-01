@@ -3,7 +3,7 @@ const AppError = require("../utils/AppError");
 const { logger } = require("../utils/logger")
 
 exports.getProfile = async (req, res, next) => {
-    logger("Entering getProfile");
+    logger.debug("Entering getProfile");
     const { id, role } = req;
     if (role == "student") {
         // TODO: implement student profile retrieval
@@ -16,5 +16,7 @@ exports.getProfile = async (req, res, next) => {
             logger.error("Error while giving profile: " + JSON.stringify(error));
             next(error);
         }
+    } else {
+        next(new AppError(40007));
     }
 }

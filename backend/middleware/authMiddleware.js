@@ -2,9 +2,11 @@
 const jwt = require('jsonwebtoken');
 const { auth } = require('../config/env');
 const AppError = require('../utils/AppError');
+const { logger } = require('../utils/logger');
 
 
 const authenticateToken = (req, res, next) => {
+    logger.info("Trying to authenticate Token");
     const token = req.headers['authorization'] && req.headers['authorization'].split(' ')[1];
 
     if (!token) return next(new AppError(40101)); // Unauthorized

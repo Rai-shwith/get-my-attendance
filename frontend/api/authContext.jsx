@@ -11,14 +11,14 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const { loading, setLoading } = useLoading();
-
+  const [verifying, setVerifying] = useState(true);
   // Fetch user profile on initial load or token refresh
   const fetchUser = async () => {
     setLoading(true);
     try {
       const profile = await api.get("/profile");
       setUser(profile.data);
-      navigate("/"+user.role)
+      navigate("/" + user.role);
     } catch (error) {
       console.error("User  fetch failed:", error);
       handleLogout();
@@ -29,16 +29,25 @@ export const AuthProvider = ({ children }) => {
 
   // Silent login: Refresh access token when it expires
   const silentLogin = async () => {
+    console.log("Entering silent login");
     try {
+      setVerifying(true);
+      setLoading(true);
       const data = await refreshJWTToken();
-      if (!data){
-        handleLogout();
+      console.log("Data of refreshJWTToken", data);
+      if (!data) {
+        console.log("No data returned from refreshJWTToken");
+        return handleLogout();
       }
+      console.log("Data of token", data.accessToken);
       setAccessToken(data.accessToken);
       fetchUser();
+      setVerifying(false);
     } catch (error) {
       console.error("Silent login failed:", error);
       handleLogout();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,6 +56,8 @@ export const AuthProvider = ({ children }) => {
     const user = getUser();
     if (!user) {
       silentLogin();
+    } else {
+      setVerifying(false);
     }
   }, []);
 
@@ -72,16 +83,16 @@ export const AuthProvider = ({ children }) => {
       console.error("Logout failed:", error);
     } finally {
       setLoading(false);
+      navigate("/");
     }
   };
-
-  return (
-    <AuthContext.Provider
-      value={{ handleLogin, handleLogout }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  if (!verifying) {
+    return (
+      <AuthContext.Provider value={{ handleLogin, handleLogout }}>
+        {children}
+      </AuthContext.Provider>
+    );
+  }
 };
 
 export const useAuth = () => useContext(AuthContext);

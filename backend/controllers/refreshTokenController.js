@@ -5,7 +5,11 @@ const { hash } = require("../utils/helpers");
 const { logger } = require("../utils/logger");
 
 exports.refreshJWTToken = async (req, res, next) => {
-    logger("Entering refreshJWTToken");
+    logger.info("Entering refreshJWTToken");
+    // Check if the signed cookie exists
+    if (!req.signedCookie || !req.signedCookie.refreshToken) {
+        return next(new AppError(40001));
+    }
     const refreshToken = req.signedCookie.refreshToken;
     const hashedRefreshToken = hash(refreshToken);
     const tokenDetails = await getDetailsFromHashedRefreshToken(hashedRefreshToken);
