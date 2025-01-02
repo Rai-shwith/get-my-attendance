@@ -15,6 +15,7 @@ const cors = require('cors');
 
 const http = require("http");
 const { initSocket } = require('./utils/socketHelper');
+const macAddressMiddleware = require('./middlewares/authentication');
 
 const PORT = server.port;
 // Get the Domain (Ip address)
@@ -57,6 +58,9 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
+
+// Set the middleware for mac Address retrieval
+app.use(macAddressMiddleware);
 
 // Redirect to /host
 app.get('/', (req, res) => {
