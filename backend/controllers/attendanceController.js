@@ -13,7 +13,7 @@ const { logger } = require('../utils/logger');
 
 exports.giveAttendance = (req, res) => {
     logger.debug("giveAttendance: Entering");
-    const registerID = req.session.registerID;
+    const registerID =  req.macAddress;;
     const student = getStudentById(registerID);
     attendance.addStudent(registerID, student);
     const remainingTime = getRemainingAttendanceTime();

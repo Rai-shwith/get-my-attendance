@@ -29,7 +29,7 @@ const checkActive = (req, res, next) => {
 
 // Middleware to handle if student is not registered
 const validateRegistration = (req,res,next) => {
-    const registerID = req.session.registerID;
+    const registerID =  req.macAddress;
     if (!registerID) {
         logger.error("Student not registered!");
         const remainingTime = getRemainingAttendanceTime();
@@ -49,7 +49,7 @@ const validateRegistration = (req,res,next) => {
 
 // Middleware to check if student already gave attendance or not
 const checkAttendanceAlreadyGiven = (req, res, next) => {
-    const registerID = req.session.registerID;
+    const registerID =  req.macAddress;;
     const student = attendance.getPresentStudentByID(registerID)
     // Student already marked the attendance
     if (student){
@@ -69,6 +69,7 @@ const checkAttendanceAlreadyGiven = (req, res, next) => {
     next();
 };
 
+// TODO: remove this as this may not be needed for mac address case
 // Middleware to check if students details missed from the system
 const verifyStudentRecords = (req, res, next) => {
     const registerID = req.session.registerID;
@@ -92,7 +93,7 @@ const verifyStudentRecords = (req, res, next) => {
 };
 
 // Start attendance
-router.get('/attendance', checkActive,validateRegistration,checkAttendanceAlreadyGiven,verifyStudentRecords,attendanceController.giveAttendance);
+router.get('/attendance', checkActive,validateRegistration,checkAttendanceAlreadyGiven,attendanceController.giveAttendance);
 
 
 module.exports = router;

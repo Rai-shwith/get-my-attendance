@@ -20,6 +20,7 @@
     "ejs": "^3.1.10",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
+    "node-arp": "^1.0.6",
     "node-fetch": "^2.7.0",
     "pdfkit": "^0.15.1",
     "perf_hooks": "^0.0.1",
