@@ -173,7 +173,7 @@ footer {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    height: 90vh;
+    max-height: 90vh;
     overflow: scroll;
 }
 
