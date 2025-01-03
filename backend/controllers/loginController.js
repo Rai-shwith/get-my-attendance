@@ -63,7 +63,7 @@ exports.login = async (req, res, next) => {
             const refreshToken = generateRefreshToken();
             const hashedRefreshToken = hash(refreshToken);
             const refreshTokenExpiryTime = new Date();
-            refreshTokenExpiryTime.setTime(refreshTokenExpiryTime.getTime() + (auth.refreshTokenExpiration*1000)); 
+            refreshTokenExpiryTime.setTime(refreshTokenExpiryTime.getTime() + (parseInt(auth.refreshTokenExpiration)*1000)); 
             await addRefreshToken(hashedRefreshToken, result.id, "teacher",refreshTokenExpiryTime)
             res.cookie("refreshToken",refreshToken,{
                 signed:true,

@@ -79,7 +79,7 @@ exports.revokeRefreshToken = async (userId, userType) => {
  * @returns {Promise<object>} - Returns the refresh token entry or an error message.
  */
 exports.addRefreshToken = async (hashedToken, userId, userType, expiresAt) => {
-    logger.debug("Attempting to add a new refresh token entry." + userId + " " + userType);
+    logger.debug("Attempting to add a new refresh token entry." + userId + " " + userType );
     if (!hashedToken) {
         logger.error("Missing hashed token");
         throw new AppError(40005);
@@ -117,10 +117,10 @@ exports.addRefreshToken = async (hashedToken, userId, userType, expiresAt) => {
         logger.error("Error occurred while deleting existing refresh token: " + JSON.stringify(error));
         throw new AppError(50002);
     }
-
+    logger.info("Expiry Date : " + expiresAt.toISOString());
     const query = `INSERT INTO refresh_tokens (token, user_id, user_type, expires_at) VALUES ($1, $2, $3, $4) RETURNING *;`;
     try {
-        const result = await pool.query(query, [hashedToken, userId, userType, expiresAt]);
+        const result = await pool.query(query, [hashedToken, userId, userType, expiresAt.toISOString()]);
         logger.info("Refresh token added successfully");
         return result.rows[0];
     } catch (error) {
