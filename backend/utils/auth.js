@@ -13,6 +13,10 @@ exports.generateRefreshToken = () => {
     return token;
 };
 
+exports.decodeJwt = (token) => {
+    return jwt.decode(token)
+}
+
 exports.validateRefreshToken = async (token) => {
     const hashedToken = hash(token);
     const details = await getDetailsFromHashedRefreshToken(hashedToken);

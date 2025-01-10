@@ -75,6 +75,12 @@ app.use('/profile', profileRoutes);
 //  Route refresh token
 app.use('/refresh-token', refreshTokenRoutes);
 
+// Route for handling attendance
+app.use('/attendance',attendanceRoutes)
+
+// Host Routes
+app.use('/host',hostRoutes)
+
 // Redirect to /host
 app.get('*', (req, res) => {
     logger.info('Sending React App');

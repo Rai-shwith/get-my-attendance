@@ -6,6 +6,7 @@ const attendanceController = require('../controllers/attendanceController');
 const { attendance, getStudentById } = require('../models/studentDetails');
 const { getAttendanceState, getRemainingAttendanceTime } = require('../states/attendanceState');
 const { logger } = require('../utils/logger');
+const AppError = require('../utils/AppError');
 
 
 // Middleware to check if the Attendance process is active
@@ -13,16 +14,8 @@ const checkActive = (req, res, next) => {
     // if attendance process is not active 
     if (!getAttendanceState()) {
         logger.debug("Attendance not started yet")
-        return res.render('attendance', {
-            name: "",
-            usn: "",
-            attendanceStarted: false,
-            color: "white",
-            message: "",
-            showReasons: "",
-            hideInfo: "",
-            interval: ""
-        });
+        // TODO:
+        next(new AppError())
     }
     next()
 };
@@ -69,30 +62,9 @@ const checkAttendanceAlreadyGiven = (req, res, next) => {
     next();
 };
 
-// Middleware to check if students details missed from the system
-const verifyStudentRecords = (req, res, next) => {
-    const registerID = req.session.registerID;
-    const student = getStudentById(registerID);
-    if (!student) {
-        req.session.registerID = null;
-        logger.error("Student details missing from the system!");
-        const remainingTime = getRemainingAttendanceTime();
-        return res.render('attendance', {
-            name: "",
-            usn: "",
-            attendanceStarted: true,
-            color: "#f44336",
-            message: "Your details are missing! 🕵️‍♂️<br> Please register again. 🔄",
-            showReasons: false,
-            hideInfo: true,
-            interval: remainingTime
-        });
-    }
-    next();
-};
 
 // Start attendance
-router.get('/attendance', checkActive,validateRegistration,checkAttendanceAlreadyGiven,verifyStudentRecords,attendanceController.giveAttendance);
+router.get('/', checkActive,validateRegistration,checkAttendanceAlreadyGiven,attendanceController.giveAttendance);
 
 
 module.exports = router;

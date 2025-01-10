@@ -3,30 +3,12 @@ const express = require('express');
 const router = express.Router();
 const { startAttendance, stopAttendance, getLoginPage, login, getHostHomepage, startRegistration, stopRegistration, getAttendanceDetails, downloadPdf, downloadExcel, getHistory, getEnrolledStudents, getRegistrationDetails, getEditStudentsPage, editStudentData, logout,  } = require('../controllers/hostController');
 const { logger } = require('../utils/logger');
+const { decodeJwt } = require('../utils/auth');
+const { authenticateToken } = require('../middleware/authMiddleware');
 
-function ensureLogin(req, res, next) {
-    if (req.session.isLoggedIn) {
-        logger.debug('Host is authenticated');
-        next(); // Proceed to the requested route
-    } else {
-        logger.warn('Unauthorized access to host page');
-        res.redirect('/host/login'); // Redirect to login if not authenticated
-    }
-}
 
-// Route to get the login Page
-router.get('/login',getLoginPage);
 
-// Route to login
-router.post('/login',login);
-
-// Route to logout
-router.get('/logout',logout);
-
-router.use(ensureLogin);
-
-// Route to serve the host homepage
-router.get('/',getHostHomepage);
+router.use(authenticateToken);
 
 // Route to start attendance
 router.get('/start-attendance', startAttendance);
