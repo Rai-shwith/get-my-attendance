@@ -3,6 +3,6 @@ const router = express.Router();
 const loginController = require('../controllers/loginController');
 
 // Router to Register a student
-router.post('/login', loginController.login);
+router.post('/', loginController.login);
 
 module.exports = router;

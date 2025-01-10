@@ -5,6 +5,6 @@ const router = express.Router();
 const registerController = require('../controllers/registerController');
 
 // Router to Register a student
-router.post('/register', registerController.register);
+router.post('/', registerController.register);
 
 module.exports = router;

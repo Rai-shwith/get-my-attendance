@@ -61,19 +61,19 @@ app.use(cors(corsOptions));
 // app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Register Route
-app.use('/', registerRoutes);
+app.use('/register', registerRoutes);
 
 // Login Route
-app.use('/', loginRoutes);
+app.use('/login', loginRoutes);
 
 // Logout Route
-app.use('/',logoutRoutes);
+app.use('/logout',logoutRoutes);
 
 // Profile Route
-app.use('/', profileRoutes);
+app.use('/profile', profileRoutes);
 
 //  Route refresh token
-app.use('/', refreshTokenRoutes);
+app.use('/refresh-token', refreshTokenRoutes);
 
 // Redirect to /host
 app.get('*', (req, res) => {
