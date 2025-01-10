@@ -21,7 +21,7 @@ const loadAttendanceData = () => {
 const saveAttendanceData = () => {
     try {
         fs.writeFileSync(filePaths.attendanceDetailsPath, JSON.stringify(attendanceDetailsCache, null, 2), 'utf8');
-        logger.debug('attendance Data Saved .')
+        logger.info('attendance Data Saved .')
     } catch (error) {
         logger.error('Failed to save attendance data:', error);
     }
