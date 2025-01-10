@@ -215,7 +215,7 @@ exports.getTeacherInfo = async (teacherId) => {
         throw new AppError(40001);
     }
 
-    const query = `SELECT id, name, email, department FROM teachers WHERE id = $1;`;
+    const query = `SELECT t.id, t.name, t.email, d.name FROM teachers t JOIN departments d ON t.department_id = d.id WHERE t.id = $1;`;
     try {
         const result = await pool.query(query, [teacherId]);
         if (result.rows.length == 0){
