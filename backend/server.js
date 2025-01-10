@@ -12,7 +12,7 @@ const attendanceRoutes = require('./routes/attendanceRoutes');
 const { auth, server } = require('./config/env');
 const { logger } = require('./utils/logger');
 const {getBaseURL } = require('./states/general');
-const FileStore = require('session-file-store')(session);
+// const FileStore = require('session-file-store')(session);
 const cors = require('cors');
 const http = require("http");
 const { initSocket } = require('./utils/socketHelper');
@@ -44,21 +44,21 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Session middleware
-app.use(session({
-    secret: auth.secretKey,      // Secret key for signing the cookie
-    resave: false,               // Prevent resaving unmodified sessions
-    saveUninitialized: true,     // Save new, empty sessions
-    cookie: { maxAge: 31104000000 },  // Session expires in 1 year
-    store: new FileStore({
-        path: './sessions',  // Directory to store session files
-        ttl: 31536000000,    // Time-to-live for each session in milliseconds (1 year)
-        retries: 0,          // Number of retries to access the file store
-        cleanupInterval: 86400  // Cleanup interval (every 24 hours)
-    })
-}));
+// // Session middleware
+// app.use(session({
+//     secret: auth.secretKey,      // Secret key for signing the cookie
+//     resave: false,               // Prevent resaving unmodified sessions
+//     saveUninitialized: true,     // Save new, empty sessions
+//     cookie: { maxAge: 31104000000 },  // Session expires in 1 year
+//     store: new FileStore({
+//         path: './sessions',  // Directory to store session files
+//         ttl: 31536000000,    // Time-to-live for each session in milliseconds (1 year)
+//         retries: 0,          // Number of retries to access the file store
+//         cleanupInterval: 86400  // Cleanup interval (every 24 hours)
+//     })
+// }));
 // Static files (e.g., images, styles)
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+// app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Register Route
 app.use('/', registerRoutes);

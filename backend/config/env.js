@@ -28,12 +28,12 @@ module.exports = {
         refreshTokenExpiration: process.env.REFRESH_TOKEN_EXPIRATION, // Refresh token expiration
     },
 
-    // File paths for reports (just an example)
-    filePaths: {
-        studentDetailsPath: process.env.STUDENT_DETAILS_PATH, // Path to student details file
-        attendanceDetailsPath: process.env.ATTENDANCE_DETAILS_PATH // Path to attendance details history
-    },
-
+    // // File paths for reports (just an example)
+    // filePaths: {
+    //     studentDetailsPath: process.env.STUDENT_DETAILS_PATH, // Path to student details file
+    //     attendanceDetailsPath: process.env.ATTENDANCE_DETAILS_PATH // Path to attendance details history
+    // },
+    
     // Other settings (can be added)
     otherSettings: {
         debugMode: process.env.DEBUG_MODE === 'true', // Example of a toggle for debugging
