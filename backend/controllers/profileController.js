@@ -11,7 +11,7 @@ exports.getProfile = async (req, res, next) => {
     } else if (role == "teacher") {
         try {
             const data = await getTeacherInfo(id);
-            return res.json({ success: true, message: "Teacher profile retrieved successfully", data }).send(200);
+            return res.json({ success: true, message: "Teacher profile retrieved successfully", data }).status(200);
         } catch (error) {
             logger.error("Error while giving profile: " + JSON.stringify(error));
             next(error);

@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+/*
 const attendanceController = require('../controllers/attendanceController');
 const { attendance, getStudentById } = require('../models/studentDetails');
 const { getAttendanceState, getRemainingAttendanceTime } = require('../states/attendanceState');
@@ -66,5 +67,5 @@ const checkAttendanceAlreadyGiven = (req, res, next) => {
 // Start attendance
 router.get('/', checkActive,validateRegistration,checkAttendanceAlreadyGiven,attendanceController.giveAttendance);
 
-
+*/
 module.exports = router;

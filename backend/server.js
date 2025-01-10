@@ -1,5 +1,4 @@
 const express = require('express');
-const session = require('express-session'); 
 const path = require('path');
 const hostRoutes = require('./routes/hostRoutes');
 const cookieParser = require('cookie-parser');

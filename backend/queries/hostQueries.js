@@ -213,7 +213,7 @@ exports.getTeacherInfo = async (teacherId) => {
     if (!teacherId){
         logger.error("No teacher Id is provided");
         throw new AppError(40001);
-    }
+}
 
     const query = `SELECT t.id, t.name, t.email, d.name FROM teachers t JOIN departments d ON t.department_id = d.id WHERE t.id = $1;`;
     try {
