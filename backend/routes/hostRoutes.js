@@ -17,7 +17,7 @@ router.get('/start-attendance', startAttendance);
 router.get('/stop-attendance', stopAttendance);
 
 // Route to start registration
-router.get('/start-registration', startRegistration);
+router.post('/start-registration', startRegistration);
 
 // Route to stop registration
 router.get('/stop-registration', stopRegistration);

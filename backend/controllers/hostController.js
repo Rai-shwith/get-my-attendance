@@ -9,6 +9,7 @@ const { addAttendanceEntry, getAttendanceReport, getAttendanceHistorySummary, ge
 const { getBaseURL } = require('../states/general');
 const { sendMessage } = require('../utils/socketHelper');
 const { generateAccessToken, generateRefreshToken } = require('../utils/auth');
+const AppError = require('../utils/AppError');
 
 
 // Route to start attendance
@@ -84,15 +85,14 @@ const stopAttendance = async (req, res) => {
 const startRegistration = (req, res) => {
     logger.info('Entering startRegistration function');
     const defaultInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
-    let interval = parseInt(req.session.interval, 10); // Convert to integer
+    let { interval } = req.body;
     if (isNaN(interval) || interval <= 0) {
         interval = defaultInterval; // Use default if invalid
     }
     const link = getBaseURL() + '/register';
     if (getAttendanceState()) {
-        logger.warn('Failed Register start attempt while attendance is active');
-        res.render('hostRegistrationSection', { interval: 0, link, showNotification: 'Registration is active', otherProcessRunning: true });
-        return;
+        // TODO:handle the case when attendance is already started
+        throw new AppError(50101);
     }
     if (!getRegistrationState()) {
         logger.info('Registration process started by host');
@@ -101,13 +101,11 @@ const startRegistration = (req, res) => {
         setRegistrationState(true);
         const remainingTime = getRemainingRegistrationTime();
         // TODO: pass the actual link of the server
-        res.render('hostRegistrationSection', { interval: remainingTime, link, showNotification: '', otherProcessRunning: false });
-        return;
+        return res.json({interval: remainingTime,link});
     }
     const remainingTime = getRemainingRegistrationTime();
     logger.warn('Failed attendance start attempt while attendance is already active');
-    res.render('hostRegistrationSection', { interval: remainingTime, link, showNotification: 'Registration is already active', otherProcessRunning: false });
-    return;
+    return res.json({interval: remainingTime, link, alreadyStarted:true})
 };
 
 
@@ -118,16 +116,13 @@ const stopRegistration = (req, res) => {
     if (getRegistrationState()) {
         logger.debug("Stopping the Registration Process")
         setRegistrationState(false);
-        saveStudentData();
-        res.redirect("/host/reports/registration");
-        logger.info("Stopping the Registration Process")
-        return;
+        // saveStudentData();
+        // res.redirect("/host/reports/registration");
+        return res.status(204).send("");
     }
     logger.warn("Failed to Stop Registration Process: process not started yet")
-    res.render('error', {
-        status: 404,
-        message: "Registration process is not started yet."
-    })
+    // TODO:Handle not started process
+    throw new AppError(50101);
 }
 
 // Route to serve the login page
