@@ -23,7 +23,8 @@ function createFileWithContent(pathToFile, content) {
     });
 }
 
-
+createFileWithContent('./backend/data/studentDetails/info.json', '{}');
+createFileWithContent('./backend/data/attendanceDetails/attendance.json', '{}');
 createFileWithContent('./.env', `STUDENT_DETAILS_PATH='./backend/data/studentDetails/info.json'
 ATTENDANCE_DETAILS_PATH='./backend/data/attendanceDetails/attendance.json'
 PORT=80
