@@ -65,7 +65,7 @@ app.use(macAddressMiddleware);
 // Redirect to /host
 app.get('/', (req, res) => {
     logger.info('GET /');
-    res.redirect('/host');
+    res.render('landingPage.ejs');
 });
 
 // Use the route handlers
