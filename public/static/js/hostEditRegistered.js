@@ -57,8 +57,8 @@ document.getElementById("submit-btn").addEventListener("click", () => {
     const updatedStudents = {};
     document.querySelectorAll("#student-table tbody tr").forEach((row) => {
         updatedStudents[row.dataset.id]={
-            usn: row.cells[0].textContent,
-            name: row.cells[1].textContent,
+            usn: row.cells[0].textContent.replace('\n','').trim(),
+            name: row.cells[1].textContent.replace('\n','').trim(),
         };
     });
     console.log("Submitting: ", updatedStudents);
