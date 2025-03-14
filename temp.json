@@ -1,0 +1,76 @@
+{
+  "nodes": [
+    {
+      "data": { "id": "A", "label": "A" },
+      "position": { "x": 0, "y": 0 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "D", "label": "D" },
+      "position": { "x": 0, "y": 100 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "B", "label": "B" },
+      "position": { "x": 100, "y": 0 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "G", "label": "G" },
+      "position": { "x": 0, "y": 200 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "E", "label": "E" },
+      "position": { "x": 100, "y": 100 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "C", "label": "C" },
+      "position": { "x": 200, "y": 0 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "H", "label": "H" },
+      "position": { "x": 100, "y": 200 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "F", "label": "F" },
+      "position": { "x": 200, "y": 100 },
+      "classes": ""
+    },
+    {
+      "data": { "id": "I", "label": "I" },
+      "position": { "x": 200, "y": 200 },
+      "classes": ""
+    }
+  ],
+  "edges": [
+    { "data": { "id": "A-back-D", "source": "A", "target": "D" } },
+    { "data": { "id": "A-right-B", "source": "A", "target": "B" } },
+    { "data": { "id": "D-front-A", "source": "D", "target": "A" } },
+    { "data": { "id": "D-back-G", "source": "D", "target": "G" } },
+    { "data": { "id": "D-right-E", "source": "D", "target": "E" } },
+    { "data": { "id": "B-back-E", "source": "B", "target": "E" } },
+    { "data": { "id": "B-left-A", "source": "B", "target": "A" } },
+    { "data": { "id": "B-right-C", "source": "B", "target": "C" } },
+    { "data": { "id": "G-front-D", "source": "G", "target": "D" } },
+    { "data": { "id": "G-right-H", "source": "G", "target": "H" } },
+    { "data": { "id": "E-front-B", "source": "E", "target": "B" } },
+    { "data": { "id": "E-back-H", "source": "E", "target": "H" } },
+    { "data": { "id": "E-left-D", "source": "E", "target": "D" } },
+    { "data": { "id": "E-right-F", "source": "E", "target": "F" } },
+    { "data": { "id": "C-back-F", "source": "C", "target": "F" } },
+    { "data": { "id": "C-left-B", "source": "C", "target": "B" } },
+    { "data": { "id": "H-front-E", "source": "H", "target": "E" } },
+    { "data": { "id": "H-left-G", "source": "H", "target": "G" } },
+    { "data": { "id": "H-right-I", "source": "H", "target": "I" } },
+    { "data": { "id": "F-front-C", "source": "F", "target": "C" } },
+    { "data": { "id": "F-back-I", "source": "F", "target": "I" } },
+    { "data": { "id": "F-left-E", "source": "F", "target": "E" } },
+    { "data": { "id": "I-front-F", "source": "I", "target": "F" } },
+    { "data": { "id": "I-left-H", "source": "I", "target": "H" } }
+  ],
+  "errors": []
+}
