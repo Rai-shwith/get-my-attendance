@@ -150,7 +150,7 @@ const data6 = [
 const data7 = [
   { id: "A", label: "A", front: null, back: "E", left: null, right: "B" },
   { id: "B", label: "B", front: null, back: "F", left: "A", right: "C" },
-  { id: "C", label: "C", front: null, back: null, left: "B", right: "D" },
+  { id: "C", label: "C", front: null, back: null, left: "B", right: "D" }, // cheater
   { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
 
   { id: "E", label: "E", front: "A", back: "I", left: null, right: "F" },
@@ -166,8 +166,7 @@ const data7 = [
   { id: "M", label: "M", front: "I", back: null, left: null, right: "N" },
   { id: "N", label: "N", front: "J", back: null, left: "M", right: "O" },
   { id: "O", label: "O", front: "K", back: null, left: "N", right: "P" },
-  { id: "Z", label: "Z", front: "K", back: null, left: "O", right: "P" }, // Cheater
-  { id: "P", label: "P", front: "L", back: null, left: "Z", right: null },
+  { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
 ];
 
 
@@ -196,10 +195,10 @@ const data8 = [
 ];
 
 
-// NOTE: Break the network
+// NOTE: Break the network in first row
 const data9 = [
   { id: "A", label: "A", front: null, back: "E", left: null, right: "B" },
-  { id: "B", label: "B", front: null, back: "F", left: "A", right: null },
+  { id: "B", label: "B", front: null, back: "F", left: "A", right: null }, // here
   { id: "C", label: "C", front: null, back: "G", left: "B", right: "D" },
   { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
 
@@ -220,7 +219,62 @@ const data9 = [
 ];
 
 
+// NOTE: Break the network in second row
+const data10 = [
+  { id: "A", label: "A", front: null, back: "E", left: null, right: "B" },
+  { id: "B", label: "B", front: null, back: "F", left: "A", right: "C" }, 
+  { id: "C", label: "C", front: null, back: "G", left: "B", right: "D" },
+  { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
+
+  { id: "E", label: "E", front: "A", back: "I", left: null, right: "F" },
+  { id: "F", label: "F", front: "B", back: "J", left: "E", right: null },
+  { id: "G", label: "G", front: "C", back: "K", left: "F", right: "H" },
+  { id: "H", label: "H", front: "D", back: "L", left: "G", right: null },
+
+  { id: "I", label: "I", front: "E", back: "M", left: null, right: "J" },
+  { id: "J", label: "J", front: "F", back: "N", left: "I", right: "K" },
+  { id: "K", label: "K", front: "G", back: "O", left: "J", right: "L" },
+  { id: "L", label: "L", front: "H", back: "P", left: "K", right: null },
+
+  { id: "M", label: "M", front: "I", back: null, left: null, right: "N" },
+  { id: "N", label: "N", front: "J", back: null, left: "M", right: "O" },
+  { id: "O", label: "O", front: "K", back: null, left: "N", right: "P" },
+  { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
+];
+
+
+// NOTE: Extra Node from Right Side and Front  Left and bottom
+const data11 =  [
+  { id: "A", label: "A", front: null, back: "E", left: null, right: "B" },
+  { id: "B", label: "B", front: null, back: "F", left: "A", right: "C" }, 
+  { id: "C", label: "C", front: "X", back: "G", left: "B", right: "D" },
+  { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
+  
+  { id: "X", label: "X", front: null, back: "C", left: null, right: null }, 
+
+  { id: "E", label: "E", front: "A", back: "I", left: "Y", right: "F" },
+  { id: "F", label: "F", front: "B", back: "J", left: "E", right: "G" },
+  { id: "G", label: "G", front: "C", back: "K", left: "F", right: "H" },
+  { id: "H", label: "H", front: "D", back: "L", left: "G", right: "Z" }, // here
+  
+  { id: "Y", label: "Y", front: null, back: null, left: null, right: "E" },
+
+  { id: "Z", label: "Z", front: null, back: null, left: "H", right: null },
+
+  { id: "I", label: "I", front: "E", back: "M", left: null, right: "J" },
+  { id: "J", label: "J", front: "F", back: "N", left: "I", right: "K" },
+  { id: "K", label: "K", front: "G", back: "O", left: "J", right: "L" },
+  { id: "L", label: "L", front: "H", back: "P", left: "K", right: null },
+
+  { id: "M", label: "M", front: "I", back: null, left: null, right: "N" },
+  { id: "N", label: "N", front: "J", back: null, left: "M", right: "O" },
+  { id: "O", label: "O", front: "K", back: null, left: "N", right: "P" },
+  { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
+  
+  // { id: "W", label: "W", front: "O", back: null, left: null, right: null },
+];
 
 
 
-const data = shuffleArray(data9);
+
+const data = shuffleArray(data11);

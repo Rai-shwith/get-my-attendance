@@ -74,7 +74,8 @@ const gapPercent = (percent) => (percent * gap) / 100;
 // Function to get the starting key (TopLeft)
 const getStartingPoint = () => {
   for (let [id, contents] of info) {
-    if (!contents.front && !contents.left) {
+    // Only if the front and left are null and right not null
+    if (!contents.front && !contents.left && contents.right) {
       console.log("Starting Point: ", id);
       return id;
     }
@@ -149,22 +150,22 @@ const getStartingPoint = () => {
 // };
 
 // NOTE: This function travels from left to right and calls the other function to traverse front to back
-const goLeftToRight = (startingPoint, width = 0) => {
+const goLeftToRight = (startingPoint, width = 0, height = 0) => {
   let current = startingPoint;
   // let width = 0; // controls the x axis
   while (current) {
     console.log("main: ", current);
-    goFrontToBack(current, width);
+    goFrontToBack(current, width, height);
     current = info.get(current).right;
     width += gap;
   }
 };
 
 // NOTE: This function traverses from Left to Right
-const goFrontToBack = (startingPoint, width) => {
+const goFrontToBack = (startingPoint, width, height = 0) => {
   console.log("sub: ", startingPoint);
   let current = startingPoint;
-  let y = 0;
+  let y = height;
   let x = width;
   while (current) {
     console.log("Loop elements of sub", current);
@@ -181,10 +182,10 @@ const goFrontToBack = (startingPoint, width) => {
     const left = info.get(current).left;
 
     // check the interconnection between the front and back node if fails mark the both node as red
-    if (back) {
+    if (back ) {
       connectEdge(current, back); // connect the edge to back
       const backContents = info.get(back);
-      addNode(back, backContents.label, x, y + gap);
+     !elements.get(back) && addNode(back, backContents.label, x, y + gap);
       if (backContents.front !== current) {
         console.log("Back: ", back, "Current: ", current);
         markNodeRed(current);
@@ -315,6 +316,10 @@ const markNodeRed = (suspectNodeId) => {
 // Marks the node red color (suspect)
 const markEdgeRed = (sourceId, targetId) => {
   const edgeId = `edge_${sourceId}->${targetId}`;
+  if (!sourceId || !targetId) {
+    console.error("Invalid source or target for edge:", edgeId);
+    return;
+  }
   console.warn("Marking the edge:", edgeId);
   let element = elements.get(edgeId);
   if (!element) {
@@ -352,16 +357,19 @@ const connectDisconnected = () => {
   console.log("-----connectDisconnected-----");
   for (let [nodeId, contents] of info) {
     if (!visitedNode.has(nodeId)) {
+      console.log("validating connection for ", nodeId)
       // If the node is not explored
       // if (!elements.get(nodeId)) connectOrphanNode(nodeId)
       if (!elements.get(nodeId)) {
+        console.log("NO element created for ",nodeId)
         if (isBackLeftExist(nodeId)) {
           console.log("--found broken node", nodeId);
-          const x = getXPositionForOrphan(nodeId);
-          goLeftToRight(nodeId, x);
+          const {x,y} = getXPositionForOrphan(nodeId);
+          goLeftToRight(nodeId, x,y);
           markEdgeRed(contents.left,nodeId)
           continue
         } else {
+          console.log("BackLeft doesn't exist for ",nodeId)
           continue;
         }
       }
@@ -445,7 +453,7 @@ const getXPositionForOrphan = (nodeId) => {
   const backId = currentNode.back;
   const backLeftId = info.get(backId).left;
   const backLeftElement = elements.get(backLeftId);
-  return backLeftElement.position.x + 100;
+  return {x: backLeftElement.position.x + gapPercent(100),y: backLeftElement.position.y - gapPercent(100)};
 };
 
 // NOTE: check if backLeft exist
@@ -454,13 +462,14 @@ const isBackLeftExist = (nodeId) => {
   const currentNode = info.get(nodeId);
   if (currentNode.front) return;
   if (!currentNode) return;
-  if (!elements.get(currentNode.left)) return
+  if (currentNode.left && !elements.get(currentNode.left)) return
   const backId = currentNode.back;
   const backNode = info.get(backId);
   if (!backNode) return;
   const backLeftId = backNode.left;
   const backLeftElement = elements.get(backLeftId);
   if (!backLeftElement) return;
+  console.log("-----BackLeftExist------ for ",nodeId, " is " , backLeftId, " position is ", backLeftElement.position.x, " ", backLeftElement.position.y)
   return backLeftElement.position.x;
 };
 
