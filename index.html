@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #reader {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            display: none;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: green;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>QR Code Scanner</h1>
+    <button id="start-btn">Start Scanning</button>
+    <div id="reader"></div>
+    <p id="result">Result will appear here!</p>
+
+    <script>
+        const startBtn = document.getElementById("start-btn");
+        const readerDiv = document.getElementById("reader");
+        const resultDiv = document.getElementById("result");
+
+        let html5QrCode;
+
+        startBtn.addEventListener("click", () => {
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+
+            readerDiv.style.display = "block";
+            startBtn.style.display = "none"; // Hide button after starting
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // Back camera
+                { fps: 10, qrbox: 250 },
+                (decodedText, decodedResult) => {
+                    resultDiv.innerHTML = `Scanned Result: <strong>${decodedText}</strong>`;
+                    html5QrCode.stop().then(() => {
+                        readerDiv.style.display = "none";
+                        startBtn.style.display = "block"; // Show button again
+                    }).catch((err) => console.error("Stop failed:", err));
+                },
+                (errorMessage) => {
+                    console.warn(`QR Code no match: ${errorMessage}`);
+                }
+            ).catch((err) => {
+                console.error("Error starting QR scanner:", err);
+            });
+        });
+    </script>
+</body>
+</html>

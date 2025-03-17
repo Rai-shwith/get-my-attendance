@@ -266,6 +266,7 @@ const goFrontToBack = (startingPoint, width, height = 0) => {
   }
 };
 
+
 // Inserts Node to the cytoscape elements array at a given x and y coordinates
 const addNode = (id, label, x, y) => {
   const element = {

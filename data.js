@@ -274,7 +274,29 @@ const data11 =  [
   // { id: "W", label: "W", front: "O", back: null, left: null, right: null },
 ];
 
+// NOTE: Break the network in many points
+const data12 = [
+  { id: "A", label: "A", front: null, back: "E", left: null, right: "B" },
+  { id: "B", label: "B", front: null, back: "F", left: "A", right: "C" }, 
+  { id: "C", label: "C", front: null, back: "G", left: null, right: "D" },
+  { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
+
+  { id: "E", label: "E", front: null, back: "I", left: null, right: "F" },
+  { id: "F", label: "F", front: "B", back: "J", left: "E", right: null },
+  { id: "G", label: "G", front: "C", back: "K", left: "F", right: "H" },
+  { id: "H", label: "H", front: "D", back: null, left: "G", right: null },
+
+  { id: "I", label: "I", front: null, back: "M", left: null, right: "J" },
+  { id: "J", label: "J", front: "F", back: "N", left: "I", right: "K" },
+  { id: "K", label: "K", front: "G", back: "O", left: null, right: "L" },
+  { id: "L", label: "L", front: "H", back: null, left: "K", right: null },
+
+  { id: "M", label: "M", front: "I", back: null, left: null, right: "N" },
+  { id: "N", label: "N", front: null, back: null, left: null, right: "O" },
+  { id: "O", label: "O", front: "K", back: null, left: "N", right: "P" },
+  { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
+];
 
 
 
-const data = shuffleArray(data11);
+const data = shuffleArray(data12);
