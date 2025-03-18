@@ -21,6 +21,8 @@ const data1 = [
   { id: "D", label: "D", front: "A", back: null, left: null, right: "E" },
   { id: "E", label: "E", front: "B", back: null, left: "D", right: "F" },
   { id: "F", label: "F", front: "C", back: null, left: "E", right: null },
+
+  { id: "Z", label: "Z", front: null, back: null, left: null, right: null },
 ];
 
 // NOTE: Ideal data 4 x 4
@@ -299,4 +301,4 @@ const data12 = [
 
 
 
-const data = shuffleArray(data12);
+const data = shuffleArray(data1);

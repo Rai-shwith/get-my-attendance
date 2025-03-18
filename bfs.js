@@ -283,12 +283,14 @@ const connectEdge = (sourceId, targetId) => {
   elements.set(edgeId, element);
 };
 
+let i = 0;
 for (let [key] of info) {
   if (elements.get(key)) continue;
   console.log(key);
   // TODO: Add dynamic cy components for each key because in bfs every connected node is a connected
   console.log("Key Node---<>", key);
-  addNode(key, info.get(key).label, 0, 0, null);
+  addNode(key, info.get(key).label, i*10*gap, 0, null);
+  i++;
   connectBond(key);
   while (queue.length) {
     // console.log("Queue ----> ", queue);
