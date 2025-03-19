@@ -83,6 +83,10 @@ const gap = 150;
 // provides the percentage w r t gap
 const gapPercent = (percent) => (percent * gap) / 100;
 
+//NOTE: The max Right and Front position of a node in the network
+let maxRight = 0;
+let maxFront = 0;
+
 const getAValidDirection = (nodeId) => {
   console.log("-----getAValidDirection------", nodeId);
   const node = info.get(nodeId);
@@ -136,12 +140,31 @@ const markNodeRed = (suspectNodeId) => {
 
 // Inserts Node to the cytoscape elements array at a given x and y coordinates
 //TODO: improve this
-const addNode = (id, label, x, y,addedByNode, parentDirection = null) => {
+const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
   // If the node already exists, return
   // Validate: If the the student gives false info of a same student
   if (elements.get(id)) return;
   if (!parentDirection) console.log("No parent direction for ", id);
   if (positionMap.has(`${x},${y}`)) {
+    if (!checkNetworkExist(id, positionMap.get(`${x},${y}`).id)) {
+      console.error(
+        "Overlap detected for ",
+        id,
+        "with (below)",
+        positionMap.get(`${x},${y}`).id
+      );
+      elements.set(id, {
+        group: "nodes",
+        data: { id, label },
+        position: { x: x + gap, y: maxFront },
+      });
+      const toBeShifted = visitedNode.has(id);
+      console.log("id: ", id);
+      console.log("blbla ", toBeShifted);
+      return shiftNetworkToRight(id);
+      // if (toBeShifted) return shiftNetworkToRight(id);
+      // return shiftNetworkToRight(positionMap.get(`${x},${y}`).id);
+    }
     const FixPrimaryOverlap = positionMap.get(`${x},${y}`).FixPrimaryOverlap;
     if (!FixPrimaryOverlap) {
       const belowElementId = positionMap.get(`${x},${y}`).id;
@@ -159,7 +182,12 @@ const addNode = (id, label, x, y,addedByNode, parentDirection = null) => {
     }
     console.log("ParentDirection is ", parentDirection);
     if (!parentDirection)
-      console.error("Parent Direction is missing. And Nodes are overlapping. For id: ",id,"added by: ",addedByNode);
+      console.error(
+        "Parent Direction is missing. And Nodes are overlapping. For id: ",
+        id,
+        "added by: ",
+        addedByNode
+      );
     let laterData;
     if (parentDirection == "front")
       laterData = { id, x, y: y + gapPercent(50), label };
@@ -182,6 +210,7 @@ const addNode = (id, label, x, y,addedByNode, parentDirection = null) => {
   console.log("Added Node", id);
   visitedNode.add(id);
   positionMap.set(`${x},${y}`, { FixPrimaryOverlap: false, id });
+  return true;
 };
 
 // Marks the node red color (suspect)
@@ -229,8 +258,18 @@ const connectBond = (nodeId) => {
     // console.log("front", front);
     connectEdge(nodeId, front);
     if (!visitedNode.has(front)) {
-      addNode(front, info.get(front).label, x, y - gap,nodeId, "front");
-      queue.push(front);
+      const success = addNode(
+        front,
+        info.get(front).label,
+        x,
+        y - gap,
+        nodeId,
+        "front"
+      );
+      if (success) {
+        if (y - gap < maxFront) maxFront -= gap;
+        queue.push(front);
+      }
     }
   }
   if (back) {
@@ -240,8 +279,8 @@ const connectBond = (nodeId) => {
     connectEdge(nodeId, back);
     // validateMissingEdges(nodeId,back,'y');
     if (!visitedNode.has(back)) {
-      addNode(back, info.get(back).label, x, y + gap,nodeId, "back");
-      queue.push(back);
+      addNode(back, info.get(back).label, x, y + gap, nodeId, "back") &&
+        queue.push(back);
     }
   }
   if (left) {
@@ -251,8 +290,8 @@ const connectBond = (nodeId) => {
     connectEdge(nodeId, left);
     // validateMissingEdges(nodeId,left,'x');
     if (!visitedNode.has(left)) {
-      addNode(left, info.get(left).label, x - gap, y,nodeId, "left");
-      queue.push(left);
+      addNode(left, info.get(left).label, x - gap, y, nodeId, "left") &&
+        queue.push(left);
     }
   }
   if (right) {
@@ -262,9 +301,76 @@ const connectBond = (nodeId) => {
     connectEdge(nodeId, right);
     // validateMissingEdges(nodeId,right,'x');
     if (!visitedNode.has(right)) {
-      addNode(right, info.get(right).label, x + gap, y,nodeId, "right");
-      queue.push(right);
+      const success = addNode(
+        right,
+        info.get(right).label,
+        x + gap,
+        y,
+        nodeId,
+        "right"
+      );
+      if (success) {
+        if (x + gap > maxRight) maxRight += gap;
+        queue.push(right);
+      }
     }
+  }
+};
+
+// NOTE: Shifts the entire network to the right side with  gap
+const shiftNetworkToRight = (nodeId) => {
+  console.log("------shiftNetworkToRight-----: ", nodeId);
+  const Queue = [nodeId];
+  const visited = new Set();
+  while (Queue.length) {
+    const nodeId = Queue.shift();
+    visited.add(nodeId);
+    const { front, back, left, right } = info.get(nodeId);
+    if (nodeId == "A") {
+      console.log(front, elements.get(front));
+      console.log(back, elements.get(back));
+      console.log(left, elements.get(left));
+      console.log(right, elements.get(right));
+    // TODO: fix here
+      return
+
+    }
+    if (front && !visited.has(front) && elements.get(front)) Queue.push(front);
+    if (back && !visited.has(back) && elements.get(back)) Queue.push(back);
+    if (left && !visited.has(left) && elements.get(left)) Queue.push(left);
+    if (right && !visited.has(right) && elements.get(right)) Queue.push(right);
+    const ele = elements.get(nodeId);
+    console.log("---before---");
+    console.log("x:", ele.position.x);
+    console.log("y:", ele.position.y);
+    positionMap.delete(`${ele.position.x},${ele.position.y}`);
+    ele.position.x += gap;
+    console.log("---after---");
+    console.log("x:", ele.position.x);
+    console.log("y:", ele.position.y);
+    elements.set(nodeId, ele);
+    positionMap.set(`${ele.position.x},${ele.position.y}`, {
+      FixPrimaryOverlap: false,
+      nodeId,
+    });
+  }
+  console.log("shifted :", visited);
+  return true;
+};
+
+// NOTE: Returns true if 2 nodes are connected in the network
+const checkNetworkExist = (nodeId1, nodeId2) => {
+  const Queue = [nodeId1];
+  const visited = new Set();
+  while (Queue.length) {
+    const nodeId = Queue.shift();
+    if (nodeId == nodeId2) return true;
+    visited.add(nodeId);
+    const { front, back, left, right } = info.get(nodeId);
+    if (front && !visited.has(front)) Queue.push(front);
+    if (back && !visited.has(back)) Queue.push(back);
+    if (left && !visited.has(left)) Queue.push(left);
+    if (right && !visited.has(right)) Queue.push(right);
   }
 };
 
@@ -283,25 +389,32 @@ const connectEdge = (sourceId, targetId) => {
   elements.set(edgeId, element);
 };
 
-let i = 0;
+let flag = false;
 for (let [key] of info) {
   if (elements.get(key)) continue;
   console.log(key);
   // TODO: Add dynamic cy components for each key because in bfs every connected node is a connected
-  console.log("Key Node---<>", key);
-  addNode(key, info.get(key).label, i*10*gap, 0, null);
-  i++;
+  console.log("Key Node <----------------------->", key);
+  console.log("MaxRight: ", maxRight);
+  console.log("MaxFront: ", maxFront);
+  addNode(key, info.get(key).label, maxRight, 0, null, null);
   connectBond(key);
   while (queue.length) {
     // console.log("Queue ----> ", queue);
     const nodeId = queue.shift();
     console.log("NodeID------->", nodeId);
     connectBond(nodeId);
+    if (nodeId == "B") {
+      console.log("I broke the loop");
+      flag = true;
+      break;
+    }
   }
+  if (flag) break;
 }
 
 const addNodeLater = () => {
-  console.log(elementsLater)
+  console.log(elementsLater);
   for (let { id, x, y } of elementsLater) {
     const node = cy.getElementById(id);
     node.position({ x, y });
@@ -321,3 +434,15 @@ const cy = cytoscape({
 });
 
 addNodeLater();
+
+function logNodePosition(cy) {
+  cy.on("tap", "node", function (event) {
+    let node = event.target;
+    let position = node.position();
+    console.log(
+      `Node ${node.id()} clicked at x: ${position.x}, y: ${position.y}`
+    );
+  });
+}
+
+logNodePosition(cy);
