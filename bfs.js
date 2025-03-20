@@ -79,13 +79,20 @@ const style = [
 ];
 
 //NOTE: The gap between the nodes
-const gap = 150;
+const gap = 100;
 // provides the percentage w r t gap
 const gapPercent = (percent) => (percent * gap) / 100;
 
 //NOTE: The max Right and Front position of a node in the network
 let maxRight = 0;
 let maxFront = 0;
+let maxCurrentLeft;
+
+const setElement = (id,element) =>{
+  // if (id == "A") abc
+  elements.set(id,element)
+}
+
 
 const getAValidDirection = (nodeId) => {
   console.log("-----getAValidDirection------", nodeId);
@@ -115,13 +122,13 @@ const shiftNode = (id, x, y, label = null) => {
       data: { id, label },
       position: { x, y },
     };
-    elements.set(id, element);
+    setElement(id, element);
     console.log("Added Node from shiftNode", id);
     visitedNode.add(id);
     return;
   }
   element.position = { x, y };
-  elements.set(id, element);
+  setElement(id, element);
 };
 
 // Marks the node red color (suspect)
@@ -133,7 +140,7 @@ const markNodeRed = (suspectNodeId) => {
 
   if (element) {
     element.classes = "red-node";
-    elements.set(suspectNodeId, element); // Update the element in the map
+    setElement(suspectNodeId, element); // Update the element in the map
   } else {
   }
 };
@@ -146,28 +153,31 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
   if (elements.get(id)) return;
   if (!parentDirection) console.log("No parent direction for ", id);
   if (positionMap.has(`${x},${y}`)) {
-    if (!checkNetworkExist(id, positionMap.get(`${x},${y}`).id)) {
+    if (!checkNetworkExist(id, positionMap.get(`${x},${y}`).nodeId)) {
       console.error(
         "Overlap detected for ",
         id,
         "with (below)",
-        positionMap.get(`${x},${y}`).id
+        positionMap.get(`${x},${y}`).nodeId,
+        "parentDirection: ",
+        parentDirection,
+        " at position ",
+        `${x},${y}`
       );
-      elements.set(id, {
+      console.log(positionMap);
+      // if (!parentDirection || parentDirection == "left") maxCurrentLeft -=gap
+      setElement(id, {
         group: "nodes",
         data: { id, label },
-        position: { x: x + gap, y: maxFront },
+        position: { x, y },
       });
-      const toBeShifted = visitedNode.has(id);
-      console.log("id: ", id);
-      console.log("blbla ", toBeShifted);
-      return shiftNetworkToRight(id);
+      return true;
       // if (toBeShifted) return shiftNetworkToRight(id);
       // return shiftNetworkToRight(positionMap.get(`${x},${y}`).id);
     }
     const FixPrimaryOverlap = positionMap.get(`${x},${y}`).FixPrimaryOverlap;
     if (!FixPrimaryOverlap) {
-      const belowElementId = positionMap.get(`${x},${y}`).id;
+      const belowElementId = positionMap.get(`${x},${y}`).nodeId;
       console.log("overlap: ", belowElementId, "<-->", id);
       const direction = getAValidDirection(belowElementId);
       console.log("valid direction is ------->", direction);
@@ -178,7 +188,7 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
       if (direction == "left") shiftNode(belowElementId, x - gapPercent(50), y);
       if (direction == "right")
         shiftNode(belowElementId, x + gapPercent(50), y);
-      positionMap.set(`${x},${y}`, { FixPrimaryOverlap: true, id });
+      positionMap.set(`${x},${y}`, { FixPrimaryOverlap: true, nodeId: id });
     }
     console.log("ParentDirection is ", parentDirection);
     if (!parentDirection)
@@ -205,11 +215,11 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
     data: { id, label },
     position: { x, y },
   };
-  elements.set(id, element);
+  setElement(id, element);
   addedBy.set(id, addedByNode);
   console.log("Added Node", id);
   visitedNode.add(id);
-  positionMap.set(`${x},${y}`, { FixPrimaryOverlap: false, id });
+  positionMap.set(`${x},${y}`, { FixPrimaryOverlap: false, nodeId: id });
   return true;
 };
 
@@ -227,7 +237,7 @@ const markEdgeRed = (sourceId, targetId) => {
 
   element.classes = "red-edge";
 
-  elements.set(edgeId, element); // Update the element in the map
+  setElement(edgeId, element); // Update the element in the map
 };
 
 // NOTE: Function Validates if there is connection mismatch between edges or missing edges
@@ -290,8 +300,21 @@ const connectBond = (nodeId) => {
     connectEdge(nodeId, left);
     // validateMissingEdges(nodeId,left,'x');
     if (!visitedNode.has(left)) {
-      addNode(left, info.get(left).label, x - gap, y, nodeId, "left") &&
+      const success = addNode(
+        left,
+        info.get(left).label,
+        x - gap,
+        y,
+        nodeId,
+        "left"
+      );
+      if (success) {
+        console.log("Left minus gap si ", x - gap, " ", x);
+        maxCurrentLeft += gap;
+        // if (x - gap < maxCurrentLeft) {
+        // }
         queue.push(left);
+      }
     }
   }
   if (right) {
@@ -316,25 +339,31 @@ const connectBond = (nodeId) => {
     }
   }
 };
-
 // NOTE: Shifts the entire network to the right side with  gap
-const shiftNetworkToRight = (nodeId) => {
-  console.log("------shiftNetworkToRight-----: ", nodeId);
-  const Queue = [nodeId];
+const shiftNetworkToRight = (nodeIdPrimary, shiftSize) => {
+  console.log(
+    "------shiftNetworkToRight-----: ",
+    nodeIdPrimary,
+    " Shift Size : ",
+    shiftSize
+  );
+  const Queue = [nodeIdPrimary];
   const visited = new Set();
   while (Queue.length) {
     const nodeId = Queue.shift();
+    console.log("---Node---", nodeId);
+    console.log("Visited Node",visited);
+    if (visited.has(nodeId)) continue;
     visited.add(nodeId);
     const { front, back, left, right } = info.get(nodeId);
-    if (nodeId == "A") {
-      console.log(front, elements.get(front));
-      console.log(back, elements.get(back));
-      console.log(left, elements.get(left));
-      console.log(right, elements.get(right));
-    // TODO: fix here
-      return
-
-    }
+    // if (nodeId == "A") {
+    //   console.log(front, elements.get(front));
+    //   console.log(back, elements.get(back));
+    //   console.log(left, elements.get(left));
+    //   console.log(right, elements.get(right));
+    //   // TODO: fix here
+    //   return;
+    // }
     if (front && !visited.has(front) && elements.get(front)) Queue.push(front);
     if (back && !visited.has(back) && elements.get(back)) Queue.push(back);
     if (left && !visited.has(left) && elements.get(left)) Queue.push(left);
@@ -344,11 +373,11 @@ const shiftNetworkToRight = (nodeId) => {
     console.log("x:", ele.position.x);
     console.log("y:", ele.position.y);
     positionMap.delete(`${ele.position.x},${ele.position.y}`);
-    ele.position.x += gap;
+    ele.position.x += shiftSize;
     console.log("---after---");
     console.log("x:", ele.position.x);
     console.log("y:", ele.position.y);
-    elements.set(nodeId, ele);
+    setElement(nodeId, ele);
     positionMap.set(`${ele.position.x},${ele.position.y}`, {
       FixPrimaryOverlap: false,
       nodeId,
@@ -386,30 +415,35 @@ const connectEdge = (sourceId, targetId) => {
     group: "edges",
     data: { id: edgeId, source: sourceId, target: targetId },
   };
-  elements.set(edgeId, element);
+  setElement(edgeId, element);
 };
 
 let flag = false;
 for (let [key] of info) {
   if (elements.get(key)) continue;
+  maxCurrentLeft = 0;
   console.log(key);
   // TODO: Add dynamic cy components for each key because in bfs every connected node is a connected
   console.log("Key Node <----------------------->", key);
   console.log("MaxRight: ", maxRight);
   console.log("MaxFront: ", maxFront);
-  addNode(key, info.get(key).label, maxRight, 0, null, null);
+  console.log("MaxCurrentLeft: ", maxCurrentLeft);
+  addNode(key, info.get(key).label, maxRight, maxFront, null, null);
   connectBond(key);
   while (queue.length) {
-    // console.log("Queue ----> ", queue);
+    console.log("MaxCurrentLeft: ", maxCurrentLeft);
+    console.log("Queue ----> ", queue);
     const nodeId = queue.shift();
     console.log("NodeID------->", nodeId);
     connectBond(nodeId);
-    if (nodeId == "B") {
+    // if (nodeId == "bla") {
+    if (false) {
       console.log("I broke the loop");
       flag = true;
       break;
     }
   }
+  shiftNetworkToRight(key, maxCurrentLeft);
   if (flag) break;
 }
 
