@@ -89,17 +89,16 @@ let maxFront = 0;
 let maxCurrentLeft;
 let currentStartX;
 
-const setElement = (id,element) =>{
+const setElement = (id, element) => {
   // if (id == "A") abc
-  elements.set(id,element)
-}
-
+  elements.set(id, element);
+};
 
 const getAValidDirection = (nodeId) => {
   console.log("-----getAValidDirection------", nodeId);
-  const node = info.get(nodeId);
   const addedByNode = addedBy.get(nodeId);
   console.log("Added By Node", addedByNode);
+  if (!addedByNode) return null;
   if (!addedBy) {
     throw new Error("Node not found for (overlapped)", nodeId);
   }
@@ -172,23 +171,27 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
         position: { x, y },
       });
       return true;
-      // if (toBeShifted) return shiftNetworkToRight(id);
-      // return shiftNetworkToRight(positionMap.get(`${x},${y}`).id);
+      // if (toBeShifted) return shiftNetwork(id);
+      // return shiftNetwork(positionMap.get(`${x},${y}`).id);
     }
     const FixPrimaryOverlap = positionMap.get(`${x},${y}`).FixPrimaryOverlap;
     if (!FixPrimaryOverlap) {
       const belowElementId = positionMap.get(`${x},${y}`).nodeId;
       console.log("overlap: ", belowElementId, "<-->", id);
       const direction = getAValidDirection(belowElementId);
-      console.log("valid direction is ------->", direction);
-      positionMap.set(`${x},${y}`, true);
-      if (direction == "front")
-        shiftNode(belowElementId, x, y - gapPercent(50));
-      if (direction == "back") shiftNode(belowElementId, x, y + gapPercent(50));
-      if (direction == "left") shiftNode(belowElementId, x - gapPercent(50), y);
-      if (direction == "right")
-        shiftNode(belowElementId, x + gapPercent(50), y);
-      positionMap.set(`${x},${y}`, { FixPrimaryOverlap: true, nodeId: id });
+      if (direction) {
+        console.log("valid direction is ------->", direction);
+        positionMap.set(`${x},${y}`, true);
+        if (direction == "front")
+          shiftNode(belowElementId, x, y - gapPercent(50));
+        if (direction == "back")
+          shiftNode(belowElementId, x, y + gapPercent(50));
+        if (direction == "left")
+          shiftNode(belowElementId, x - gapPercent(50), y);
+        if (direction == "right")
+          shiftNode(belowElementId, x + gapPercent(50), y);
+        positionMap.set(`${x},${y}`, { FixPrimaryOverlap: true, nodeId: id });
+      }
     }
     console.log("ParentDirection is ", parentDirection);
     if (!parentDirection)
@@ -200,14 +203,14 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
       );
     let laterData;
     if (parentDirection == "front")
-      laterData = {  x, y: y + gapPercent(50), label };
+      laterData = { x, y: y + gapPercent(50), label };
     if (parentDirection == "back")
       laterData = { x, y: y - gapPercent(50), label };
     if (parentDirection == "left")
       laterData = { x: x + gapPercent(50), y, label };
     if (parentDirection == "right")
       laterData = { x: x - gapPercent(50), y, label };
-    elementsLater.set(id,laterData);
+    elementsLater.set(id, laterData);
   }
 
   const element = {
@@ -309,14 +312,17 @@ const connectBond = (nodeId) => {
         "left"
       );
       if (success) {
-        console.warn("currentStartX",currentStartX)
-        console.warn("maxCurrentLeft",maxCurrentLeft)
-        console.warn("X",x)
-        console.warn("X - GAP",x - gap)
-        console.warn("Y",y)
-        if ((x - gap) < currentStartX && currentStartX - x + gap > maxCurrentLeft ) {
-          maxCurrentLeft = currentStartX - x +gap;
-          console.error(maxCurrentLeft)
+        console.warn("currentStartX", currentStartX);
+        console.warn("maxCurrentLeft", maxCurrentLeft);
+        console.warn("X", x);
+        console.warn("X - GAP", x - gap);
+        console.warn("Y", y);
+        if (
+          x - gap < currentStartX &&
+          currentStartX - x + gap > maxCurrentLeft
+        ) {
+          maxCurrentLeft = currentStartX - x + gap;
+          console.error(maxCurrentLeft);
         }
         queue.push(left);
       }
@@ -345,19 +351,19 @@ const connectBond = (nodeId) => {
   }
 };
 // NOTE: Shifts the entire network to the right side with  gap
-const shiftNetworkToRight = (nodeIdPrimary, shiftSize) => {
+const shiftNetwork = (nodeIdPrimary, rightShiftSize, bottomShiftSize) => {
   console.log(
-    "------shiftNetworkToRight-----: ",
+    "------shiftNetwork-----: ",
     nodeIdPrimary,
     " Shift Size : ",
-    shiftSize
+    rightShiftSize
   );
   const Queue = [nodeIdPrimary];
   const visited = new Set();
   while (Queue.length) {
     const nodeId = Queue.shift();
     console.log("---Node---", nodeId);
-    console.log("Visited Node",visited);
+    console.log("Visited Node", visited);
     if (visited.has(nodeId)) continue;
     visited.add(nodeId);
     const { front, back, left, right } = info.get(nodeId);
@@ -378,7 +384,8 @@ const shiftNetworkToRight = (nodeIdPrimary, shiftSize) => {
     console.log("x:", ele.position.x);
     console.log("y:", ele.position.y);
     positionMap.delete(`${ele.position.x},${ele.position.y}`);
-    ele.position.x += shiftSize;
+    ele.position.x += rightShiftSize;
+    ele.position.y += bottomShiftSize;
     console.log("---after---");
     console.log("x:", ele.position.x);
     console.log("y:", ele.position.y);
@@ -387,11 +394,15 @@ const shiftNetworkToRight = (nodeIdPrimary, shiftSize) => {
       FixPrimaryOverlap: false,
       nodeId,
     });
-    if (elementsLater.has(nodeId)){
-      const laterEle = elementsLater.get(nodeId)
-      elementsLater.set(nodeId,{x:ele.position.x,y:laterEle.y,label:laterEle.label})
+    if (elementsLater.has(nodeId)) {
+      const laterEle = elementsLater.get(nodeId);
+      elementsLater.set(nodeId, {
+        x: ele.position.x,
+        y: ele.position.y,
+        label: laterEle.label,
+      });
     }
-    if (ele.position.x > maxRight) maxRight = ele.position.x
+    if (ele.position.x > maxRight) maxRight = ele.position.x;
   }
   console.log("shifted :", visited);
   return true;
@@ -428,18 +439,18 @@ const connectEdge = (sourceId, targetId) => {
   setElement(edgeId, element);
 };
 
-let flag = false;
 for (let [key] of info) {
   if (elements.get(key)) continue;
   currentStartX = maxRight;
   maxCurrentLeft = 0;
+  maxFront = 0;
   console.log(key);
   // TODO: Add dynamic cy components for each key because in bfs every connected node is a connected
   console.log("Key Node <----------------------->", key);
   console.log("MaxRight: ", maxRight);
   console.log("MaxFront: ", maxFront);
   console.log("MaxCurrentLeft: ", maxCurrentLeft);
-  addNode(key, info.get(key).label, maxRight, maxFront, null, null);
+  addNode(key, info.get(key).label, maxRight + 100, 0, null, null);
   connectBond(key);
   while (queue.length) {
     console.log("MaxCurrentLeft: ", maxCurrentLeft);
@@ -447,20 +458,13 @@ for (let [key] of info) {
     const nodeId = queue.shift();
     console.log("NodeID------->", nodeId);
     connectBond(nodeId);
-    // if (nodeId == "bla") {
-    if (false) {
-      console.log("I broke the loop");
-      flag = true;
-      break;
-    }
   }
-  shiftNetworkToRight(key, maxCurrentLeft + gap);
-  if (flag) break;
+  shiftNetwork(key, maxCurrentLeft + gap, -maxFront);
 }
 
 const addNodeLater = () => {
   console.log(elementsLater);
-  for (let [id,{x,y}] of elementsLater) {
+  for (let [id, { x, y }] of elementsLater) {
     const node = cy.getElementById(id);
     node.position({ x, y });
     node.classes("red-node");

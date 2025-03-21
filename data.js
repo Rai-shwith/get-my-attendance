@@ -101,13 +101,41 @@ const data4 = [
   { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
 
   { id: "E", label: "E", front: "A", back: "I", left: null, right: "F" },
+  { id: "F", label: "F", front: "B", back: "J", left: "E", right: "Z" },
+  { id: "G", label: "G", front: "C", back: "K", left: "F", right: "H" },
+  { id: "H", label: "H", front: "D", back: "L", left: "G", right: null },
+
+  { id: "I", label: "I", front: "E", back: "M", left: null, right: "J" },
+
+  { id: "Z", label: "Z", front: null, back: null, left: "E", right: "F" }, // Cheater
+
+  { id: "J", label: "J", front: "F", back: "N", left: "I", right: "K" },
+  { id: "K", label: "K", front: "G", back: "O", left: "J", right: "L" },
+  { id: "L", label: "L", front: "H", back: "P", left: "K", right: null },
+
+  { id: "M", label: "M", front: "I", back: null, left: null, right: "N" },
+  { id: "N", label: "N", front: "J", back: null, left: "M", right: "O" },
+  { id: "O", label: "O", front: "K", back: null, left: "N", right: "P" },
+  { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
+];
+
+// NOTE: Cheater data in  4x4  Z is in between I and J
+const data45 = [
+  { id: "A", label: "A", front: null, back: "E", left: null, right: "B" },
+  { id: "B", label: "B", front: null, back: "F", left: "A", right: "C" },
+  { id: "C", label: "C", front: null, back: "G", left: "B", right: "D" },
+  { id: "D", label: "D", front: null, back: "H", left: "C", right: null },
+
+  { id: "E", label: "E", front: "A", back: "I", left: null, right: "F" },
   { id: "F", label: "F", front: "B", back: "J", left: "E", right: "G" },
   { id: "G", label: "G", front: "C", back: "K", left: "F", right: "H" },
   { id: "H", label: "H", front: "D", back: "L", left: "G", right: null },
 
-  { id: "I", label: "I", front: "E", back: "M", left: null, right: "Z" },
-  { id: "Z", label: "Z", front: "E", back: "M", left: "I", right: "J" }, // Cheater
-  { id: "J", label: "J", front: "F", back: "N", left: "Z", right: "K" },
+  { id: "I", label: "I", front: "E", back: "M", left: null, right: "J" },
+
+  { id: "Z", label: "Z", front: null, back: null, left: "E", right: "F" }, // Cheater
+
+  { id: "J", label: "J", front: "F", back: "N", left: "I", right: "K" },
   { id: "K", label: "K", front: "G", back: "O", left: "J", right: "L" },
   { id: "L", label: "L", front: "H", back: "P", left: "K", right: null },
 
@@ -312,8 +340,45 @@ const data12 = [
   { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
 ];
 
-// const data = shuffleArray(data4)
+const data13 = [
+  { id: "A", label: "A", front: null, back: null, left: null, right: null }, // Cheater
+  { id: "B", label: "B", front: null, back: null, left: null, right: null }, // Cheater
+  { id: "C", label: "C", front: null, back: null, left: null, right: null }, // Cheater
+  { id: "D", label: "D", front: null, back: null, left: null, right: null }, // Cheater
+  { id: "E", label: "E", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "F", label: "F", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "G", label: "G", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "H", label: "H", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "I", label: "I", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "J", label: "J", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "K", label: "K", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "L", label: "L", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "M", label: "M", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "N", label: "N", front: null, back: null, left: null, right: null }, // Cheater
+  // { id: "O", label: "O", front: null, back: null, left: null, right: null }, // Cheater
+];
 
-const data = shuffleArray(data1);
+let data;
+let shuffle = true;
+
+// NOTE: Function to set the data with shuffle option
+const setData = (inputData) => {
+  if (shuffle) data = shuffleArray(inputData);
+  else data = inputData;
+};
+
+// setData(data0) // 2 X 3 with  1 unconnected node
+// setData(data2) // 4 x 4 network
+// setData(data3) // 4 x 4 network with 2 nodes at the last row
+// setData(data4); // 4 x 4 with Z node tried to enter himself and F node helped him
+// setData(data45); // 4 x 4 with Z node tried to enter himself
+// setData(data5); // 4 X 4 with Z node tried to enter at the corner
+// setData(data6) // same as before but the direction is different
+// setData(data7) // missing edge from C to G 
+// setData(data8) // missing edge and Z node error
+// setData(data11) // extending network from all 4 sides
+// setData(data12) // multiple missing edges
+// setData(data13) // multiple isolated single nodes
+setData(data1) // three 2 x 3 isolated networks
 
 console.log(data);
