@@ -314,15 +314,6 @@ const data12 = [
 
 // const data = shuffleArray(data4)
 
-const data = [
-  { id: "A", label: "A", front: null, back: "D", left: null, right: "B" },
-  { id: "B", label: "B", front: null, back: "E", left: "A", right: "C" },
-  { id: "C", label: "C", front: null, back: "F", left: "B", right: null },
-  { id: "D", label: "D", front: "A", back: null, left: null, right: "Z" },
-  { id: "E", label: "E", front: "B", back: null, left: "Z", right: "F" },
-  { id: "F", label: "F", front: "C", back: null, left: "E", right: null },
-
-  { id: "Z", label: "Z", front: null, back: null, left: "D", right: "E" },
-];
+const data = shuffleArray(data1);
 
 console.log(data);

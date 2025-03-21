@@ -17,7 +17,7 @@ const positionMap = new Map();
 const elements = new Map();
 
 // NOTE: Elements to add later in cytoScape
-const elementsLater = new Array();
+const elementsLater = new Map();
 
 // NOTE: Keep track of who added who because to shift the conflicted nodes
 const addedBy = new Map();
@@ -79,7 +79,7 @@ const style = [
 ];
 
 //NOTE: The gap between the nodes
-const gap = 100;
+const gap = 150;
 // provides the percentage w r t gap
 const gapPercent = (percent) => (percent * gap) / 100;
 
@@ -200,14 +200,14 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
       );
     let laterData;
     if (parentDirection == "front")
-      laterData = { id, x, y: y + gapPercent(50), label };
+      laterData = {  x, y: y + gapPercent(50), label };
     if (parentDirection == "back")
-      laterData = { id, x, y: y - gapPercent(50), label };
+      laterData = { x, y: y - gapPercent(50), label };
     if (parentDirection == "left")
-      laterData = { id, x: x + gapPercent(50), y, label };
+      laterData = { x: x + gapPercent(50), y, label };
     if (parentDirection == "right")
-      laterData = { id, x: x - gapPercent(50), y, label };
-    elementsLater.push(laterData);
+      laterData = { x: x - gapPercent(50), y, label };
+    elementsLater.set(id,laterData);
   }
 
   const element = {
@@ -387,6 +387,10 @@ const shiftNetworkToRight = (nodeIdPrimary, shiftSize) => {
       FixPrimaryOverlap: false,
       nodeId,
     });
+    if (elementsLater.has(nodeId)){
+      const laterEle = elementsLater.get(nodeId)
+      elementsLater.set(nodeId,{x:ele.position.x,y:laterEle.y,label:laterEle.label})
+    }
     if (ele.position.x > maxRight) maxRight = ele.position.x
   }
   console.log("shifted :", visited);
@@ -456,7 +460,7 @@ for (let [key] of info) {
 
 const addNodeLater = () => {
   console.log(elementsLater);
-  for (let { id, x, y } of elementsLater) {
+  for (let [id,{x,y}] of elementsLater) {
     const node = cy.getElementById(id);
     node.position({ x, y });
     node.classes("red-node");
