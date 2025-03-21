@@ -312,105 +312,17 @@ const data12 = [
   { id: "P", label: "P", front: "L", back: null, left: "O", right: null },
 ];
 
-const data = shuffleArray(data11)
+// const data = shuffleArray(data4)
 
-// const data = [
-//   {
-//     id: "J",
-//     label: "J",
-//     front: "G",
-//     back: null,
-//     left: null,
-//     right: "K",
-//   },
-//   {
-//     id: "C",
-//     label: "C",
-//     front: null,
-//     back: "F",
-//     left: "B",
-//     right: null,
-//   },
-//   {
-//     id: "K",
-//     label: "K",
-//     front: "H",
-//     back: null,
-//     left: "J",
-//     right: "L",
-//   },
-//   {
-//     id: "D",
-//     label: "D",
-//     front: "A",
-//     back: null,
-//     left: null,
-//     right: "E",
-//   },
-//   {
-//     id: "B",
-//     label: "B",
-//     front: null,
-//     back: "E",
-//     left: "A",
-//     right: "C",
-//   },
-//   {
-//     id: "H",
-//     label: "H",
-//     front: null,
-//     back: "K",
-//     left: "G",
-//     right: "I",
-//   },
-//   {
-//     id: "G",
-//     label: "G",
-//     front: null,
-//     back: "J",
-//     left: null,
-//     right: "H",
-//   },
-//   {
-//     id: "E",
-//     label: "E",
-//     front: "B",
-//     back: null,
-//     left: "D",
-//     right: "F",
-//   },
-//   {
-//     id: "I",
-//     label: "I",
-//     front: null,
-//     back: "L",
-//     left: "H",
-//     right: null,
-//   },
-//   {
-//     id: "L",
-//     label: "L",
-//     front: "I",
-//     back: null,
-//     left: "K",
-//     right: null,
-//   },
-//   {
-//     id: "A",
-//     label: "A",
-//     front: null,
-//     back: "D",
-//     left: null,
-//     right: "B",
-//   },
-//   {
-//     id: "F",
-//     label: "F",
-//     front: "C",
-//     back: null,
-//     left: "E",
-//     right: null,
-//   },
-// ];
+const data = [
+  { id: "A", label: "A", front: null, back: "D", left: null, right: "B" },
+  { id: "B", label: "B", front: null, back: "E", left: "A", right: "C" },
+  { id: "C", label: "C", front: null, back: "F", left: "B", right: null },
+  { id: "D", label: "D", front: "A", back: null, left: null, right: "Z" },
+  { id: "E", label: "E", front: "B", back: null, left: "Z", right: "F" },
+  { id: "F", label: "F", front: "C", back: null, left: "E", right: null },
+
+  { id: "Z", label: "Z", front: null, back: null, left: "D", right: "E" },
+];
 
 console.log(data);

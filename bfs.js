@@ -87,6 +87,7 @@ const gapPercent = (percent) => (percent * gap) / 100;
 let maxRight = 0;
 let maxFront = 0;
 let maxCurrentLeft;
+let currentStartX;
 
 const setElement = (id,element) =>{
   // if (id == "A") abc
@@ -165,7 +166,6 @@ const addNode = (id, label, x, y, addedByNode, parentDirection = null) => {
         `${x},${y}`
       );
       console.log(positionMap);
-      // if (!parentDirection || parentDirection == "left") maxCurrentLeft -=gap
       setElement(id, {
         group: "nodes",
         data: { id, label },
@@ -309,10 +309,15 @@ const connectBond = (nodeId) => {
         "left"
       );
       if (success) {
-        console.log("Left minus gap si ", x - gap, " ", x);
-        maxCurrentLeft += gap;
-        // if (x - gap < maxCurrentLeft) {
-        // }
+        console.warn("currentStartX",currentStartX)
+        console.warn("maxCurrentLeft",maxCurrentLeft)
+        console.warn("X",x)
+        console.warn("X - GAP",x - gap)
+        console.warn("Y",y)
+        if ((x - gap) < currentStartX && currentStartX - x + gap > maxCurrentLeft ) {
+          maxCurrentLeft = currentStartX - x +gap;
+          console.error(maxCurrentLeft)
+        }
         queue.push(left);
       }
     }
@@ -382,6 +387,7 @@ const shiftNetworkToRight = (nodeIdPrimary, shiftSize) => {
       FixPrimaryOverlap: false,
       nodeId,
     });
+    if (ele.position.x > maxRight) maxRight = ele.position.x
   }
   console.log("shifted :", visited);
   return true;
@@ -421,6 +427,7 @@ const connectEdge = (sourceId, targetId) => {
 let flag = false;
 for (let [key] of info) {
   if (elements.get(key)) continue;
+  currentStartX = maxRight;
   maxCurrentLeft = 0;
   console.log(key);
   // TODO: Add dynamic cy components for each key because in bfs every connected node is a connected
@@ -443,7 +450,7 @@ for (let [key] of info) {
       break;
     }
   }
-  shiftNetworkToRight(key, maxCurrentLeft);
+  shiftNetworkToRight(key, maxCurrentLeft + gap);
   if (flag) break;
 }
 
