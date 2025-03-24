@@ -358,6 +358,74 @@ const data13 = [
   // { id: "O", label: "O", front: null, back: null, left: null, right: null }, // Cheater
 ];
 
+const data14  = [
+  { id: "A1", label: "A1", front: null, back: "B1", left: null, right: "A2" },
+  { id: "A2", label: "A2", front: null, back: "B2", left: "A1", right: "A3" },
+  { id: "A3", label: "A3", front: null, back: "B3", left: "A2", right: "A4" },
+  { id: "A4", label: "A4", front: null, back: "B4", left: "A3", right: "A5" },
+  { id: "A5", label: "A5", front: null, back: "B5", left: "A4", right: "A6" },
+  { id: "A6", label: "A6", front: null, back: "B6", left: "A5", right: "A7" },
+  { id: "A7", label: "A7", front: null, back: "B7", left: "A6", right: "A8" },
+  { id: "A8", label: "A8", front: null, back: "B8", left: "A7", right: "A9" },
+  { id: "A9", label: "A9", front: null, back: "B9", left: "A8", right: "A10" },
+  { id: "A10", label: "A10", front: null, back: "B10", left: "A9", right: null },
+
+  { id: "B1", label: "B1", front: "A1", back: "C1", left: null, right: "B2" },
+  { id: "B2", label: "B2", front: "A2", back: "C2", left: "B1", right: "B3" },
+  { id: "B3", label: "B3", front: "A3", back: "C3", left: "B2", right: "B4" },
+  { id: "B4", label: "B4", front: "A4", back: "C4", left: "B3", right: "B5" },
+  { id: "B5", label: "B5", front: "A5", back: "C5", left: "B4", right: "B6" },
+  { id: "B6", label: "B6", front: "A6", back: "C6", left: "B5", right: "B7" },
+  { id: "B7", label: "B7", front: "A7", back: "C7", left: "B6", right: "B8" },
+  { id: "B8", label: "B8", front: "A8", back: "C8", left: "B7", right: "B9" },
+  { id: "B9", label: "B9", front: "A9", back: "C9", left: "B8", right: "B10" },
+  { id: "B10", label: "B10", front: "A10", back: "C10", left: "B9", right: null },
+
+  { id: "C1", label: "C1", front: "B1", back: "D1", left: null, right: "C2" },
+  { id: "C2", label: "C2", front: "B2", back: "D2", left: "C1", right: "C3" },
+  { id: "C3", label: "C3", front: "B3", back: "D3", left: "C2", right: "C4" },
+  { id: "C4", label: "C4", front: "B4", back: "D4", left: "C3", right: "C5" },
+  { id: "C5", label: "C5", front: "B5", back: "D5", left: "C4", right: "C6" },
+  { id: "C6", label: "C6", front: "B6", back: "D6", left: "C5", right: "C7" },
+  { id: "C7", label: "C7", front: "B7", back: "D7", left: "C6", right: "C8" },
+  { id: "C8", label: "C8", front: "B8", back: "D8", left: "C7", right: "C9" },
+  { id: "C9", label: "C9", front: "B9", back: "D9", left: "C8", right: "C10" },
+  { id: "C10", label: "C10", front: "B10", back: "D10", left: "C9", right: null },
+
+  { id: "D1", label: "D1", front: "C1", back: "E1", left: null, right: "D2" },
+  { id: "D2", label: "D2", front: "C2", back: "E2", left: "D1", right: "D3" },
+  { id: "D3", label: "D3", front: "C3", back: "E3", left: "D2", right: "D4" },
+  { id: "D4", label: "D4", front: "C4", back: "E4", left: "D3", right: "D5" },
+  { id: "D5", label: "D5", front: "C5", back: "E5", left: "D4", right: "D6" },
+  { id: "D6", label: "D6", front: "C6", back: "E6", left: "D5", right: "D7" },
+  { id: "D7", label: "D7", front: "C7", back: "E7", left: "D6", right: "D8" },
+  { id: "D8", label: "D8", front: "C8", back: "E8", left: "D7", right: "D9" },
+  { id: "D9", label: "D9", front: "C9", back: "E9", left: "D8", right: "D10" },
+  { id: "D10", label: "D10", front: "C10", back: "E10", left: "D9", right: null },
+
+  { id: "E1", label: "E1", front: "D1", back:  "F1", left: null, right: "E2" },
+  { id: "E2", label: "E2", front: "D2", back:  "F2", left: "E1", right: "E3" },
+  { id: "E3", label: "E3", front: "D3", back:  "F3", left: "E2", right: "E4" },
+  { id: "E4", label: "E4", front: "D4", back:  "F4", left: "E3", right: "E5" },
+  { id: "E5", label: "E5", front: "D5", back:  "F5", left: "E4", right: "E6" },
+  { id: "E6", label: "E6", front: "D6", back:  "F6", left: "E5", right: "E7" },
+  { id: "E7", label: "E7", front: "D7", back:  "F7", left: "E6", right: "E8" },
+  { id: "E8", label: "E8", front: "D8", back:  "F8", left: "E7", right: "E9" },
+  { id: "E9", label: "E9", front: "D9", back:  "F9", left: "E8", right: "E10" },
+  { id: "E10", label: "E10", front: "D10", back: "F10", left: "E9", right: null },
+
+  { id: "F1", label: "F1", front: "E1", back: null, left: null, right: "F2" },
+  { id: "F2", label: "F2", front: "E2", back: null, left: "F1", right: "F3" },
+  { id: "F3", label: "F3", front: "E3", back: null, left: "F2", right: "F4" },
+  { id: "F4", label: "F4", front: "E4", back: null, left: "F3", right: "F5" },
+  { id: "F5", label: "F5", front: "E5", back: null, left: "F4", right: "F6" },
+  { id: "F6", label: "F6", front: "E6", back: null, left: "F5", right: "F7" },
+  { id: "F7", label: "F7", front: "E7", back: null, left: "F6", right: "F8" },
+  { id: "F8", label: "F8", front: "E8", back: null, left: "F7", right: "F9" },
+  { id: "F9", label: "F9", front: "E9", back: null, left: "F8", right: "F10" },
+  { id: "F10", label: "F10", front: "E10", back: null, left: "F9", right: null }
+];
+
 let data;
 let shuffle = true;
 
@@ -379,6 +447,6 @@ const setData = (inputData) => {
 // setData(data11) // extending network from all 4 sides
 // setData(data12) // multiple missing edges
 // setData(data13) // multiple isolated single nodes
-setData(data1) // three 2 x 3 isolated networks
-
+// setData(data1) // three 2 x 3 isolated networks
+setData(data14) // 60 students
 console.log(data);

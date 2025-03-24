@@ -3,7 +3,7 @@
 const info = new Map(
   data.map(({ id, label, front, back, left, right }) => [
     id,
-    { label, front, back, left, right },
+    { label, front:back, back:front, left, right },
   ])
 );
 
